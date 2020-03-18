@@ -15,7 +15,19 @@ This project seeks to create open-source designs for both physcial test lungs an
 
 ## Motiavtion
 
+As of March 18, 2020, the pandemic is growing quickly. The Maker, Humanitarian Enginering, and Free Sofware communities are attempting to answer the call. Public Invention is attempting to help the potential shortfall of ventilators, which is uncertain but could mean hundreds of thousands of needless deaths in a worst-case scenario.
+
+Working with NECSI and [EndCoronavirus.org](https://www.endcoronavirus.org/), a self-organized project instigated by Bruce Fenton has arisen. It has become clear, however, that there are and should be many technical approaches.
+
+In order to unify this community, some of us at the #response-ventilators-meta channel at the [necsi-edu.slack.com](necsi-edu.slack.com), include Nariman Poushin, have decided an practical response will have to focus on effectiveness and reliability testing, because ventilators are life-critical pieces of machinery. In effect, we need an informal certification process similar in spirit only to FDA approval, which can convince a doctor or medical decision maker to deploy unapproved ventilators as an absolute last resort if there is a shortage of ventilators.
+
+The Free Software and Maker communities know how to form teams; our plan is to form teams for design, testing, training, building, and even fundraising. The basic process we propose is captured in the diagram below.
+
 ![Deployment Process](https://github.com/PubInv/ventilator-test-lung-analyzer/blob/master/Meta-process%20for%20Open%20Source%20Ventilator%20Deployment.svg)
+
+## Necessity of Extensive Testing
+
+To deploy a ventilator, extensive testing is *absolutely* required. This repo is an attempt to build a "test fixture" capable of running a 48-hour test on any ventilator design and collecting data on many important parameters.  We hope to create a "gold standard" test that all DIY teams can work to; but this project will proceed in parallel with that.
 
 ## Physical Test Lungs
 
