@@ -22,4 +22,8 @@ Note the units of resistance here: Pressure/volume/sec. Presumable a test that u
 
 An example of a certifier, including an explanation of its functionality is here: [Alnor-4070 Certifier  Flow Analyzer](https://www.globaltestsupply.com/product/alnor-4070-certifier-flow-analyzer-system?gclid=Cj0KCQjwjcfzBRCHARIsAO-1_OpV87HtnO7sJXdt92m7W3j69KOddmV-gV0eCZjfKlHTDMWsUCqYe4kaAoaQEALw_wcB)
 
+However, we also need to do multi-iteration reliabillity tests.  An initial design is here:
+
+![initial design](../initial_design.svg)
+
 
