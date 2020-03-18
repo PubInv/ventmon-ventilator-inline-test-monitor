@@ -24,6 +24,6 @@ An example of a certifier, including an explanation of its functionality is here
 
 However, we also need to do multi-iteration reliabillity tests.  An initial design is here:
 
-![initial design](../initial_design.svg)
+![initial design](../VentilatorTextFixture.svg)
 
 
