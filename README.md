@@ -1,11 +1,17 @@
 # ventilator-test-lung
-Design for a hardware "lung" instumented to be a test fixture for an emergency ventilator
+Design for test machine for rapidly doing high-quality tests, including burn-in and multi-day tests, of 
+ventiators. The purpose is to produce a benchmark for the [multiple efforts](https://github.com/PubInv/covid19-vent-list) going on right now to try to develop a 
+Free-libre Open Source ventilator design.
 
-## Progress
+## Status
 
 This is an emergeny project in response to the COVID-19 pandemic. We are in a learning mode.
 
-This project seeks to create open-source designs for both physcial test lungs and "certifiers"
+This project seeks to create open-source designs for both physcial test lungs and "certifiers".
+
+## Motiavtion
+
+![Deployment Process](https://github.com/PubInv/ventilator-test-lung-analyzer/blob/master/Meta-process%20for%20Open%20Source%20Ventilator%20Deployment.svg)
 
 ## Physical Test Lungs
 
