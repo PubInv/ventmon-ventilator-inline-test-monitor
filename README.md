@@ -3,6 +3,10 @@ Design for test machine for rapidly doing high-quality tests, including burn-in 
 ventiators. The purpose is to produce a benchmark for the [multiple efforts](https://github.com/PubInv/covid19-vent-list) going on right now to try to develop a 
 Free-libre Open Source ventilator design.
 
+## Licensing
+
+All code in this repo is licensed under the GNU public license. All documents and diagrams and licensed under CC0.
+
 ## Status
 
 This is an emergeny project in response to the COVID-19 pandemic. We are in a learning mode.
