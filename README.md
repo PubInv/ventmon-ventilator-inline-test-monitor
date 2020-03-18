@@ -11,8 +11,6 @@ All code in this repo is licensed under the GNU public license. All documents an
 
 This is an emergeny project in response to the COVID-19 pandemic. We are in a learning mode.
 
-This project seeks to create open-source designs for both physcial test lungs and "certifiers".
-
 ## Motiavtion
 
 As of March 18, 2020, the pandemic is growing quickly. The Maker, Humanitarian Enginering, and Free Sofware communities are attempting to answer the call. Public Invention is attempting to help the potential shortfall of ventilators, which is uncertain but could mean hundreds of thousands of needless deaths in a worst-case scenario.
