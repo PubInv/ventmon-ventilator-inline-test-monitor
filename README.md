@@ -1,4 +1,4 @@
-# ventilator-test-lung
+# Ventilator Test Fixture
 Design for test machine for rapidly doing high-quality tests, including burn-in and multi-day tests, of 
 ventiators. The purpose is to produce a benchmark for the [multiple efforts](https://github.com/PubInv/covid19-vent-list) going on right now to try to develop a 
 Free-libre Open Source ventilator design.
