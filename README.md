@@ -23,7 +23,7 @@ The Free Software and Maker communities know how to form teams; our plan is to f
 
 ![Deployment Process](https://github.com/PubInv/ventilator-test-lung-analyzer/blob/master/FLOSS%20Build%20Model.png)
 
-![Deployment Process](https://github.com/PubInv/ventilator-test-lung-analyzer/blob/master/Meta-process%20for%20Open%20Source%20Ventilator%20Deployment.svg)
+
 
 ## Necessity of Extensive Testing
 
@@ -47,5 +47,11 @@ An example of a certifier, including an explanation of its functionality is here
 However, we also need to do multi-iteration reliabillity tests.  An initial design is here:
 
 ![initial design](https://github.com/PubInv/ventilator-test-lung/blob/master/VentilatorTestFixture.svg)
+
+## Older diagram
+
+
+![Deployment Process](https://github.com/PubInv/ventilator-test-lung-analyzer/blob/master/Meta-process%20for%20Open%20Source%20Ventilator%20Deployment.svg)
+
 
 
