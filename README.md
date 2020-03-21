@@ -21,7 +21,7 @@ In order to unify this community, some of us at the #response-ventilators-meta c
 
 The Free Software and Maker communities know how to form teams; our plan is to form teams for design, testing, training, building, and even fundraising. The basic process we propose is captured in the diagram below.
 
-![Deployment Process](FLOSS%20Build%20Model.pdf)
+![Deployment Process](https://github.com/PubInv/ventilator-test-lung-analyzer/blob/master/FLOSS%20Build%20Model.pdf)
 
 ![Deployment Process](https://github.com/PubInv/ventilator-test-lung-analyzer/blob/master/Meta-process%20for%20Open%20Source%20Ventilator%20Deployment.svg)
 
