@@ -19,6 +19,8 @@ Free-libre Open Source ventilator design.
 
 ## Volunteering
 
+This project is co-led by Robert L. Read <read.robert@gmail.com> and Geoff Mulligan.
+
 Righ now we have several needs. People need to be experienced, have read the [essential reading](https://github.com/PubInv/covid19-vent-list) list, be able to work at
 least 20 hours a week, and able to work with limited supervision.  They also must be able to tolerate the chaos
 produced by the pandemic itself, and the chaos produced by my own mistakes. Finally, they must accept and 
