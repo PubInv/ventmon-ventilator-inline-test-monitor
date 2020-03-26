@@ -1,4 +1,4 @@
-# Ventilator Test Fixture
+# Inline Ventilator Test Fixture and Monitor
 
 Since March 16th, I've been working full time on this. Along with volunteers at [EndCornaVirus.org](https://www.endcoronavirus.org/) and [Public Invention](https:\\www.pubinv.org), we have been 
 [tracking and analyzing](https://github.com/PubInv/covid19-vent-list)
@@ -33,16 +33,19 @@ Righ now, we could use:
 
 ## Licensing
 
-All code in this repo is licensed under the GNU public license. All documents and diagrams and licensed under CC0.
+All code in this repo is licensed under the GNU 3 public license. All documents and diagrams and licensed under CC0.
 
-## Status
-
-This is an emergeny project in response to the COVID-19 pandemic. We are in a learning mode.
 
 ## Initial Design Idea
 
 ![InlineVentMonitor](https://github.com/PubInv/ventilator-test-lung-analyzer/blob/master/InlineVentMonitor.svg)
 
+## Status
+
+This is an emergeny project in response to the COVID-19 pandemic. We are in a learning mode.
+
+At present I have I2C pressure sensors and flow meters in my possesion ready to start hacking. (See parts list).
+I have purchased a TIMETER T-200 flow analyzer (used) which has not arrived.
 
 
 # Motiavtion of Strategy
