@@ -49,6 +49,16 @@ This is an emergeny project in response to the COVID-19 pandemic. We are in a le
 At present I have I2C pressure sensors and flow meters in my possesion ready to start hacking. (See parts list).
 I have purchased a TIMETER T-200 flow analyzer (used) which has not arrived.
 
+## Parts
+
+We are moving fast and Agile; expect this to change.
+
+[Adafruit BME680](https://www.mouser.com/ProductDetail/adafruit/3660/?qs=W0yvOO0ixfFypXCClAyRMg%3D%3D&countrycode=US&currencycode=USD) Note: Adrafuit is currently closed due to pandemic, but this part is in stock at Mouser.
+
+[Sensiron Flow Meter](https://www.sparkfun.com/products/14958) Note: This requires an unusual connector (JST ZH 1.5mm 4 pin).
+
+[JST ZH 1.5MM 4 Pin Female connectors](https://smile.amazon.com/gp/product/B07FCCWS96/ref=ppx_yo_dt_b_asin_title_o03_s00?ie=UTF8&psc=1)
+
 
 # Motiavtion of Strategy
 
