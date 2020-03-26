@@ -41,7 +41,7 @@ This is an emergeny project in response to the COVID-19 pandemic. We are in a le
 
 ## Initial Design Idea
 
-![InlineVentMonitor](https://raw.githubusercontent.com/PubInv/ventilator-test-lung-analyzer/master/InlineVentMonitor.svg)
+![InlineVentMonitor](https://github.com/PubInv/ventilator-test-lung-analyzer/blob/master/InlineVentMonitor.svg)
 
 
 
