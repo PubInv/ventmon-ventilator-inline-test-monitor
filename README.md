@@ -1,7 +1,35 @@
 # Ventilator Test Fixture
-Design for test machine for rapidly doing high-quality tests, including burn-in and multi-day tests, of 
-ventiators. The purpose is to produce a benchmark for the [multiple efforts](https://github.com/PubInv/covid19-vent-list) going on right now to try to develop a 
+
+Since March 16th, I've been working full time on this. Along with volunteers at [EndCornaVirus.org](https://www.endcoronavirus.org/) and [Public Invention](https:\\www.pubinv.org), we have been 
+[tracking and analyzing](https://github.com/PubInv/covid19-vent-list)
+all [open-source ventilator projects]((https://medium.com/@RobertLeeRead/analysis-of-open-source-covid-19-pandemic-ventilator-projects-27acf9075f7e)) we can find. It has become apparent that the biggest piece
+they are missing and the place Public Invention can most help is not in desining a new ventilator,
+but in building a test/monitoring fixture to assist other teams.
+
+Because monitoring is critical to keeping patients alive and so similar to the need to test, we are attempting to
+make a combine tester/monitor.
+
+At the moment, this repo is for that work, and also our overall strategic plan for a process that will give clinicians
+enough confidence to actually deploy an open-source ventilator. Our goal is to certify, in a certain limited, last-resort
+sense, ventilators in the case of a shortfall of commercial and professional equipment. That Stretgy is discussed lower in this document.
+
+This includes rapidly doing high-quality tests, but also includes burn-in and multi-day tests, of 
+ventilators. Perhaps we can produce a benchmark for the [multiple efforts](https://github.com/PubInv/covid19-vent-list) going on right now to try to develop a 
 Free-libre Open Source ventilator design.
+
+## Volunteering
+
+Righ now we have several needs. People need to be experienced, have read the [essential reading](https://github.com/PubInv/covid19-vent-list) list, be able to work at
+least 20 hours a week, and able to work with limited supervision.  They also must be able to tolerate the chaos
+produced by the pandemic itself, and the chaos produced by my own mistakes. Finally, they must accept and 
+hope for the possibility that industry will increase production and the disease will be controlled so that this 
+solution is not required.
+
+Righ now, we could use:
+1. An experienced Arduino engineer to build and improve the design below
+1. Someone who knows how to reliably process a time series to tell when a breath begins and respiration rate
+1. A website build who can make nice graphs of pressure/volume curves show up
+1. Someone to build a software test-bench to analyze 48 hours worth of data and mark anomalies.
 
 ## Licensing
 
@@ -11,7 +39,13 @@ All code in this repo is licensed under the GNU public license. All documents an
 
 This is an emergeny project in response to the COVID-19 pandemic. We are in a learning mode.
 
-## Motiavtion
+## Initial Design Idea
+
+![InlineVentMonitor](https://raw.githubusercontent.com/PubInv/ventilator-test-lung-analyzer/master/InlineVentMonitor.svg)
+
+
+
+# Motiavtion of Strategy
 
 As of March 18, 2020, the COVID-19 pandemic is growing quickly. The Maker, Humanitarian Enginering, and Free Sofware communities are attempting to answer the call. Public Invention is attempting to help the potential shortfall of ventilators, which is uncertain but could mean hundreds of thousands of needless deaths in a worst-case scenario.
 
