@@ -59,6 +59,8 @@ We are moving fast and Agile; expect this to change.
 
 [JST ZH 1.5MM 4 Pin Female connectors](https://smile.amazon.com/gp/product/B07FCCWS96/ref=ppx_yo_dt_b_asin_title_o03_s00?ie=UTF8&psc=1)
 
+Obviously, Arduinos, with control shield, and propably speakers, but I haven't selected them yet.
+
 
 # Motiavtion of Strategy
 
