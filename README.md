@@ -61,6 +61,12 @@ We are moving fast and Agile; expect this to change.
 
 Obviously, Arduinos, with control shield, and propably speakers, but I haven't selected them yet.
 
+## Progress
+
+![SensirionFM3200](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/SensirionFM3200/SFM3200/SensirionFM3200Working.jpg)
+
+Got the SensirionFM3200 flow meter working. Documentation on this hard to find---had to guess a bit.
+
 
 # Motiavtion of Strategy
 
