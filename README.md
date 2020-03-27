@@ -86,8 +86,10 @@ The Free Software and Maker communities know how to form teams; our plan is to f
 
 To deploy a ventilator, extensive testing is *absolutely* required. This repo is an attempt to build a "test fixture" capable of running a 48-hour test on any ventilator design and collecting data on many important parameters.  We hope to create a "gold standard" test that all DIY teams can work to; but this project will proceed in parallel with that.
 
-As part of extensive testings, in combination with BreathOfLife (thanks to Jonathan Orban) and with help from Juan E. Villacres Perez, biomedical engineering student at UT, we have create a [spreadsheet](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/ValidationTestSuites) of user tests which attempt to 
-match the [RMVS](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/876167/RMVS001_v3.1.pdf) standard for Rapidly Manufactured Ventilator Systems.
+As part of extensive testings, in combination with BreathOfLife (thanks to Jonathan Orban) and with help from Juan E. Villacres Perez, biomedical engineering student at UT, we have create a [Google Sheet](https://docs.google.com/spreadsheets/d/17EJ9TN6O1wqP4c-lIn5hbmuMRrto7M_KXHf17zjNSLk/edit?usp=sharing)
+downloaded as an OpenDocument Calc and Microsoft Excel [spreadsheet](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/ValidationTestSuites) of user tests which attempt to 
+match the [RMVS](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/876167/RMVS001_v3.1.pdf) standard for Rapidly Manufactured Ventilator Systems.  (There are checkboxes in the Google Sheet that don't look nice in the other two formats.)
+The spreadsheet is licenced under CC0, so you can make a copy of it and use it for testing your own ventilators.
 
 ## Physical Test Lungs
 
