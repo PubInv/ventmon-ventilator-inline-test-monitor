@@ -67,8 +67,10 @@ Obviously, Arduinos, with control shield, and propably speakers, but I haven't s
 
 Got the SensirionFM3200 flow meter working. Documentation on this hard to find---had to guess a bit.
 
+Saturday Night: Can record a breath trace and accurately identify transitions. Now must try integration to compute volume!
 
-# Motiavtion of Strategy
+
+# Motivation of Strategy
 
 As of March 18, 2020, the COVID-19 pandemic is growing quickly. The Maker, Humanitarian Enginering, and Free Sofware communities are attempting to answer the call. Public Invention is attempting to help the potential shortfall of ventilators, which is uncertain but could mean hundreds of thousands of needless deaths in a worst-case scenario.
 
