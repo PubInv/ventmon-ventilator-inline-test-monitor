@@ -3,7 +3,7 @@
 Since March 16th, I've been working full time on this. Along with volunteers at [EndCornaVirus.org](https://www.endcoronavirus.org/) and [Public Invention](https:\\www.pubinv.org), we have been 
 [tracking and analyzing](https://github.com/PubInv/covid19-vent-list)
 all [open-source ventilator projects]((https://medium.com/@RobertLeeRead/analysis-of-open-source-covid-19-pandemic-ventilator-projects-27acf9075f7e)) we can find. It has become apparent that the biggest piece
-they are missing and the place Public Invention can most help is not in desining a new ventilator,
+they are missing and the place Public Invention can most help is not in designing a new ventilator,
 but in building a test/monitoring fixture to assist other teams.
 
 Because monitoring is critical to keeping patients alive and so similar to the need to test, we are attempting to
@@ -11,7 +11,7 @@ make a combine tester/monitor.
 
 At the moment, this repo is for that work, and also our overall strategic plan for a process that will give clinicians
 enough confidence to actually deploy an open-source ventilator. Our goal is to certify, in a certain limited, last-resort
-sense, ventilators in the case of a shortfall of commercial and professional equipment. That Stretgy is discussed lower in this document.
+sense, ventilators in the case of a shortfall of commercial and professional equipment. That Strategy is discussed lower in this document.
 
 This includes rapidly doing high-quality tests, but also includes burn-in and multi-day tests, of 
 ventilators. Perhaps we can produce a benchmark for the [multiple efforts](https://github.com/PubInv/covid19-vent-list) going on right now to try to develop a 
@@ -63,7 +63,7 @@ We are moving fast and Agile; expect this to change.
 
 [JST ZH 1.5MM 4 Pin Female connectors](https://smile.amazon.com/gp/product/B07FCCWS96/ref=ppx_yo_dt_b_asin_title_o03_s00?ie=UTF8&psc=1)
 
-Obviously, Arduinos, with control shield, and propably speakers, but I haven't selected them yet.
+Obviously, Arduinos, with control shield, and probably speakers, but I haven't selected them yet.
 
 ## Progress
 
