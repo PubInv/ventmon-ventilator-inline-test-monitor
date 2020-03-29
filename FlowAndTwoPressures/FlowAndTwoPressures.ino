@@ -121,7 +121,16 @@ void seekBME(int idx) {
 int ambient_counter = 0;
 float AMB_kPa = 0.0;  // Ambient pressure
 #define AMB_UNDERSAMPLE 100
+
+unsigned long sample_millis = 0;
 void loop() {
+  unsigned long m = millis();
+  if (m > sample_millis) {
+    sample_millis = m;
+  } else {
+    Serial.println("unticked");
+    return;
+  }
   seekUnfoundBME();
   float IPA_kPa = 0.0;  // Inspiratory Pathway pressure
 
@@ -141,16 +150,19 @@ void loop() {
 
 // Note: Units are kiloPasccas for pressure, and slm for flow
   Serial.print("{ ");
-  Serial.print("IPA: ");
+  Serial.print("\"millis\": ");
+  Serial.print(millis());
+  Serial.print(",");
+  Serial.print("\"IPA\": ");
   Serial.print(IPA_kPa);
   Serial.print(",");
-  Serial.print("AMB: ");
+  Serial.print("\"AMB\": ");
   Serial.print(AMB_kPa);
   Serial.print(",");
-  Serial.print("Flow :");
+  Serial.print("\"Flow\" :");
   Serial.print(flow);
-  Serial.print("}\n");
-//  delay(10);
+  Serial.print("}\n"); 
+  Serial.flush();
 }
 
 float readPressureOnly(int idx) 

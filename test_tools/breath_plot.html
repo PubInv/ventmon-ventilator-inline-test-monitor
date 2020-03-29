@@ -66,7 +66,7 @@ function samplesToLine(samples) {
   //  return [flow,sum];
   return [flow];
 }
-function plot(samples, trans) {
+function plot(samples, trans, breaths) {
   var new_data = samplesToLine(samples);
   if (trans) {
     var ttimes = unpack(trans, 'ms');
@@ -80,6 +80,18 @@ function plot(samples, trans) {
             line: {color: '#0000FF'}
             };
     new_data.push(transPlot);
+  }
+  if (breaths) {
+    var ttimes = unpack(breaths, 'ms');
+    var zeroed = ttimes.map(m =>m/1000.0);
+    var ys = breaths.map( b => 0);
+    var breathPlot = {type: "scatter", mode: "markers",
+                     name: "breaths",
+                     x: zeroed,
+                      y: ys,
+                      marker: { size: 12, color: "red" }
+            };
+    new_data.push(breathPlot);
   }
   Plotly.newPlot('myDiv', new_data, layout);
 }
@@ -196,9 +208,50 @@ function computeMovingWindowTrace(samples,t,v) {
     }
   }
 
-  console.log(transitions);
 
-  return [stack,transitions];
+
+  // Now that we have transitions, we can apply a
+  // diferent algorithm to try to define "breaths".
+  // Because a breath is defined as an inspiration
+  // and then an expiration, we will define a breath
+  // as from the first inspiration, until there has
+  // been one expiration, until the next inspiration.
+  var breaths = []
+  var expiring = false;
+  var last = 0;
+  var voli = 0;
+  var vole = 0;
+  for(var i = 0; i < transitions.length; i++) {
+    if (expiring && transitions[i].state == 1) {
+      breaths.push({ ms: transitions[i].ms,
+                     sample: transitions[i].sample,
+                     vol_e: vole,
+                     vol_i: voli
+                   }
+                  );
+      expiring = false;
+      vole = 0;
+      for(var j = last; j < transitions[i].sample; j++) {
+        vole += samples[j].Flow;
+      }
+      last = transitions[i].sample;
+    }
+    if (!expiring && transitions[i].state == -1) {
+      expiring = true;
+      // let's try to integrate v...
+      voli = 0;
+      for(var j = last; j < transitions[i].sample; j++) {
+        voli += samples[j].Flow;
+      }
+      last = transitions[i].sample;
+    }
+    // At this point we can in theory compute an inspiratory volume..
+
+  }
+
+  console.log(breaths);
+
+  return [stack,transitions,breaths];
 }
 
 // Experimental math by Rob.
@@ -220,12 +273,12 @@ function findBreaths(samples,t,v) {
 $("#breath").click(function(){
   const t = 200; // size of the window is 200ms
   const v = 50; // min volume in ml
-  var [summation,transitions] = computeMovingWindowTrace(samples,t,v);
+  var [summation,transitions,breaths] = computeMovingWindowTrace(samples,t,v);
   findBreaths(samples,t,v);
   for(var i = 0; i < summation.length; i++) {
     samples[i].sum = summation[i];
   }
-  plot(samples,transitions);
+  plot(samples,transitions,breaths);
 });
 
   </script>
