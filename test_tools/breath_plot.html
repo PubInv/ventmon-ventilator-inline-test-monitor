@@ -1,0 +1,231 @@
+  <!--
+Breath Plot: COVID-19 VentMon analysis software
+    Copyright (C) 2022  Robert L. Read
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+  <head>
+	<!-- Load plotly.js into the DOM -->
+	<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+</head>
+
+<body>
+  <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
+
+  <button id="record">Record</button>
+  <button id="plot">Plot</button>
+    <button id="breath">Find breath points</button>
+</body>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script>
+  const url = "http://localhost:80";
+
+var samples;
+
+
+
+function unpack(rows, key) {
+  return rows.map(function(row) { return row[key]; });
+}
+
+var layout = {
+  title: 'Basic Time Series',
+};
+
+function samplesToLine(samples) {
+  var millis = unpack(samples, 'millis');
+  var sums = unpack(samples, 'sum');
+  // Convert to seconds...
+  var min = Math.min(...millis);
+  var zeroed = millis.map(m =>(m-min)/1000.0);
+  var flow = {type: "scatter", mode: "lines",
+            name: "flow",
+            x: zeroed,
+            y: unpack(samples, 'Flow'),
+            line: {color: '#17BECF'}
+             };
+  var sum = {type: "scatter", mode: "lines",
+            name: "sum",
+            x: zeroed,
+            y: sums,
+            line: {color: '#FF00CF'}
+            };
+  //  return [flow,sum];
+  return [flow];
+}
+function plot(samples, trans) {
+  var new_data = samplesToLine(samples);
+  if (trans) {
+    var ttimes = unpack(trans, 'ms');
+    var zeroed = ttimes.map(m =>m/1000.0);
+    var tstates = unpack(trans, 'state');
+    var tstates_amped = tstates.map(m =>m*4);
+    var transPlot = {type: "scatter", mode: "lines",
+                     name: "trans",
+                     x: zeroed,
+            y: tstates_amped,
+            line: {color: '#0000FF'}
+            };
+    new_data.push(transPlot);
+  }
+  Plotly.newPlot('myDiv', new_data, layout);
+}
+
+
+$("#plot").click(function(){
+  $.ajax({url: url, success: function(result){
+    var lines = result.split("\n").filter( x => (x.length > 0) && (x[0] == '{') );
+
+    samples = lines.map(JSON.parse);
+    plot(samples);
+  }});
+});
+
+$("#record").click(function(){
+  $.ajax({url: url+"/rec?"+1000, success: function(result){
+  }});
+});
+
+
+// A simple computation of a moving window trace
+// computing [A + -B], where A is volume to left
+// of sample int time window t, and B is volume to right
+// t is in milliseconds
+function computeMovingWindowTrace(samples,t,v) {
+  var A = 0; // running volume behind sample[i]
+  var B = 0; // running volume ahead of sample[i]
+  // first, compute the number of samples in a window...
+  // this is a kludge!
+  var first_time = samples[0].millis;
+  var last_time = samples[samples.length - 1].millis;
+  var duration = last_time - first_time;
+  var n = Math.ceil(samples.length * t / duration);
+  // make it odd...
+  if ((n % 2) == 0) {
+    n = n+1;
+  }
+  // This way of doing it biases it because
+  // of the way we start, and we remained biased.
+  // By setting A = -B to begin with, we solve that problem.
+  var h = Math.floor(n/2); // h is now num of samples
+  // on either side of s
+  for(var i = 1; i < h+1; i++) {
+    B = B + samples[i].Flow;
+  }
+  var stack = [];
+
+  for(var i = 0; i < samples.length; i++) {
+    // first, create the sample
+    stack[i] = A + -B;
+    // now adust A and B!
+    A = A + samples[i].Flow;
+    if (i - h > 0) {
+      A = A - samples[i-h].Flow;
+    }
+
+    if (i + h < samples.length)
+      B = B + samples[i+h].Flow;
+    B = B - samples[i].Flow;
+  }
+
+  // Experimental area...
+  // Now we want to compute local extrema in the time window,
+  // and we will call those breath points...
+  var maxs = [];
+  var mins = [];
+
+  // Here is an idea...
+  // We define you to be in one of three states:
+  // Inspiring, expiring, or neither.
+  // Every transition between these states is logged.
+  // Having two inspirations between an expiration is
+  // weird but could happen.
+  // We record transitions.
+  // When the time series crossed a fixed threshold
+  // or zero, it causes a transition. If you are inspiring,
+  // you have to cross zero to transition to neither,
+  // and you start expiring when you cross the treshold.
+  const vm = 4;
+
+  // We will model this as a list of transitions.
+  // A breath is any number of inspirations followed by
+  // any number of expirations. (I+)(E+)
+
+  var transitions = [];
+  var state = 0; // Let 1 mean inspiration, -1 mean expiration, 0 neither
+  for(var i = 0; i < samples.length; i++) {
+    var f = samples[i].Flow;
+    var ms = samples[i].millis-first_time;
+    if (state == 0) {
+      if (f > vm) {
+        state = 1;
+        transitions.push({ state: 1, sample: i, ms: ms})
+      } else if (f < -vm) {
+        state = -1;
+        transitions.push({ state: -1, sample: i, ms: ms})
+      }
+    } else if (state == 1) {
+      if (f < -vm) {
+        state = -1;
+        transitions.push({ state: -1, sample: i, ms: ms})
+      } else if (f < 0) {
+        state = 0;
+        transitions.push({ state: 0, sample: i, ms: ms})
+      }
+    } else if (state == -1) {
+      if (f > vm) {
+        state = 1;
+        transitions.push({ state: 1, sample: i, ms: ms})
+      } else if (f > 0) {
+        state = 0;
+        transitions.push({ state: 0, sample: i, ms: ms})
+      }
+    }
+  }
+
+  console.log(transitions);
+
+  return [stack,transitions];
+}
+
+// Experimental math by Rob.
+// Take ALL of the samples (so that we have times)
+// A quick and dirty approximation is to sample equal
+// sample spacing, which is proably wrong.
+// The basic algorithm is take width of time t,
+// move a window of time t along the curve.
+// Any sample s which
+function findBreaths(samples,t,v) {
+  var summation = computeMovingWindowTrace(samples,t,v);
+  // Now the summation points are quite prominent...
+  // We seach for local maxima. Then when we have two
+  // maxima, we will look for minima between these
+  // peaks as a simple minima
+  //
+}
+
+$("#breath").click(function(){
+  const t = 200; // size of the window is 200ms
+  const v = 50; // min volume in ml
+  var [summation,transitions] = computeMovingWindowTrace(samples,t,v);
+  findBreaths(samples,t,v);
+  for(var i = 0; i < summation.length; i++) {
+    samples[i].sum = summation[i];
+  }
+  plot(samples,transitions);
+});
+
+  </script>
