@@ -69,7 +69,7 @@ Obviously, Arduinos, with control shield, and probably speakers, but I haven't s
 
 ![SensirionFM3200](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/SensirionFM3200/SFM3200/SensirionFM3200Working.jpg)
 
-Got the SensirionFM3200 flow meter working. Documentation on this hard to find---had to guess a bit.
+Got the Sensirion FM3200 flow meter working. Documentation on this hard to find---had to guess a bit.
 
 Saturday Night: Can record a breath trace and accurately identify transitions. Now must try integration to compute volume!
 
