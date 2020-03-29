@@ -3,7 +3,7 @@
 Since March 16th, I've been working full time on this. Along with volunteers at [EndCornaVirus.org](https://www.endcoronavirus.org/) and [Public Invention](https:\\www.pubinv.org), we have been 
 [tracking and analyzing](https://github.com/PubInv/covid19-vent-list)
 all [open-source ventilator projects]((https://medium.com/@RobertLeeRead/analysis-of-open-source-covid-19-pandemic-ventilator-projects-27acf9075f7e)) we can find. It has become apparent that the biggest piece
-they are missing and the place Public Invention can most help is not in desining a new ventilator,
+they are missing and the place Public Invention can most help is not in designing a new ventilator,
 but in building a test/monitoring fixture to assist other teams.
 
 Because monitoring is critical to keeping patients alive and so similar to the need to test, we are attempting to
@@ -11,7 +11,7 @@ make a combine tester/monitor.
 
 At the moment, this repo is for that work, and also our overall strategic plan for a process that will give clinicians
 enough confidence to actually deploy an open-source ventilator. Our goal is to certify, in a certain limited, last-resort
-sense, ventilators in the case of a shortfall of commercial and professional equipment. That Stretgy is discussed lower in this document.
+sense, ventilators in the case of a shortfall of commercial and professional equipment. That Strategy is discussed lower in this document.
 
 This includes rapidly doing high-quality tests, but also includes burn-in and multi-day tests, of 
 ventilators. Perhaps we can produce a benchmark for the [multiple efforts](https://github.com/PubInv/covid19-vent-list) going on right now to try to develop a 
@@ -42,6 +42,10 @@ All code in this repo is licensed under the GNU 3 public license. All documents 
 
 ![InlineVentMonitor](https://github.com/PubInv/ventilator-test-lung-analyzer/blob/master/InlineVentMonitor.svg)
 
+The idea is to make a standalone inline device plugged into the airway. It serves a dual purpose as a monitor/alarm when used on an actual patient, and a test devices for testing prototype ventilators. It also allows for burnin.
+
+![](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/Block%20Architecture.svg)
+
 ## Status
 
 This is an emergeny project in response to the COVID-19 pandemic. We are in a learning mode.
@@ -59,7 +63,7 @@ We are moving fast and Agile; expect this to change.
 
 [JST ZH 1.5MM 4 Pin Female connectors](https://smile.amazon.com/gp/product/B07FCCWS96/ref=ppx_yo_dt_b_asin_title_o03_s00?ie=UTF8&psc=1)
 
-Obviously, Arduinos, with control shield, and propably speakers, but I haven't selected them yet.
+Obviously, Arduinos, with control shield, and probably speakers, but I haven't selected them yet.
 
 ## Progress
 
@@ -67,8 +71,10 @@ Obviously, Arduinos, with control shield, and propably speakers, but I haven't s
 
 Got the SensirionFM3200 flow meter working. Documentation on this hard to find---had to guess a bit.
 
+Saturday Night: Can record a breath trace and accurately identify transitions. Now must try integration to compute volume!
 
-# Motiavtion of Strategy
+
+# Motivation of Strategy
 
 As of March 18, 2020, the COVID-19 pandemic is growing quickly. The Maker, Humanitarian Enginering, and Free Sofware communities are attempting to answer the call. Public Invention is attempting to help the potential shortfall of ventilators, which is uncertain but could mean hundreds of thousands of needless deaths in a worst-case scenario.
 
