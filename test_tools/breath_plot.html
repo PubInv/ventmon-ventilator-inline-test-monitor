@@ -92,6 +92,33 @@ function plot(samples, trans, breaths) {
                       marker: { size: 12, color: "red" }
             };
     new_data.push(breathPlot);
+    // Now I attempt to extract volumes...
+    // Our breaths mark the END of a breath..
+    // so we want to draw the volumes that way.
+    const volume_ht_factor = 20;
+    var exh_v = unpack(breaths, 'vol_e').map(e => e * volume_ht_factor);
+    var t_exh_v =  unpack(breaths, 'vol_e').map(e => Math.round(e*1000.0)+"ml exh");
+    var inh_v = unpack(breaths, 'vol_i').map(i => i * volume_ht_factor);
+    var t_inh_v = unpack(breaths, 'vol_i').map(e => Math.round(e*1000.0)+"ml inh");
+    var inhPlot = {type: "scatter", mode: "markers+text",
+                   name: "inhales",
+                   textposition: 'top center',
+                   x: zeroed,
+                   y: inh_v,
+                   text: t_inh_v,
+                   marker: { size: 12, color: "black" }
+                  };
+    var exhPlot = {type: "scatter", mode: "markers+text",
+                   name: "exhales",
+                   textposition: 'bottom center',
+                   x: zeroed,
+                   y: exh_v,
+                   text: t_exh_v,
+                   marker: { size: 12, color: "green" }
+                  };
+    new_data.push(inhPlot);
+    new_data.push(exhPlot);
+
   }
   Plotly.newPlot('myDiv', new_data, layout);
 }
@@ -221,6 +248,25 @@ function computeMovingWindowTrace(samples,t,v) {
   var last = 0;
   var voli = 0;
   var vole = 0;
+
+  // This should be in liters...
+  function integrateSamples(a,z) {
+    // -1 for quadilateral approximation
+    var vol = 0;
+    for(var j = a; j < z-1; j++) {
+      // I'll use qadrilateral approximation.
+      // We'll form each quadrilateral between two samples.
+      var ms = samples[j+1].millis - samples[j].millis;
+      var ht = (samples[j+1].Flow + samples[j].Flow)/2;
+      // Flow is actually in standard liters per minute,
+      // so to get liters we divide by 60 to it l/s,
+      // and and divde by 1000 to convert ms to seconds.
+      // We could do that here, but will move constants
+      // to end...
+      vol += ms * ht;
+    }
+    return vol/(60*1000);
+  }
   for(var i = 0; i < transitions.length; i++) {
     if (expiring && transitions[i].state == 1) {
       breaths.push({ ms: transitions[i].ms,
@@ -230,19 +276,12 @@ function computeMovingWindowTrace(samples,t,v) {
                    }
                   );
       expiring = false;
-      vole = 0;
-      for(var j = last; j < transitions[i].sample; j++) {
-        vole += samples[j].Flow;
-      }
+      vole = integrateSamples(last,transitions[i].sample);
       last = transitions[i].sample;
     }
     if (!expiring && transitions[i].state == -1) {
       expiring = true;
-      // let's try to integrate v...
-      voli = 0;
-      for(var j = last; j < transitions[i].sample; j++) {
-        voli += samples[j].Flow;
-      }
+      voli = integrateSamples(last,transitions[i].sample);
       last = transitions[i].sample;
     }
     // At this point we can in theory compute an inspiratory volume..
