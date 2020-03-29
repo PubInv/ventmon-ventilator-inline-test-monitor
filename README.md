@@ -32,6 +32,9 @@ Righ now, we could use:
 1. Someone who knows how to reliably process a time series to tell when a breath begins and respiration rate
 1. A website build who can make nice graphs of pressure/volume curves show up
 1. Someone to build a software test-bench to analyze 48 hours worth of data and mark anomalies.
+1. Someone to compare our Javascript analys algorithms to [BreathMetrics](https://github.com/zelanolab/breathmetrics) in MatLab.
+1. Someone to design the User Interface of the "monitor and alarm" feature. Would have to be or become familiar with existing ventilators to make a similar interface. This is likely to be a small LCD or OLED text screen, 4 physical buttons, and a small speaker or buzzer.
+
 
 ## Licensing
 
@@ -50,8 +53,13 @@ The idea is to make a standalone inline device plugged into the airway. It serve
 
 This is an emergeny project in response to the COVID-19 pandemic. We are in a learning mode.
 
-At present I have I2C pressure sensors and flow meters in my possesion ready to start hacking. (See parts list).
-I have purchased a TIMETER T-200 flow analyzer (used) which has not arrived.
+Got the SensirionFM3200 flow meter working. Documentation on this hard to find---had to guess a bit.
+
+Saturday Night (March 28th): Can record a breath trace and accurately identify transitions. Now must try integration to compute volume!
+
+![Screen Shot 2020-03-29 at 12 30 14 PM](https://user-images.githubusercontent.com/5296671/77855904-2319c000-71b9-11ea-81c9-3f8eff32330a.png)
+
+
 
 ## Parts
 
@@ -67,11 +75,6 @@ Obviously, Arduinos, with control shield, and probably speakers, but I haven't s
 
 ## Progress
 
-![SensirionFM3200](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/SensirionFM3200/SFM3200/SensirionFM3200Working.jpg)
-
-Got the SensirionFM3200 flow meter working. Documentation on this hard to find---had to guess a bit.
-
-Saturday Night: Can record a breath trace and accurately identify transitions. Now must try integration to compute volume!
 
 
 # Motivation of Strategy
