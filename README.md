@@ -32,6 +32,9 @@ Righ now, we could use:
 1. Someone who knows how to reliably process a time series to tell when a breath begins and respiration rate
 1. A website build who can make nice graphs of pressure/volume curves show up
 1. Someone to build a software test-bench to analyze 48 hours worth of data and mark anomalies.
+1. Someone to compare our Javascript analys algorithms to [BreathMetrics](https://github.com/zelanolab/breathmetrics) in MatLab.
+1. Someone to design the User Interface of the "monitor and alarm" feature. Would have to be or become familiar with existing ventilators to make a similar interface. This is likely to be a small LCD or OLED text screen, 4 physical buttons, and a small speaker or buzzer.
+
 
 ## Licensing
 
