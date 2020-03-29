@@ -42,6 +42,10 @@ All code in this repo is licensed under the GNU 3 public license. All documents 
 
 ![InlineVentMonitor](https://github.com/PubInv/ventilator-test-lung-analyzer/blob/master/InlineVentMonitor.svg)
 
+The idea is to make a standalone inline device plugged into the airway. It serves a dual purpose as a monitor/alarm when used on an actual patient, and a test devices for testing prototype ventilators. It also allows for burnin.
+
+![](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/Block%20Architecture.svg)
+
 ## Status
 
 This is an emergeny project in response to the COVID-19 pandemic. We are in a learning mode.
