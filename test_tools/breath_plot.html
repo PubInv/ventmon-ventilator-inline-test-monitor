@@ -24,8 +24,7 @@ Breath Plot: COVID-19 VentMon analysis software
 <body>
   <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
 
-  <button id="record">Record</button>
-  <button id="plot">Plot</button>
+  <button id="plot">Read from Server and Plot</button>
     <button id="breath">Find breath points</button>
 </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -133,10 +132,7 @@ $("#plot").click(function(){
   }});
 });
 
-$("#record").click(function(){
-  $.ajax({url: url+"/rec?"+1000, success: function(result){
-  }});
-});
+
 
 
 // A simple computation of a moving window trace
