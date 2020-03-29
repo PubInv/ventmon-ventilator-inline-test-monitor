@@ -53,8 +53,13 @@ The idea is to make a standalone inline device plugged into the airway. It serve
 
 This is an emergeny project in response to the COVID-19 pandemic. We are in a learning mode.
 
-At present I have I2C pressure sensors and flow meters in my possesion ready to start hacking. (See parts list).
-I have purchased a TIMETER T-200 flow analyzer (used) which has not arrived.
+Got the SensirionFM3200 flow meter working. Documentation on this hard to find---had to guess a bit.
+
+Saturday Night (March 28th): Can record a breath trace and accurately identify transitions. Now must try integration to compute volume!
+
+![Screen Shot 2020-03-29 at 12 30 14 PM](https://user-images.githubusercontent.com/5296671/77855904-2319c000-71b9-11ea-81c9-3f8eff32330a.png)
+
+
 
 ## Parts
 
@@ -70,11 +75,6 @@ Obviously, Arduinos, with control shield, and probably speakers, but I haven't s
 
 ## Progress
 
-![SensirionFM3200](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/SensirionFM3200/SFM3200/SensirionFM3200Working.jpg)
-
-Got the SensirionFM3200 flow meter working. Documentation on this hard to find---had to guess a bit.
-
-Saturday Night: Can record a breath trace and accurately identify transitions. Now must try integration to compute volume!
 
 
 # Motivation of Strategy
