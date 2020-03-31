@@ -29,6 +29,14 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
 
+#include <Adafruit_MPRLS.h>
+
+// This code is from mprls_simpletest; I don't know what it means
+// You dont *need* a reset and EOC pin for most uses, so we set to -1 and don't connect
+#define RESET_PIN  -1  // set to any GPIO pin # to hard-reset on begin()
+#define EOC_PIN    -1  // set to any GPIO pin to read end-of-conversion by pin
+Adafruit_MPRLS mpr = Adafruit_MPRLS(RESET_PIN, EOC_PIN);
+
 #define BME_SCK 13
 #define BME_MISO 12
 #define BME_MOSI 11
@@ -42,6 +50,8 @@ Adafruit_BME680 bme[2]; // I2C
 
 bool found_bme[2] = { false, false}; // an abundance of caution to init
 
+bool found_mprls = false;
+
 uint8_t addr[2] = {0x76,0x77};
 
 //Adafruit_BME680 bme(BME_CS); // hardware SPI
@@ -50,6 +60,13 @@ uint8_t addr[2] = {0x76,0x77};
 void setup() {
   Wire.begin();
   Serial.begin(115200);
+
+   if (! mpr.begin()) {
+    Serial.println("Failed to communicate with MPRLS sensor, check wiring?");
+  } else {
+    Serial.println("Found MPRLS sensor");
+    found_mprls = true;
+  }
   int a = 0;
   int b = 0;
   int c = 0; 
@@ -123,6 +140,7 @@ float AMB_kPa = 0.0;  // Ambient pressure
 #define AMB_UNDERSAMPLE 100
 
 unsigned long sample_millis = 0;
+
 void loop() {
   unsigned long m = millis();
   if (m > sample_millis) {
@@ -132,18 +150,23 @@ void loop() {
     return;
   }
   seekUnfoundBME();
-  float IPA_kPa = 0.0;  // Inspiratory Pathway pressure
+  float IPA0_kPa = 0.0;  // Inspiratory Pathway pressure
 
-  float flow = -999.0;
   if (found_bme[0])
-    IPA_kPa = readPressureOnly(0);
+    IPA0_kPa = readPressureOnly(0);
   if (((ambient_counter % AMB_UNDERSAMPLE) == 0) && found_bme[1]) {
     AMB_kPa = readPressureOnly(1);
     ambient_counter = 1;
   } else {
     ambient_counter++;
   }
+
+  
+  float flow = -999.0;
   flow = readFlow();
+
+  float IPA1_kPa = -999;
+  IPA1_kPa = readPressureOnly(2);
 
 // I personally prefer to transfer JSON objects, 
 // separated by new lines
@@ -153,9 +176,23 @@ void loop() {
   Serial.print("\"millis\": ");
   Serial.print(millis());
   Serial.print(",");
-  Serial.print("\"IPA\": ");
-  Serial.print(IPA_kPa);
+
+  Serial.print("\"IPA0\": ");
+  if (IPA0_kPa != -999) {
+    Serial.print(IPA0_kPa );
+  } else {
+    Serial.print("\"NA\"");  
+  }
   Serial.print(",");
+  
+  Serial.print("\"IPA1\": ");
+  if (IPA1_kPa != -999) {
+    Serial.print(IPA1_kPa );
+  } else {
+    Serial.print("\"NA\"");  
+  }
+  Serial.print(",");
+
   Serial.print("\"AMB\": ");
   Serial.print(AMB_kPa);
   Serial.print(",");
@@ -165,17 +202,28 @@ void loop() {
   Serial.flush();
 }
 
+// the parameter idx here numbers our pressure sensors.
 float readPressureOnly(int idx) 
 {
-  if (! bme[idx].performReading()) {
-    Serial.println("Failed to perform reading :( for:");
-    Serial.println(addr[idx],HEX);
-    found_bme[idx] = false;
-    return -999.0;
+  if (idx < 2) {
+    if (! bme[idx].performReading()) {
+      Serial.println("Failed to perform reading :( for:");
+      Serial.println(addr[idx],HEX);
+      found_bme[idx] = false;
+      return -999.0;
+    } else {     
+      // returning resorts in kPa
+    return bme[idx].pressure / 1000.0;
+    }
+  } else {
+    float mprls_pressure_hPa = -999.0;
+    float mprls_pressure_kPa = -999.0;
+    if (found_mprls) {
+      mprls_pressure_hPa = mpr.readPressure();
+      mprls_pressure_kPa = mprls_pressure_hPa / 10.0;
+    }
+    return mprls_pressure_kPa;     
   }
-
-  // returning resorts in kPa
-  return bme[idx].pressure / 1000.0;
 }
 void readBME(int idx) 
 {
