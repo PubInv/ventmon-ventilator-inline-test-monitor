@@ -124,5 +124,6 @@ However, we also need to do multi-iteration reliabillity tests.  An initial desi
 
 ![Deployment Process](https://github.com/PubInv/ventilator-test-lung-analyzer/blob/master/Meta-process%20for%20Open%20Source%20Ventilator%20Deployment.svg)
 
+# Request for Donations to Public Invention
 
-
+[Public Invention](https://www.pubinv.org/) is a small, all-volunteer 501(c)3 US public charity. Your [small donation](https://www.pubinv.org/donate/) is a stamp of approval for our work that will really help us.
