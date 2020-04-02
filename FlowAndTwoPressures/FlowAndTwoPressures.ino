@@ -150,10 +150,10 @@ void loop() {
     return;
   }
   seekUnfoundBME();
-  float IPA0_kPa = 0.0;  // Inspiratory Pathway pressure
+  float IPA0_kPa = -999.0;  // Inspiratory Pathway pressure
 
-  if (found_bme[0])
-    IPA0_kPa = readPressureOnly(0);
+//  if (found_bme[0])
+//    IPA0_kPa = readPressureOnly(0);
   if (((ambient_counter % AMB_UNDERSAMPLE) == 0) && found_bme[1]) {
     AMB_kPa = readPressureOnly(1);
     ambient_counter = 1;
@@ -168,6 +168,7 @@ void loop() {
   float IPA1_kPa = -999;
   IPA1_kPa = readPressureOnly(2);
 
+
 // I personally prefer to transfer JSON objects, 
 // separated by new lines
 
@@ -177,13 +178,13 @@ void loop() {
   Serial.print(millis());
   Serial.print(",");
 
-  Serial.print("\"IPA0\": ");
-  if (IPA0_kPa != -999) {
-    Serial.print(IPA0_kPa );
-  } else {
-    Serial.print("\"NA\"");  
-  }
-  Serial.print(",");
+//  Serial.print("\"IPA0\": ");
+//  if (IPA0_kPa != -999) {
+//    Serial.print(IPA0_kPa );
+//  } else {
+//   Serial.print("\"NA\"");  
+//  }
+//  Serial.print(",");
   
   Serial.print("\"IPA1\": ");
   if (IPA1_kPa != -999) {
@@ -200,6 +201,19 @@ void loop() {
   Serial.print(flow);
   Serial.print("}\n"); 
   Serial.flush();
+}
+
+
+// Warning!! This is a bad, hacky way to deal with this.
+// we need an input button or action which causes 
+// calibration when we know the airway is at ambient air 
+// pressure. For now, I am hard-wiring based on
+// data taken in the open air; but this needs to be dynamic!
+// Breathing pressures are generally low---
+// any error in calibration here will be problematic!
+float calibrateMPRLS_to_BME680(float mprls_kPa) {
+ float C = 100.84 / 98.89;
+ return mprls_kPa * C;
 }
 
 // the parameter idx here numbers our pressure sensors.
@@ -221,6 +235,7 @@ float readPressureOnly(int idx)
     if (found_mprls) {
       mprls_pressure_hPa = mpr.readPressure();
       mprls_pressure_kPa = mprls_pressure_hPa / 10.0;
+      mprls_pressure_kPa = calibrateMPRLS_to_BME680(mprls_pressure_kPa);
     }
     return mprls_pressure_kPa;     
   }
