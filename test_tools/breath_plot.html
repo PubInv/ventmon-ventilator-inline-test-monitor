@@ -23,9 +23,18 @@ Breath Plot: COVID-19 VentMon analysis software
 
 <body>
   <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
-
+<div>
   <button id="plot">Read from Server and Plot</button>
-    <button id="breath">Find breath points</button>
+  <button id="breath">Find breath points</button>
+</div>
+<div>
+  <button id="import">Import Trace</button>
+  <button id="export">Export Trace</button>
+  </div>
+<div>
+  <textarea id="json_trace" rows="30" cols="80"></textarea>
+  </div>
+
 </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
@@ -40,53 +49,59 @@ function unpack(rows, key) {
   return rows.map(function(row) { return row[key]; });
 }
 
-var layout = {
-  title: 'Basic Time Series',
-};
+
 
 function samplesToLine(samples) {
   var millis = unpack(samples, 'millis');
-  var sums = unpack(samples, 'sum');
   // Convert to seconds...
   var min = Math.min(...millis);
   var zeroed = millis.map(m =>(m-min)/1000.0);
+  var ipa = unpack(samples, 'IPA1');
+  var amb = unpack(samples, 'AMB');
+  var delta_p = [];
+  const PRESSURE_SCALE = 10;
+  for(var i = 0; i < ipa.length; i++) {
+    delta_p[i] = PRESSURE_SCALE*(ipa[i]-amb[i]);
+  }
   var flow = {type: "scatter", mode: "lines",
             name: "flow",
             x: zeroed,
             y: unpack(samples, 'Flow'),
             line: {color: '#17BECF'}
              };
-  var sum = {type: "scatter", mode: "lines",
-            name: "sum",
+  var diff_p = {type: "scatter", mode: "lines",
+            name: "kPa",
             x: zeroed,
-            y: sums,
-            line: {color: '#FF00CF'}
-            };
-  //  return [flow,sum];
-  return [flow];
+            y: delta_p,
+            line: {color: "#00FF00"}
+             };
+  return [flow,diff_p];
 }
 function plot(samples, trans, breaths) {
   var new_data = samplesToLine(samples);
+  var millis = unpack(samples, 'millis');
+  var min = Math.min(...millis);
+  var zeroed = millis.map(m =>(m-min)/1000.0);
   if (trans) {
-    var ttimes = unpack(trans, 'ms');
-    var zeroed = ttimes.map(m =>m/1000.0);
+    var tmillis = unpack(trans, 'ms');
+    var tzeroed = tmillis.map(m =>(m)/1000.0);
     var tstates = unpack(trans, 'state');
     var tstates_amped = tstates.map(m =>m*4);
     var transPlot = {type: "scatter", mode: "lines",
                      name: "trans",
-                     x: zeroed,
+                     x: tzeroed,
             y: tstates_amped,
             line: {color: '#0000FF'}
             };
     new_data.push(transPlot);
   }
   if (breaths) {
-    var ttimes = unpack(breaths, 'ms');
-    var zeroed = ttimes.map(m =>m/1000.0);
+    var bmillis = unpack(breaths, 'ms');
+    var bzeroed = bmillis.map(m =>(m)/1000.0);
     var ys = breaths.map( b => 0);
     var breathPlot = {type: "scatter", mode: "markers",
                      name: "breaths",
-                     x: zeroed,
+                     x: bzeroed,
                       y: ys,
                       marker: { size: 12, color: "red" }
             };
@@ -102,7 +117,7 @@ function plot(samples, trans, breaths) {
     var inhPlot = {type: "scatter", mode: "markers+text",
                    name: "inhales",
                    textposition: 'top center',
-                   x: zeroed,
+                   x: bzeroed,
                    y: inh_v,
                    text: t_inh_v,
                    marker: { size: 12, color: "black" }
@@ -110,26 +125,58 @@ function plot(samples, trans, breaths) {
     var exhPlot = {type: "scatter", mode: "markers+text",
                    name: "exhales",
                    textposition: 'bottom center',
-                   x: zeroed,
+                   x: bzeroed,
                    y: exh_v,
                    text: t_exh_v,
                    marker: { size: 12, color: "green" }
                   };
     new_data.push(inhPlot);
     new_data.push(exhPlot);
-
   }
+
+  var layout = {
+    title: 'VentMon Breath Analysis',
+    xaxis: {domain: [0.1, 0.9]},
+   yaxis: {
+    title: 'Flow (slm)',
+    titlefont: {color: '#1f77b4'},
+    tickfont: {color: '#1f77b4'}
+  },
+  yaxis2: {
+    title: 'airway pressure (kPa)',
+    titlefont: {color: '#ff7f0e'},
+    tickfont: {color: '#ff7f0e'},
+    anchor: 'free',
+    overlaying: 'y',
+    side: 'left',
+    position: -0.1
+  },
+  };
+
+  // TODO: move to making all axes fixed....
+  new_data[1].yaxis = 'y2';
+  // If we have done a breath analysis, we need to push onto
+  // the "y" axis...this could be more elegant...
+  for(var i = 2; i < new_data.length; i++)
+    new_data[i].yaxis = 'y';
+
   Plotly.newPlot('myDiv', new_data, layout);
+ // Plotly.newPlot('myDiv', [trace1,trace2], layout);
 }
 
 
 $("#plot").click(function(){
-  $.ajax({url: url, success: function(result){
-    var lines = result.split("\n").filter( x => (x.length > 0) && (x[0] == '{') );
-
-    samples = lines.map(JSON.parse);
-    plot(samples);
-  }});
+  $.ajax({url: url,
+          success: function(result){
+            var lines = result.split("\n").filter( x => (x.length > 0) && (x[0] == '{') );
+            samples = lines.map(JSON.parse);
+            plot(samples);
+          },
+          error: function(xhr, ajaxOptions, thrownError) {
+            alert("Error!" + xhr.status);
+            alert(thrownError);
+          }
+         });
 });
 
 
@@ -140,47 +187,9 @@ $("#plot").click(function(){
 // of sample int time window t, and B is volume to right
 // t is in milliseconds
 function computeMovingWindowTrace(samples,t,v) {
-  var A = 0; // running volume behind sample[i]
-  var B = 0; // running volume ahead of sample[i]
-  // first, compute the number of samples in a window...
-  // this is a kludge!
   var first_time = samples[0].millis;
   var last_time = samples[samples.length - 1].millis;
   var duration = last_time - first_time;
-  var n = Math.ceil(samples.length * t / duration);
-  // make it odd...
-  if ((n % 2) == 0) {
-    n = n+1;
-  }
-  // This way of doing it biases it because
-  // of the way we start, and we remained biased.
-  // By setting A = -B to begin with, we solve that problem.
-  var h = Math.floor(n/2); // h is now num of samples
-  // on either side of s
-  for(var i = 1; i < h+1; i++) {
-    B = B + samples[i].Flow;
-  }
-  var stack = [];
-
-  for(var i = 0; i < samples.length; i++) {
-    // first, create the sample
-    stack[i] = A + -B;
-    // now adust A and B!
-    A = A + samples[i].Flow;
-    if (i - h > 0) {
-      A = A - samples[i-h].Flow;
-    }
-
-    if (i + h < samples.length)
-      B = B + samples[i+h].Flow;
-    B = B - samples[i].Flow;
-  }
-
-  // Experimental area...
-  // Now we want to compute local extrema in the time window,
-  // and we will call those breath points...
-  var maxs = [];
-  var mins = [];
 
   // Here is an idea...
   // We define you to be in one of three states:
@@ -230,8 +239,6 @@ function computeMovingWindowTrace(samples,t,v) {
       }
     }
   }
-
-
 
   // Now that we have transitions, we can apply a
   // diferent algorithm to try to define "breaths".
@@ -286,34 +293,24 @@ function computeMovingWindowTrace(samples,t,v) {
 
   console.log(breaths);
 
-  return [stack,transitions,breaths];
+  return [transitions,breaths];
 }
 
-// Experimental math by Rob.
-// Take ALL of the samples (so that we have times)
-// A quick and dirty approximation is to sample equal
-// sample spacing, which is proably wrong.
-// The basic algorithm is take width of time t,
-// move a window of time t along the curve.
-// Any sample s which
-function findBreaths(samples,t,v) {
-  var summation = computeMovingWindowTrace(samples,t,v);
-  // Now the summation points are quite prominent...
-  // We seach for local maxima. Then when we have two
-  // maxima, we will look for minima between these
-  // peaks as a simple minima
-  //
-}
 
 $("#breath").click(function(){
   const t = 200; // size of the window is 200ms
   const v = 50; // min volume in ml
-  var [summation,transitions,breaths] = computeMovingWindowTrace(samples,t,v);
-  findBreaths(samples,t,v);
-  for(var i = 0; i < summation.length; i++) {
-    samples[i].sum = summation[i];
-  }
+  var [transitions,breaths] = computeMovingWindowTrace(samples,t,v);
   plot(samples,transitions,breaths);
+});
+
+$("#import").click(function() {
+  var input_trace = $("#json_trace").val();
+  samples = JSON.parse(input_trace);
+});
+
+$("#export").click(function() {
+  $("#json_trace").val(JSON.stringify(samples,null,2));
 });
 
   </script>
