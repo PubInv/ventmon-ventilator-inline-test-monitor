@@ -24,10 +24,17 @@ app = Flask(__name__)
 
 CORS(app)
 
+NUMREAD = 0;
+REPORT_MODULUS = 500;
 def read_from_port():
+  global NUMREAD
   while True:
     line = ser.readline()   # read a '\n' terminated line
-    print(str(line)+"\n",sys.stderr)
+    NUMREAD = NUMREAD + 1;
+    if (NUMREAD % REPORT_MODULUS) == 0:
+      print(str(len(d)) + " ready!\n",sys.stderr)
+      print(str(line) + "\n",sys.stderr)
+      NUMREAD = 0;
     d.append(line);
 
 
@@ -67,7 +74,9 @@ thread.start()
 
 @app.route("/")
 def getsamples():
+  global d
   result = ""
+  print(str(len(d))+"\n",sys.stderr)
   for x in d:
     line = x
     result = result + line.decode('utf-8')
