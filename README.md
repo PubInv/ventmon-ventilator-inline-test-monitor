@@ -59,6 +59,7 @@ Saturday Night (March 28th): Can record a breath trace and accurately identify t
 
 ![Screen Shot 2020-03-29 at 12 30 14 PM](https://user-images.githubusercontent.com/5296671/77855904-2319c000-71b9-11ea-81c9-3f8eff32330a.png)
 
+Sunday morning: The first two VentMon units are loosely promised to the teams lead by Ethan Chaleff and John Bennett.
 
 
 ## Parts
