@@ -85,9 +85,9 @@ void setup() {
   b = Wire.read(); // second received byte stored here
   c = Wire.read(); // third received byte stored here
   Wire.endTransmission();
-  Serial.print(a);
-  Serial.print(b);
-  Serial.println(c);
+//  Serial.print(a);
+//  Serial.print(b);
+//  Serial.println(c);
 
   delay(5);
  
@@ -96,13 +96,13 @@ void setup() {
   b = Wire.read(); // second received byte stored here
   c = Wire.read(); // third received byte stored here
   Wire.endTransmission();
-  Serial.print(a);
-  Serial.print(b);
-  Serial.println(c);
+//  Serial.print(a);
+//  Serial.print(b);
+//  Serial.println(c);
 
   delay(5);
   while (!Serial);
-  Serial.println(F("BME680 test"));
+  //Serial.println(F("BME680 test"));
   seekBME(0);
   seekBME(1);
 }
@@ -142,6 +142,7 @@ float AMB_kPa = 0.0;  // Ambient pressure
 unsigned long sample_millis = 0;
 
 void loop() {
+  
   unsigned long m = millis();
   if (m > sample_millis) {
     sample_millis = m;
@@ -152,8 +153,8 @@ void loop() {
   seekUnfoundBME();
   float IPA0_kPa = -999.0;  // Inspiratory Pathway pressure
 
-//  if (found_bme[0])
-//    IPA0_kPa = readPressureOnly(0);
+  if (found_bme[0])
+    IPA0_kPa = readPressureOnly(0);
   if (((ambient_counter % AMB_UNDERSAMPLE) == 0) && found_bme[1]) {
     AMB_kPa = readPressureOnly(1);
     ambient_counter = 1;
@@ -178,13 +179,13 @@ void loop() {
   Serial.print(millis());
   Serial.print(",");
 
-//  Serial.print("\"IPA0\": ");
-//  if (IPA0_kPa != -999) {
-//    Serial.print(IPA0_kPa );
-//  } else {
-//   Serial.print("\"NA\"");  
-//  }
-//  Serial.print(",");
+  Serial.print("\"IPA0\": ");
+  if (IPA0_kPa != -999) {
+    Serial.print(IPA0_kPa );
+  } else {
+   Serial.print("\"NA\"");  
+  }
+  Serial.print(",");
   
   Serial.print("\"IPA1\": ");
   if (IPA1_kPa != -999) {
@@ -292,9 +293,9 @@ float readFlow() {
   Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
   uint16_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
   uint8_t b = Wire.read(); // second received byte stored here
- // Serial.println("raw");
-  //Serial.println(a);
- // Serial.println(b);
+//  Serial.println("raw");
+//  Serial.println(a);
+//  Serial.println(b);
   uint8_t crc = Wire.read(); // crc value stored here
   uint8_t mycrc = 0xFF; // initialize crc variable
   mycrc = crc8(a, mycrc); // let first byte through CRC calculation
@@ -305,9 +306,9 @@ float readFlow() {
   a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
   a >>= 2; // remove the two least significant bits
 
-  //Serial.println("combined");
-  //Serial.println(a);
-  //Serial.println(a - 8192);
+//  Serial.println("combined");
+//  Serial.println(a);
+//  Serial.println(a - 8192);
   float Flow = ((float)a - 8192) / scale;
   //Serial.println(a); // print the raw data from the sensor to the serial interface
   //Serial.print("Flow in spm: ");
