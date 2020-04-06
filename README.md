@@ -65,8 +65,7 @@ Diagrams of the current system architechure and electrical design are below.
 
 ![SystemDiagram](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/VentMonSystemDiagram.png)
 
-![ElectrialBlockDiagram](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/ElectricalBlockDiagram.png)
-
+![ElectricalBlockDiagram](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/PressureSensorElectricalBlockDiagram.png)
 
 ## Parts
 
