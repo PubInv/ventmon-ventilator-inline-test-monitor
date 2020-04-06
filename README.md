@@ -61,6 +61,12 @@ Saturday Night (March 28th): Can record a breath trace and accurately identify t
 
 Sunday morning: The first two VentMon units are loosely promised to the teams lead by Ethan Chaleff and John Bennett.
 
+Diagrams of the current system architechure and electrical design are below.
+
+![SystemDiagram](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/VentMonSystemDiagram.png)
+
+![ElectrialBlockDiagram](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/ElectricalBlockDiagram.png)
+
 
 ## Parts
 
