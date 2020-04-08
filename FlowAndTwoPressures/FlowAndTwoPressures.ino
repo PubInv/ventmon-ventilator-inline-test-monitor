@@ -29,14 +29,6 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
 
-#include <Adafruit_MPRLS.h>
-
-// This code is from mprls_simpletest; I don't know what it means
-// You dont *need* a reset and EOC pin for most uses, so we set to -1 and don't connect
-#define RESET_PIN  -1  // set to any GPIO pin # to hard-reset on begin()
-#define EOC_PIN    -1  // set to any GPIO pin to read end-of-conversion by pin
-Adafruit_MPRLS mpr = Adafruit_MPRLS(RESET_PIN, EOC_PIN);
-
 #define BME_SCK 13
 #define BME_MISO 12
 #define BME_MOSI 11
@@ -50,7 +42,6 @@ Adafruit_BME680 bme[2]; // I2C
 
 bool found_bme[2] = { false, false}; // an abundance of caution to init
 
-bool found_mprls = false;
 
 uint8_t addr[2] = {0x76,0x77};
 
@@ -61,46 +52,12 @@ void setup() {
   Wire.begin();
   Serial.begin(115200);
 
-   if (! mpr.begin()) {
-    Serial.println("Failed to communicate with MPRLS sensor, check wiring?");
-  } else {
-    Serial.println("Found MPRLS sensor");
-    found_mprls = true;
-  }
   int a = 0;
   int b = 0;
   int c = 0; 
  
   delay(1000);
 
-  Wire.beginTransmission(byte(0x40)); // transmit to device #064 (0x40)
-  Wire.write(byte(0x10));      //
-  Wire.write(byte(0x00));      //
-  Wire.endTransmission(); 
-
-  delay(5);
-
-  Wire.requestFrom(0x40, 3); //
-  a = Wire.read(); // first received byte stored here
-  b = Wire.read(); // second received byte stored here
-  c = Wire.read(); // third received byte stored here
-  Wire.endTransmission();
-//  Serial.print(a);
-//  Serial.print(b);
-//  Serial.println(c);
-
-  delay(5);
- 
-  Wire.requestFrom(0x40, 3); //
-  a = Wire.read(); // first received byte stored here
-  b = Wire.read(); // second received byte stored here
-  c = Wire.read(); // third received byte stored here
-  Wire.endTransmission();
-//  Serial.print(a);
-//  Serial.print(b);
-//  Serial.println(c);
-
-  delay(5);
   while (!Serial);
   //Serial.println(F("BME680 test"));
   seekBME(0);
@@ -141,6 +98,40 @@ float AMB_kPa = 0.0;  // Ambient pressure
 
 unsigned long sample_millis = 0;
 
+void outputChrField(char *name,char v) {
+  Serial.print("\"");
+  Serial.print(name);
+  Serial.print("\" : \"");
+  Serial.print(v);
+  Serial.print("\",");
+}
+void outputNumField(char *name,signed long v) {
+  Serial.print("\"");
+  Serial.print(name);
+  Serial.print("\" : \"");
+  Serial.print(v);
+  Serial.print("\",");
+}
+
+void outputByteField(char *name,unsigned short v) {
+  Serial.print("\"");
+  Serial.print(name);
+  Serial.print("\" : \"");
+  Serial.print((unsigned short int) v);
+  Serial.print("\",");
+}
+
+void outputMeasurment(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
+  Serial.print("{ ");
+  outputChrField("event",e);
+  outputChrField("type",t);
+  outputNumField("ms",ms);
+  outputChrField("loc",loc);
+  outputByteField("num",n);
+  outputNumField("val",val);
+  Serial.print(" }");
+}
+
 void loop() {
   
   unsigned long m = millis();
@@ -151,74 +142,56 @@ void loop() {
     return;
   }
   seekUnfoundBME();
-  float IPA0_kPa = -999.0;  // Inspiratory Pathway pressure
 
-  if (found_bme[0])
-    IPA0_kPa = readPressureOnly(0);
+  unsigned long ms = millis();
+  // We need to use a better sentinel...this is a legal value!
+  // units for pressure are cm H2O * 100 (integer 10ths of mm)
+  signed long ambient_pressure = -999; 
+  signed long internal_pressure = -999;  // Inspiratory Pathway pressure
+  
+  if (found_bme[0]) {
+    internal_pressure = readPressureOnly(0);
+  }
   if (((ambient_counter % AMB_UNDERSAMPLE) == 0) && found_bme[1]) {
-    AMB_kPa = readPressureOnly(1);
-    ambient_counter = 1;
+      ambient_pressure = readPressureOnly(1);
+      ambient_counter = 1;
+
+      if (ambient_pressure != -999) {    
+        outputMeasurment('M', 'P', 'B', 1, ms, ambient_pressure);
+        Serial.println();
+      } else {
+        Serial.print("\"NA\"");  
+      }
   } else {
-    ambient_counter++;
+   ambient_counter++;
   }
 
-  
   float flow = -999.0;
   flow = readFlow();
 
-  float IPA1_kPa = -999;
-  IPA1_kPa = readPressureOnly(2);
-
-
-// I personally prefer to transfer JSON objects, 
-// separated by new lines
-
 // Note: Units are kiloPasccas for pressure, and slm for flow
-  Serial.print("{ ");
-  Serial.print("\"millis\": ");
-  Serial.print(millis());
-  Serial.print(",");
 
-  Serial.print("\"IPA0\": ");
-  if (IPA0_kPa != -999) {
-    Serial.print(IPA0_kPa );
+  if (internal_pressure != -999) {    
+    outputMeasurment('M', 'P', 'A', 0, ms, internal_pressure);
+    Serial.println();
   } else {
-   Serial.print("\"NA\"");  
-  }
-  Serial.print(",");
-  
-  Serial.print("\"IPA1\": ");
-  if (IPA1_kPa != -999) {
-    Serial.print(IPA1_kPa );
-  } else {
+    // This is not actually part of the format!!!
     Serial.print("\"NA\"");  
   }
-  Serial.print(",");
 
-  Serial.print("\"AMB\": ");
-  Serial.print(AMB_kPa);
-  Serial.print(",");
-  Serial.print("\"Flow\" :");
-  Serial.print(flow);
-  Serial.print("}\n"); 
+
+
+// our units are slm * 1000, or milliliters per minute.
+  signed long flow_milliliters_per_minute = (signed long) (flow * 1000);
+
+  outputMeasurment('M', 'F', 'A', 0, ms, flow_milliliters_per_minute);
+  Serial.println();
   Serial.flush();
 }
 
-
-// Warning!! This is a bad, hacky way to deal with this.
-// we need an input button or action which causes 
-// calibration when we know the airway is at ambient air 
-// pressure. For now, I am hard-wiring based on
-// data taken in the open air; but this needs to be dynamic!
-// Breathing pressures are generally low---
-// any error in calibration here will be problematic!
-float calibrateMPRLS_to_BME680(float mprls_kPa) {
- float C = 100.84 / 98.89;
- return mprls_kPa * C;
-}
-
 // the parameter idx here numbers our pressure sensors.
-float readPressureOnly(int idx) 
+// The sensors may be better, for as per the PIRDS we are returning integer 10ths of a mm of H2O
+signed long readPressureOnly(int idx) 
 {
   if (idx < 2) {
     if (! bme[idx].performReading()) {
@@ -228,18 +201,14 @@ float readPressureOnly(int idx)
       return -999.0;
     } else {     
       // returning resorts in kPa
-    return bme[idx].pressure / 1000.0;
+      // the sensor apparently gives us Pascals...
+      
+    return (signed long) (0.5 + (bme[idx].pressure / (98.0665 / 10)));
     }
   } else {
-    float mprls_pressure_hPa = -999.0;
-    float mprls_pressure_kPa = -999.0;
-    if (found_mprls) {
-      mprls_pressure_hPa = mpr.readPressure();
-      mprls_pressure_kPa = mprls_pressure_hPa / 10.0;
-      mprls_pressure_kPa = calibrateMPRLS_to_BME680(mprls_pressure_kPa);
-    }
-    return mprls_pressure_kPa;     
+    // internal error! Ideally would publish and internal error event
   }
+
 }
 void readBME(int idx) 
 {
