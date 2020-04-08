@@ -27,7 +27,7 @@ app = Flask(__name__)
 CORS(app)
 
 NUMREAD = 0;
-REPORT_MODULUS = 500;
+REPORT_MODULUS = 50;
 def read_from_port():
   global NUMREAD
   global my_deque
@@ -41,7 +41,15 @@ def read_from_port():
       print(str(line) + "\n",sys.stderr)
       print(line.decode("utf-8") + "\n",sys.stderr)
       NUMREAD = 0;
-    my_deque.append(line.decode("utf-8"));
+    # performing a try except here really seems to
+    # make the coding of characters all messed up,
+    # I don't realy know why, it is like we get off by one character
+#    try:
+    thisline = line.decode("utf-8")
+    my_deque.append(thisline)
+#    except(UnicodeDecodeError):
+#      pass
+
 
 
 thread = threading.Thread(target=read_from_port)

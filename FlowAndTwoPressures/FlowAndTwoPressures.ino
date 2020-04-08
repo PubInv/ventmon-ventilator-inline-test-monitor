@@ -58,6 +58,7 @@ void setup() {
  
   delay(1000);
 
+  init_ambient();
   while (!Serial);
   //Serial.println(F("BME680 test"));
   seekBME(0);
@@ -80,21 +81,29 @@ void seekBME(int idx) {
     Serial.println(addr[idx],HEX);
   } else {
     // Set up oversampling and filter initialization
+    if (idx == 0) {
 //    bme[idx].setTemperatureOversampling(BME680_OS_8X);
-      bme[idx].setTemperatureOversampling(BME680_OS_NONE);
-      bme[idx].setHumidityOversampling(BME680_OS_NONE);
+      bme[idx].setTemperatureOversampling(BME680_OS_1X);
+      bme[idx].setHumidityOversampling(BME680_OS_1X);
       bme[idx].setPressureOversampling(BME680_OS_1X);
  //   bme[idx].setIIRFilterSize(BME680_FILTER_SIZE_3);
   //  bme[idx].setGasHeater(320, 150); // 320*C for 150 ms
     bme[idx].setGasHeater(0, 0); // 320*C for 150 ms 
+    } else if (idx == 1) {
+     // bme[idx].setTemperatureOversampling(BME680_OS_8X);
+      bme[idx].setTemperatureOversampling(BME680_OS_1X);
+      bme[idx].setHumidityOversampling(BME680_OS_1X);
+      bme[idx].setPressureOversampling(BME680_OS_1X);
+    bme[idx].setIIRFilterSize(BME680_FILTER_SIZE_3);
+    bme[idx].setGasHeater(320, 150); // 320*C for 150 ms
+//    bme[idx].setGasHeater(0, 0); // 320*C for 150 ms  
+    }
   }
 }
 
 // only need to sample the ambient air occasinally
 // (say once a minute) for PEEP analysis
 int ambient_counter = 0;
-float AMB_kPa = 0.0;  // Ambient pressure
-#define AMB_UNDERSAMPLE 100
 
 unsigned long sample_millis = 0;
 
@@ -103,14 +112,21 @@ void outputChrField(char *name,char v) {
   Serial.print(name);
   Serial.print("\" : \"");
   Serial.print(v);
-  Serial.print("\",");
+  Serial.print("\", ");
 }
 void outputNumField(char *name,signed long v) {
   Serial.print("\"");
   Serial.print(name);
   Serial.print("\" : \"");
   Serial.print(v);
-  Serial.print("\",");
+  Serial.print("\", ");
+}
+void outputNumFieldNoSep(char *name,signed long v) {
+  Serial.print("\"");
+  Serial.print(name);
+  Serial.print("\" : \"");
+  Serial.print(v);
+  Serial.print("\" ");
 }
 
 void outputByteField(char *name,unsigned short v) {
@@ -118,7 +134,7 @@ void outputByteField(char *name,unsigned short v) {
   Serial.print(name);
   Serial.print("\" : \"");
   Serial.print((unsigned short int) v);
-  Serial.print("\",");
+  Serial.print("\", ");
 }
 
 void outputMeasurment(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
@@ -128,8 +144,73 @@ void outputMeasurment(char e, char t, char loc, unsigned short int n, unsigned l
   outputNumField("ms",ms);
   outputChrField("loc",loc);
   outputByteField("num",n);
-  outputNumField("val",val);
+  outputNumFieldNoSep("val",val);
   Serial.print(" }");
+}
+
+// We could send out only raw data, and let more powerful computers process thing.
+// But we have a powerful micro controller here, so we will try to be useful!
+// Instead of outputting only the absolute pressure, we will output the differential
+// pressure in the Airway. We will compute a differential pressure against the 
+// ambient air. We will name this D0. We need a moving window to make sure there
+// is not jitter.
+int amb_wc = 0;
+#define AMB_WINDOW_SIZE 4
+#define AMB_SAMPLES_PER_WINDOW_ELEMENT 25 
+// sea level starting pressure.
+signed long ambient_window[AMB_WINDOW_SIZE];
+
+void init_ambient() {
+  for(int i = 0; i < 4; i++) ambient_window[i] = 10340;
+}
+
+void report_full(int idx) 
+{
+  unsigned long ms = millis(); 
+   
+  if (! bme[idx].performReading()) {
+    Serial.println("Failed to perform reading :( for:");
+    Serial.println(addr[idx],HEX);
+    found_bme[idx] = false;
+    return;
+  }
+
+
+  char loc = (idx == 0) ? 'A' : 'B';
+
+  outputMeasurment('M', 'T', loc, 0, ms, (signed long) (0.5 + (bme[idx].temperature * 100)));
+  Serial.println();
+
+// This code is useful for debugging 
+//  Serial.print("Data For:");
+//  Serial.println(addr[idx],HEX);
+//  Serial.print("Temperature = ");
+// Serial.print(bme[idx].temperature);
+// Serial.println(" *C");
+//
+//  Serial.print("Pressure = ");
+//  Serial.print(bme[idx].pressure / 1000.0);
+//  Serial.println(" kPa");
+
+  outputMeasurment('M', 'P', loc, 0, ms, (signed long) (0.5 + (bme[idx].pressure / (98.0665 / 10))));
+  Serial.println(); 
+// Serial.print("Humidity = ");
+// Serial.print(bme[idx].humidity);
+// Serial.println(" %");
+
+ outputMeasurment('M', 'H', loc, 0, ms, (signed long) (0.5 + (bme[idx].humidity * 100)));
+  Serial.println();
+//  Serial.print("Gas = ");
+//  Serial.print(bme[idx].gas_resistance / 1000.0);
+//  Serial.println(" KOhms");
+  outputMeasurment('M', 'G', loc, 0, ms, (signed long) (0.5 + bme[idx].gas_resistance));
+  Serial.println();
+//  Serial.print("Approx. Altitude = ");
+//  Serial.print(bme[idx].readAltitude(SEALEVELPRESSURE_HPA));
+//  Serial.println(" m");
+  outputMeasurment('M', 'A', loc, 0, ms, (signed long) (0.5 + bme[idx].readAltitude(SEALEVELPRESSURE_HPA)));
+
+  Serial.println();
 }
 
 void loop() {
@@ -152,12 +233,19 @@ void loop() {
   if (found_bme[0]) {
     internal_pressure = readPressureOnly(0);
   }
-  if (((ambient_counter % AMB_UNDERSAMPLE) == 0) && found_bme[1]) {
+  if (((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0) && found_bme[1]) {
       ambient_pressure = readPressureOnly(1);
       ambient_counter = 1;
 
+      // experimentally we will report everything in the stream from 
+      // both sensor; sadly the BM# 680 is to slow to do this every sample.
+      report_full(0);
+      report_full(1);
+      
       if (ambient_pressure != -999) {    
         outputMeasurment('M', 'P', 'B', 1, ms, ambient_pressure);
+        ambient_window[amb_wc] = ambient_pressure;
+        amb_wc = (amb_wc +1) % AMB_WINDOW_SIZE;
         Serial.println();
       } else {
         Serial.print("\"NA\"");  
@@ -165,6 +253,11 @@ void loop() {
   } else {
    ambient_counter++;
   }
+  signed long smooth_ambient = 0;
+  for(int i = 0; i < AMB_WINDOW_SIZE; i++) {
+    smooth_ambient += ambient_window[i];
+  }
+  smooth_ambient = (signed long) (smooth_ambient / AMB_WINDOW_SIZE);
 
   float flow = -999.0;
   flow = readFlow();
@@ -172,7 +265,9 @@ void loop() {
 // Note: Units are kiloPasccas for pressure, and slm for flow
 
   if (internal_pressure != -999) {    
-    outputMeasurment('M', 'P', 'A', 0, ms, internal_pressure);
+ //   outputMeasurment('M', 'P', 'A', 0, ms, internal_pressure);
+ //   Serial.println();
+    outputMeasurment('M', 'P', 'D', 0, ms, internal_pressure - smooth_ambient);  
     Serial.println();
   } else {
     // This is not actually part of the format!!!
@@ -210,38 +305,7 @@ signed long readPressureOnly(int idx)
   }
 
 }
-void readBME(int idx) 
-{
-  if (! bme[idx].performReading()) {
-    Serial.println("Failed to perform reading :( for:");
-    Serial.println(addr[idx],HEX);
-    found_bme[idx] = false;
-    return;
-  }
-  Serial.print("Data For:");
-  Serial.println(addr[idx],HEX);
-//  Serial.print("Temperature = ");
-//  Serial.print(bme[idx].temperature);
-//  Serial.println(" *C");
 
-  Serial.print("Pressure = ");
-  Serial.print(bme[idx].pressure / 1000.0);
-  Serial.println(" kPa");
-
- // Serial.print("Humidity = ");
-//  Serial.print(bme[idx].humidity);
-//  Serial.println(" %");
-
-  // Serial.print("Gas = ");
-  // Serial.print(bme[idx].gas_resistance / 1000.0);
-  //Serial.println(" KOhms");
-
-  //Serial.print("Approx. Altitude = ");
-  //Serial.print(bme[idx].readAltitude(SEALEVELPRESSURE_HPA));
-  //Serial.println(" m");
-
-  Serial.println();
-}
 
 uint8_t crc8(const uint8_t data, uint8_t crc) {
   crc ^= data;

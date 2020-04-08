@@ -50,9 +50,12 @@ function unpack(rows, key) {
 }
 
 
-
+// we have now changed this, there will be flow and
+// pressure in the same samples, and we should filter.
 function samplesToLine(samples) {
-  var millis = unpack(samples, 'millis');
+  var flows = samples.filter(s => s.event == 'M' && s.type == 'F');
+  var pressures = samples.filter(s => s.event == 'M' && s.type == 'P');
+  var millis = unpack(samples, 'ms');
   // Convert to seconds...
   var min = Math.min(...millis);
   var zeroed = millis.map(m =>(m-min)/1000.0);
@@ -169,7 +172,15 @@ $("#plot").click(function(){
   $.ajax({url: url,
           success: function(result){
             var lines = result.split("\n").filter( x => (x.length > 0) && (x[0] == '{') );
-            samples = lines.map(JSON.parse);
+            samples = lines.map(line =>
+                                {
+                                  try {
+                                    return JSON.parse(line);
+                                  } catch {
+                                    return null;
+                                  }
+                                });
+            samples = samples.filter( s => s != null);
             plot(samples);
           },
           error: function(xhr, ajaxOptions, thrownError) {
