@@ -5,7 +5,7 @@
 void setup()
 {
   Wire.begin();
-  Serial.begin(9600);
+  Serial.begin(115200);
   int a = 0;
   int b = 0;
   int c = 0; 
@@ -62,9 +62,9 @@ void loop() {
   Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
   uint16_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
   uint8_t b = Wire.read(); // second received byte stored here
- // Serial.println("raw");
-  //Serial.println(a);
- // Serial.println(b);
+  Serial.println("raw");
+  Serial.println(a);
+  Serial.println(b);
   uint8_t crc = Wire.read(); // crc value stored here
   uint8_t mycrc = 0xFF; // initialize crc variable
   mycrc = crc8(a, mycrc); // let first byte through CRC calculation
@@ -75,9 +75,9 @@ void loop() {
   a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
   a >>= 2; // remove the two least significant bits
 
-  //Serial.println("combined");
-  //Serial.println(a);
-  //Serial.println(a - 8192);
+  Serial.println("combined");
+  Serial.println(a);
+  Serial.println(a - 8192);
   float Flow = ((float)a - 8192) / scale;
   //Serial.println(a); // print the raw data from the sensor to the serial interface
   Serial.println(Flow); // print the calculated flow to the serial interface
