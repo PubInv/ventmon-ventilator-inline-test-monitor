@@ -54,27 +54,29 @@ function unpack(rows, key) {
 // pressure in the same samples, and we should filter.
 function samplesToLine(samples) {
   var flows = samples.filter(s => s.event == 'M' && s.type == 'F');
-  var pressures = samples.filter(s => s.event == 'M' && s.type == 'P');
-  var millis = unpack(samples, 'ms');
+
+  // These are slm/1000, or ml/minute...
+  var flow_values = unpack(flows,"val");
+  var fmillis = unpack(flows, 'ms');
   // Convert to seconds...
-  var min = Math.min(...millis);
-  var zeroed = millis.map(m =>(m-min)/1000.0);
-  var ipa = unpack(samples, 'IPA1');
-  var amb = unpack(samples, 'AMB');
-  var delta_p = [];
-  const PRESSURE_SCALE = 10;
-  for(var i = 0; i < ipa.length; i++) {
-    delta_p[i] = PRESSURE_SCALE*(ipa[i]-amb[i]);
-  }
+  var fmin = Math.min(...fmillis);
+  var fzeroed = fmillis.map(m =>(m-fmin)/1000.0);
+
+  var pressures = samples.filter(s => s.event == 'M' && s.type == 'D' && s.loc == 'A');
+
+  var pmillis = unpack(pressures, 'ms');
+  var pmin = Math.min(...pmillis);
+  var pzeroed = pmillis.map(m =>(m-pmin)/1000.0);
+  var delta_p = unpack(pressures, 'val');
   var flow = {type: "scatter", mode: "lines",
             name: "flow",
-            x: zeroed,
-            y: unpack(samples, 'Flow'),
+            x: fzeroed,
+            y: flow_values,
             line: {color: '#17BECF'}
              };
   var diff_p = {type: "scatter", mode: "lines",
-            name: "kPa",
-            x: zeroed,
+            name: "pressure",
+            x: pzeroed,
             y: delta_p,
             line: {color: "#00FF00"}
              };

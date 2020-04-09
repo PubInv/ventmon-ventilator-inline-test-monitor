@@ -29,6 +29,39 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
 
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+ 
+Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
+ 
+// OLED FeatherWing buttons map to different pins depending on board:
+#if defined(ESP8266)
+  #define BUTTON_A  0
+  #define BUTTON_B 16
+  #define BUTTON_C  2
+#elif defined(ESP32)
+  #define BUTTON_A 15
+  #define BUTTON_B 32
+  #define BUTTON_C 14
+#elif defined(ARDUINO_STM32_FEATHER)
+  #define BUTTON_A PA15
+  #define BUTTON_B PC7
+  #define BUTTON_C PC5
+#elif defined(TEENSYDUINO)
+  #define BUTTON_A  4
+  #define BUTTON_B  3
+  #define BUTTON_C  8
+#elif defined(ARDUINO_FEATHER52832)
+  #define BUTTON_A 31
+  #define BUTTON_B 30
+  #define BUTTON_C 27
+#else // 32u4, M0, M4, nrf52840 and 328p
+  #define BUTTON_A  9
+  #define BUTTON_B  6
+  #define BUTTON_C  5
+#endif
+
+
 #define BME_SCK 13
 #define BME_MISO 12
 #define BME_MOSI 11
@@ -48,9 +81,63 @@ uint8_t addr[2] = {0x76,0x77};
 //Adafruit_BME680 bme(BME_CS); // hardware SPI
 //Adafruit_BME680 bme(BME_CS, BME_MOSI, BME_MISO,  BME_SCK);
 
+bool found_display = false;
+
+// we will ust this as a pressure to display to make the OLED useful...
+// Eventually we will put this into running window
+unsigned long display_max_pressure = 0;
+
+void setupOLED() {
+ // Here we initialize the OLED...
+  Serial.println("OLED FeatherWing test");
+  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
+  int ret_oled = display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  Serial.println("Return value for OLED");
+  Serial.println(ret_oled);
+  if (ret_oled != 1) { // Address 0x3C for 128x32
+    // hopefully this just means you don't have the board; we should send this as a message in the stream
+    Serial.println("returing from OLED setup!");
+    return;
+  }
+  found_display = true;
+  Serial.println("OLED begun");
+ 
+  // Show image buffer on the display hardware.
+  // Since the buffer is intialized with an Adafruit splashscreen
+  // internally, this will display the splashscreen.
+  display.display();
+
+  delay(1000);
+ 
+  // Clear the buffer.
+  display.clearDisplay();
+  display.display();
+ 
+  Serial.println("IO test");
+ 
+  pinMode(BUTTON_A, INPUT_PULLUP);
+  pinMode(BUTTON_B, INPUT_PULLUP);
+  pinMode(BUTTON_C, INPUT_PULLUP);
+ 
+  // text display tests
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0,0);
+  display.print("Connecting to SSID\n'adafruit':");
+  display.print("connected!");
+  display.println("IP: 10.0.1.23");
+  display.println("Sending val #0");
+  display.setCursor(0,0);
+  display.display(); // actually display all of the above 
+}
+
 void setup() {
-  Wire.begin();
+
   Serial.begin(115200);
+  Wire.begin();
+
+  setupOLED();
+
 
   int a = 0;
   int b = 0;
@@ -117,16 +204,16 @@ void outputChrField(char *name,char v) {
 void outputNumField(char *name,signed long v) {
   Serial.print("\"");
   Serial.print(name);
-  Serial.print("\" : \"");
+  Serial.print("\" : ");
   Serial.print(v);
-  Serial.print("\", ");
+  Serial.print(", ");
 }
 void outputNumFieldNoSep(char *name,signed long v) {
   Serial.print("\"");
   Serial.print(name);
-  Serial.print("\" : \"");
+  Serial.print("\" : ");
   Serial.print(v);
-  Serial.print("\" ");
+  Serial.print(" ");
 }
 
 void outputByteField(char *name,unsigned short v) {
@@ -156,7 +243,7 @@ void outputMeasurment(char e, char t, char loc, unsigned short int n, unsigned l
 // is not jitter.
 int amb_wc = 0;
 #define AMB_WINDOW_SIZE 4
-#define AMB_SAMPLES_PER_WINDOW_ELEMENT 25 
+#define AMB_SAMPLES_PER_WINDOW_ELEMENT 1 
 // sea level starting pressure.
 signed long ambient_window[AMB_WINDOW_SIZE];
 
@@ -213,76 +300,10 @@ void report_full(int idx)
   Serial.println();
 }
 
-void loop() {
-  
-  unsigned long m = millis();
-  if (m > sample_millis) {
-    sample_millis = m;
-  } else {
-    Serial.println("unticked");
-    return;
-  }
-  seekUnfoundBME();
-
-  unsigned long ms = millis();
-  // We need to use a better sentinel...this is a legal value!
-  // units for pressure are cm H2O * 100 (integer 10ths of mm)
-  signed long ambient_pressure = -999; 
-  signed long internal_pressure = -999;  // Inspiratory Pathway pressure
-  
-  if (found_bme[0]) {
-    internal_pressure = readPressureOnly(0);
-  }
-  if (((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0) && found_bme[1]) {
-      ambient_pressure = readPressureOnly(1);
-      ambient_counter = 1;
-
-      // experimentally we will report everything in the stream from 
-      // both sensor; sadly the BM# 680 is to slow to do this every sample.
-      report_full(0);
-      report_full(1);
-      
-      if (ambient_pressure != -999) {    
-        outputMeasurment('M', 'P', 'B', 1, ms, ambient_pressure);
-        ambient_window[amb_wc] = ambient_pressure;
-        amb_wc = (amb_wc +1) % AMB_WINDOW_SIZE;
-        Serial.println();
-      } else {
-        Serial.print("\"NA\"");  
-      }
-  } else {
-   ambient_counter++;
-  }
-  signed long smooth_ambient = 0;
-  for(int i = 0; i < AMB_WINDOW_SIZE; i++) {
-    smooth_ambient += ambient_window[i];
-  }
-  smooth_ambient = (signed long) (smooth_ambient / AMB_WINDOW_SIZE);
-
-  float flow = -999.0;
-  flow = readFlow();
-
-// Note: Units are kiloPasccas for pressure, and slm for flow
-
-  if (internal_pressure != -999) {    
- //   outputMeasurment('M', 'P', 'A', 0, ms, internal_pressure);
- //   Serial.println();
-    outputMeasurment('M', 'P', 'D', 0, ms, internal_pressure - smooth_ambient);  
-    Serial.println();
-  } else {
-    // This is not actually part of the format!!!
-    Serial.print("\"NA\"");  
-  }
 
 
 
-// our units are slm * 1000, or milliliters per minute.
-  signed long flow_milliliters_per_minute = (signed long) (flow * 1000);
 
-  outputMeasurment('M', 'F', 'A', 0, ms, flow_milliliters_per_minute);
-  Serial.println();
-  Serial.flush();
-}
 
 // the parameter idx here numbers our pressure sensors.
 // The sensors may be better, for as per the PIRDS we are returning integer 10ths of a mm of H2O
@@ -326,9 +347,9 @@ float readFlow() {
   Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
   uint16_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
   uint8_t b = Wire.read(); // second received byte stored here
-//  Serial.println("raw");
-//  Serial.println(a);
-//  Serial.println(b);
+ // Serial.println("raw");
+ // Serial.println(a);
+ // Serial.println(b);
   uint8_t crc = Wire.read(); // crc value stored here
   uint8_t mycrc = 0xFF; // initialize crc variable
   mycrc = crc8(a, mycrc); // let first byte through CRC calculation
@@ -348,4 +369,135 @@ float readFlow() {
   //Serial.println(Flow); // print the calculated flow to the serial interface
   //Serial.println();
   return Flow;
+}
+
+
+void buttonA() {
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.print("A");
+}
+void buttonB() {
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.print("B");
+}
+void buttonC() {
+    display.clearDisplay();
+    display.setCursor(0, 10);
+    display.print("C");
+}
+
+// Trying to make simple, I will define 3 lines..
+void displayLine(int n,char* s) {
+    display.setCursor(0, 10);
+    display.print(s);
+}
+
+void loop() {
+
+Serial.println("found_display");
+Serial.println(found_display);
+
+if (found_display) {
+// experimental OLED test code
+  if(!digitalRead(BUTTON_A)) {
+    buttonA();
+  } else if(!digitalRead(BUTTON_B)) {
+    buttonB();
+  } else if(!digitalRead(BUTTON_C)) { 
+    buttonC();
+  } else {
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    display.print("Airway Pressure: ");
+    char buffer[16];
+    sprintf(buffer, "%.2f", display_max_pressure/100.0);
+    Serial.println(buffer);
+    display.println(buffer);
+  }
+//  delay(10);
+//  yield();
+  display.display();
+
+}
+  
+  unsigned long m = millis();
+  if (m > sample_millis) {
+    sample_millis = m;
+  } else {
+    Serial.println("unticked");
+    return;
+  }
+
+  unsigned long ms = millis();
+  seekUnfoundBME();
+
+
+  // We need to use a better sentinel...this is a legal value!
+  // units for pressure are cm H2O * 100 (integer 10ths of mm)
+  signed long ambient_pressure = -999; 
+  signed long internal_pressure = -999;  // Inspiratory Pathway pressure
+  
+  if (found_bme[0]) {
+    internal_pressure = readPressureOnly(0);
+    Serial.println("internal pressure");
+    Serial.println(internal_pressure);
+  }
+  if (((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0) && found_bme[1]) {
+      ambient_pressure = readPressureOnly(1);
+    Serial.println("ambient pressure");
+    Serial.println(ambient_pressure);
+      ambient_counter = 1;
+
+      // experimentally we will report everything in the stream from 
+      // both sensor; sadly the BM# 680 is to slow to do this every sample.
+  //    report_full(0);
+  //    report_full(1);
+      
+      if (ambient_pressure != -999) {    
+        outputMeasurment('M', 'P', 'B', 1, ms, ambient_pressure);
+        ambient_window[amb_wc] = ambient_pressure;
+        amb_wc = (amb_wc +1) % AMB_WINDOW_SIZE;
+        Serial.println();
+      } else {
+        Serial.print("\"NA\"");  
+      }
+  } else {
+   ambient_counter++;
+  }
+  signed long smooth_ambient = 0;
+  for(int i = 0; i < AMB_WINDOW_SIZE; i++) {
+    smooth_ambient += ambient_window[i];
+  }
+  smooth_ambient = (signed long) (smooth_ambient / AMB_WINDOW_SIZE);
+
+
+  if (internal_pressure != -999) {    
+    outputMeasurment('M', 'P', 'A', 0, ms, internal_pressure);
+    Serial.println();
+     // really this should be a running max, for now it is instantaneous
+    display_max_pressure = internal_pressure - smooth_ambient;
+    outputMeasurment('M', 'D', 'A', 0, ms, internal_pressure - smooth_ambient);  
+    Serial.println();
+  } else {
+    // This is not actually part of the format!!!
+    Serial.print("\"NA\"");  
+  }
+
+
+
+// our units are slm * 1000, or milliliters per minute.
+  float flow = -999.0;
+  flow = readFlow();
+
+// Note: Units are kiloPasccas for pressure, and slm for flow
+
+  signed long flow_milliliters_per_minute = (signed long) (flow * 1000);
+
+  Serial.println("FLOW:");
+  Serial.println(flow);
+  outputMeasurment('M', 'F', 'A', 0, ms, flow_milliliters_per_minute);
+  Serial.println();
+  Serial.flush();
 }

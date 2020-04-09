@@ -27,28 +27,31 @@ app = Flask(__name__)
 CORS(app)
 
 NUMREAD = 0;
-REPORT_MODULUS = 50;
+REPORT_MODULUS = 1;
 def read_from_port():
   global NUMREAD
   global my_deque
   while True:
-    if(ser.inWaiting() == 0):
+    if(ser.inWaiting() <= 50):
       pass
     line = ser.readline()   # read a '\n' terminated line
     NUMREAD = NUMREAD + 1;
     if (NUMREAD % REPORT_MODULUS) == 0:
       print(str(len(my_deque)) + " ready!\n",sys.stderr)
       print(str(line) + "\n",sys.stderr)
-      print(line.decode("utf-8") + "\n",sys.stderr)
+
       NUMREAD = 0;
     # performing a try except here really seems to
     # make the coding of characters all messed up,
     # I don't realy know why, it is like we get off by one character
-#    try:
-    thisline = line.decode("utf-8")
-    my_deque.append(thisline)
-#    except(UnicodeDecodeError):
-#      pass
+    try:
+      thisline = line.decode("utf-8")+"\n"
+      # For bizarre reason I'm unable to figure out,
+      # printing this here is NECESSARY!!!
+      print(thisline,sys.stderr)
+      my_deque.append(thisline)
+    except(UnicodeDecodeError):
+      print("ERRRRROR\n",sys.stderr)
 
 
 
