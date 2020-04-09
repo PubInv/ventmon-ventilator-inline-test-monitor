@@ -85,7 +85,8 @@ bool found_display = false;
 
 // we will ust this as a pressure to display to make the OLED useful...
 // Eventually we will put this into running window
-unsigned long display_max_pressure = 0;
+signed long display_max_pressure = 0;
+signed long display_min_pressure = 0;
 
 void setupOLED() {
  // Here we initialize the OLED...
@@ -137,6 +138,7 @@ void setup() {
   Wire.begin();
 
   setupOLED();
+  initSensirionFM3200Measurement();
 
 
   int a = 0;
@@ -182,8 +184,8 @@ void seekBME(int idx) {
       bme[idx].setHumidityOversampling(BME680_OS_1X);
       bme[idx].setPressureOversampling(BME680_OS_1X);
     bme[idx].setIIRFilterSize(BME680_FILTER_SIZE_3);
-    bme[idx].setGasHeater(320, 150); // 320*C for 150 ms
-//    bme[idx].setGasHeater(0, 0); // 320*C for 150 ms  
+    // bme[idx].setGasHeater(320, 150); // 320*C for 150 ms
+    bme[idx].setGasHeater(0, 0); // 320*C for 150 ms  
     }
   }
 }
@@ -243,7 +245,7 @@ void outputMeasurment(char e, char t, char loc, unsigned short int n, unsigned l
 // is not jitter.
 int amb_wc = 0;
 #define AMB_WINDOW_SIZE 4
-#define AMB_SAMPLES_PER_WINDOW_ELEMENT 1 
+#define AMB_SAMPLES_PER_WINDOW_ELEMENT 100 
 // sea level starting pressure.
 signed long ambient_window[AMB_WINDOW_SIZE];
 
@@ -339,6 +341,9 @@ uint8_t crc8(const uint8_t data, uint8_t crc) {
   return crc;
 }
 
+
+// This routine was gotten from the Arduino forums and is informal.
+// I may need to improve it; the problem I am currently having is awful.
 float readFlow() {
 // Documentation inconsistent
   int offset = 32768; // Offset for the sensor
@@ -347,9 +352,6 @@ float readFlow() {
   Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
   uint16_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
   uint8_t b = Wire.read(); // second received byte stored here
- // Serial.println("raw");
- // Serial.println(a);
- // Serial.println(b);
   uint8_t crc = Wire.read(); // crc value stored here
   uint8_t mycrc = 0xFF; // initialize crc variable
   mycrc = crc8(a, mycrc); // let first byte through CRC calculation
@@ -371,6 +373,30 @@ float readFlow() {
   return Flow;
 }
 
+// My lame-o attempt to get the flow sensor working
+// https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/5_Mass_Flow_Meters/Application_Notes/Sensirion_Mass_Flo_Meters_SFM3xxx_I2C_Functional_Description.pdf
+//
+
+void initSensirionFM3200Measurement() {
+// Trying to explicitly send an instruction byte:
+  Wire.beginTransmission(0x40); 
+  Wire.write(byte(0x10));
+  Wire.write(byte(0x00)); // sends instruction byte    Wire.write(val);             // sends potentiometer value byte  
+  Wire.endTransmission();     // stop transmitting
+  delay(5);
+  {
+   Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
+   delay(110);
+   Serial.println(Wire.available());
+  uint16_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
+  uint8_t b = Wire.read();
+  uint8_t c = Wire.read();
+  Serial.println("a,b,c");
+  Serial.println(a,HEX);
+  Serial.println(b,HEX);
+    Serial.println(c,HEX);
+  }
+}
 
 void buttonA() {
     display.clearDisplay();
@@ -394,33 +420,41 @@ void displayLine(int n,char* s) {
     display.print(s);
 }
 
+void displayPressure(bool max_not_min) {     
+      display.print(max_not_min ? "Max" : "Min" );   
+      display.print(" cm H2O: ");
+      char buffer[32];
+      long display_pressure = max_not_min ? display_max_pressure : display_min_pressure;
+      int pressure_sign = ( display_pressure < 0) ? -1 : 1;
+      int abs_pressure = (pressure_sign == -1) ? - display_pressure : display_pressure;
+      sprintf(buffer, "%d.1", display_pressure/10);  
+      display.println(buffer);
+}
+
 void loop() {
 
-Serial.println("found_display");
-Serial.println(found_display);
-
-if (found_display) {
+  if (found_display) {
 // experimental OLED test code
-  if(!digitalRead(BUTTON_A)) {
-    buttonA();
-  } else if(!digitalRead(BUTTON_B)) {
-    buttonB();
-  } else if(!digitalRead(BUTTON_C)) { 
-    buttonC();
-  } else {
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.print("Airway Pressure: ");
-    char buffer[16];
-    sprintf(buffer, "%.2f", display_max_pressure/100.0);
-    Serial.println(buffer);
-    display.println(buffer);
-  }
-//  delay(10);
-//  yield();
-  display.display();
+    if(!digitalRead(BUTTON_A)) {
+      buttonA();
+    } else if(!digitalRead(BUTTON_B)) {
+      buttonB();
+    } else if(!digitalRead(BUTTON_C)) { 
+      buttonC();
+    } else {
+      display.clearDisplay();
 
-}
+      display.setCursor(0, 0);
+      displayPressure(true);
+      display.setCursor(0,10);
+      displayPressure(false);  
+
+    }
+  //  delay(10);
+  //  yield();
+    display.display();
+  
+  }
   
   unsigned long m = millis();
   if (m > sample_millis) {
@@ -441,19 +475,15 @@ if (found_display) {
   
   if (found_bme[0]) {
     internal_pressure = readPressureOnly(0);
-    Serial.println("internal pressure");
-    Serial.println(internal_pressure);
   }
   if (((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0) && found_bme[1]) {
       ambient_pressure = readPressureOnly(1);
-    Serial.println("ambient pressure");
-    Serial.println(ambient_pressure);
       ambient_counter = 1;
 
       // experimentally we will report everything in the stream from 
       // both sensor; sadly the BM# 680 is to slow to do this every sample.
-  //    report_full(0);
-  //    report_full(1);
+      report_full(0);
+      report_full(1);
       
       if (ambient_pressure != -999) {    
         outputMeasurment('M', 'P', 'B', 1, ms, ambient_pressure);
@@ -491,12 +521,8 @@ if (found_display) {
   float flow = -999.0;
   flow = readFlow();
 
-// Note: Units are kiloPasccas for pressure, and slm for flow
-
   signed long flow_milliliters_per_minute = (signed long) (flow * 1000);
-
-  Serial.println("FLOW:");
-  Serial.println(flow);
+  
   outputMeasurment('M', 'F', 'A', 0, ms, flow_milliliters_per_minute);
   Serial.println();
   Serial.flush();
