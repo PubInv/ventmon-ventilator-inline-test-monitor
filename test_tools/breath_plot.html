@@ -75,7 +75,7 @@ function samplesToLine(samples) {
             name: "flow",
             x: fzeroed,
             y: flow_values,
-            line: {color: '#17BECF'}
+            line: {color: '#0000FF'}
              };
   var diff_p = {type: "scatter", mode: "lines",
             name: "pressure",
@@ -147,13 +147,13 @@ function plot(samples, trans, breaths) {
     xaxis: {domain: [0.1, 0.9]},
    yaxis: {
     title: 'Flow (slm)',
-    titlefont: {color: '#1f77b4'},
-    tickfont: {color: '#1f77b4'}
+    titlefont: {color: 'blue'},
+    tickfont: {color: 'blue'}
   },
   yaxis2: {
     title: 'airway pressure (cm H2O)',
-    titlefont: {color: '#ff7f0e'},
-    tickfont: {color: '#ff7f0e'},
+    titlefont: {color: 'red'},
+    tickfont: {color: 'red'},
     anchor: 'free',
     overlaying: 'y',
     side: 'left',
