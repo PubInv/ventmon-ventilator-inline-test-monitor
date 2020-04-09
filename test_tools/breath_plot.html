@@ -49,6 +49,7 @@ function unpack(rows, key) {
   return rows.map(function(row) { return row[key]; });
 }
 
+const CONVERT_PIRDS_TO_SLM = 1/1000;
 
 // we have now changed this, there will be flow and
 // pressure in the same samples, and we should filter.
@@ -56,7 +57,8 @@ function samplesToLine(samples) {
   var flows = samples.filter(s => s.event == 'M' && s.type == 'F');
 
   // These are slm/1000, or ml/minute...
-  var flow_values = unpack(flows,"val");
+  // so we multiply by 1000 to get liters per minute
+  var flow_values = unpack(flows,"val").map(v => v * CONVERT_PIRDS_TO_SLM);
   var fmillis = unpack(flows, 'ms');
   // Convert to seconds...
   var fmin = Math.min(...fmillis);
@@ -67,7 +69,8 @@ function samplesToLine(samples) {
   var pmillis = unpack(pressures, 'ms');
   var pmin = Math.min(...pmillis);
   var pzeroed = pmillis.map(m =>(m-pmin)/1000.0);
-  var delta_p = unpack(pressures, 'val');
+  // the PIRDS standard is integral mm H2O, so we divide by 10
+  var delta_p = unpack(pressures, 'val').map(p => p / 10);
   var flow = {type: "scatter", mode: "lines",
             name: "flow",
             x: fzeroed,
@@ -78,7 +81,7 @@ function samplesToLine(samples) {
             name: "pressure",
             x: pzeroed,
             y: delta_p,
-            line: {color: "#00FF00"}
+            line: {color: "#FF0000"}
              };
   return [flow,diff_p];
 }
@@ -148,7 +151,7 @@ function plot(samples, trans, breaths) {
     tickfont: {color: '#1f77b4'}
   },
   yaxis2: {
-    title: 'airway pressure (kPa)',
+    title: 'airway pressure (cm H2O)',
     titlefont: {color: '#ff7f0e'},
     tickfont: {color: '#ff7f0e'},
     anchor: 'free',
@@ -200,8 +203,10 @@ $("#plot").click(function(){
 // of sample int time window t, and B is volume to right
 // t is in milliseconds
 function computeMovingWindowTrace(samples,t,v) {
-  var first_time = samples[0].millis;
-  var last_time = samples[samples.length - 1].millis;
+
+  var flows = samples.filter(s => s.event == 'M' && s.type == 'F');
+  var first_time = flows[0].ms;
+  var last_time = flows[flows.length - 1].ms;
   var duration = last_time - first_time;
 
   // Here is an idea...
@@ -223,9 +228,9 @@ function computeMovingWindowTrace(samples,t,v) {
 
   var transitions = [];
   var state = 0; // Let 1 mean inspiration, -1 mean expiration, 0 neither
-  for(var i = 0; i < samples.length; i++) {
-    var f = samples[i].Flow;
-    var ms = samples[i].millis-first_time;
+  for(var i = 0; i < flows.length; i++) {
+    var f = flows[i].val * CONVERT_PIRDS_TO_SLM;
+    var ms = flows[i].ms-first_time;
     if (state == 0) {
       if (f > vm) {
         state = 1;
@@ -272,8 +277,8 @@ function computeMovingWindowTrace(samples,t,v) {
     for(var j = a; j < z-1; j++) {
       // I'll use qadrilateral approximation.
       // We'll form each quadrilateral between two samples.
-      var ms = samples[j+1].millis - samples[j].millis;
-      var ht = (samples[j+1].Flow + samples[j].Flow)/2;
+      var ms = flows[j+1].ms - flows[j].ms;
+      var ht = ((flows[j+1].val + flows[j].val )/2) * CONVERT_PIRDS_TO_SLM;
       // Flow is actually in standard liters per minute,
       // so to get liters we divide by 60 to it l/s,
       // and and divde by 1000 to convert ms to seconds.
@@ -310,16 +315,20 @@ function computeMovingWindowTrace(samples,t,v) {
 }
 
 
-$("#breath").click(function(){
+function plotBreathes() {
   const t = 200; // size of the window is 200ms
   const v = 50; // min volume in ml
   var [transitions,breaths] = computeMovingWindowTrace(samples,t,v);
   plot(samples,transitions,breaths);
+}
+$("#breath").click(function(){
+  plotBreathes();
 });
 
 $("#import").click(function() {
   var input_trace = $("#json_trace").val();
   samples = JSON.parse(input_trace);
+  plotBreathes();
 });
 
 $("#export").click(function() {
