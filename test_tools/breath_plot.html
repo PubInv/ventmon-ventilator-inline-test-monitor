@@ -20,6 +20,10 @@ Breath Plot: COVID-19 VentMon analysis software
 	<!-- Load plotly.js into the DOM -->
 	<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 </head>
+<label for="dserver">PIRDS data server url:</label>
+  <input type="text" id="dserverurl" name="dserverurl" size="50"><br><br>
+<label for="num_to_read">Number of samples to Read and Plot:</label>
+  <input type="text" id="num_to_read" name="num_to_read" size="10"><br><br>
 
 <body>
   <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
@@ -35,13 +39,102 @@ Breath Plot: COVID-19 VentMon analysis software
   <textarea id="json_trace" rows="30" cols="80"></textarea>
   </div>
 
+<p>
+This is a work in progress of <a href="https://www.pubinv.org">Public Invention</a>.
+
+<p>
+This is a tester tool for open-source ventilators.
+  It uses the <a href="https://github.com/PubInv/respiration-data-standard">PIRDS data format</a>.
+
+<p>
+The basic operation is receive data from web server specified in the URL above.
+  Probably for now that will be the VentMon Python web server that
+listens on a serial port for the VentMon device or any other
+device that streams PIRDS events.
+
 </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-<script>
-  const url = "http://localhost:80";
+  <script>
+  var DSERVER_URL = "http://localhost:80";
+  var NUM_TO_READ = 1000;
 
-var samples;
+
+// This sould be better as time, but is easier
+// to do as number of samples.
+const MAX_SAMPLES_TO_STORE_S = 3000;
+var samples = [];
+var INITS_ONLY = true;
+
+// This is just to get the party started!
+function init_samples() {
+  return [
+  {
+    "event": "M",
+    "type": "P",
+    "ms": 19673310,
+    "loc": "A",
+    "num": "0",
+    "val": 10111
+  },
+  {
+    "event": "M",
+    "type": "D",
+    "ms": 19673310,
+    "loc": "A",
+    "num": "0",
+    "val": 4
+  },
+  {
+    "event": "M",
+    "type": "F",
+    "ms": 19673310,
+    "loc": "A",
+    "num": "0",
+    "val": 0
+  },
+  {
+    "event": "M",
+    "type": "P",
+    "ms": 19673376,
+    "loc": "A",
+    "num": "0",
+    "val": 10111
+  },
+  {
+    "event": "M",
+    "type": "D",
+    "ms": 19673376,
+    "loc": "A",
+    "num": "0",
+    "val": 4
+  },
+  {
+    "event": "M",
+    "type": "F",
+    "ms": 19673376,
+    "loc": "A",
+    "num": "0",
+    "val": 0
+  },
+  {
+    "event": "M",
+    "type": "P",
+    "ms": 19673442,
+    "loc": "A",
+    "num": "0",
+    "val": 10110
+  },
+  {
+    "event": "M",
+    "type": "D",
+    "ms": 19673442,
+    "loc": "A",
+    "num": "0",
+    "val": 3
+  },
+  ];
+}
 
 
 
@@ -99,7 +192,7 @@ function plot(samples, trans, breaths) {
                      name: "trans",
                      x: tzeroed,
             y: tstates_amped,
-            line: {color: '#0000FF'}
+            line: {color: '#00FF00'}
             };
     new_data.push(transPlot);
   }
@@ -174,10 +267,11 @@ function plot(samples, trans, breaths) {
 
 
 $("#plot").click(function(){
+  var url =  DSERVER_URL +"/s?n="+ NUM_TO_READ;
   $.ajax({url: url,
           success: function(result){
             var lines = result.split("\n").filter( x => (x.length > 0) && (x[0] == '{') );
-            samples = lines.map(line =>
+            var cur_sam = lines.map(line =>
                                 {
                                   try {
                                     return JSON.parse(line);
@@ -185,8 +279,17 @@ $("#plot").click(function(){
                                     return null;
                                   }
                                 });
-            samples = samples.filter( s => s != null);
+            cur_sam = cur_sam.filter( s => s != null);
+            // now we want to append these sample...
+            if (INITS_ONLY) {
+              samples = cur_sam;
+              INITS_ONLY = false;
+            } else {
+              samples = samples.slice(cur_sam.length-1);
+            }
+            samples = samples.concat(cur_sam);
             plot(samples);
+            plotBreathes();
           },
           error: function(xhr, ajaxOptions, thrownError) {
             alert("Error!" + xhr.status);
@@ -334,5 +437,28 @@ $("#import").click(function() {
 $("#export").click(function() {
   $("#json_trace").val(JSON.stringify(samples,null,2));
 });
+
+$( document ).ready(function() {
+
+  var DSERVER_URL = "http://localhost:80";
+  var NUM_TO_READ = 1000;
+
+  $( "#dserverurl" ).val( DSERVER_URL );
+  $('#dserverurl').change(function () {
+    alert("changed");
+    DESERVER_URL = $("#dserverurl").val();
+  });
+
+  $( "#num_to_read" ).val( NUM_TO_READ );
+  $('#num_to_read').change(function () {
+    alert("changed");
+    NUM_TO_READ = $("#num_to_read").val();
+  });
+
+
+  samples = init_samples();
+  plotBreathes();
+});
+
 
   </script>

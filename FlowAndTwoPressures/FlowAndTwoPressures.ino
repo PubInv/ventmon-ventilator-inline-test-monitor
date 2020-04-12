@@ -83,6 +83,10 @@ uint8_t addr[2] = {0x76,0x77};
 
 bool found_display = false;
 
+#define SENSIRION_FM3200 0
+#define SENSIRION_SFM3400 1
+int sensirion_sensor_type = SENSIRION_SFM3400;
+
 // we will ust this as a pressure to display to make the OLED useful...
 // Eventually we will put this into running window
 signed long display_max_pressure = 0;
@@ -185,6 +189,7 @@ void seekBME(int idx) {
       bme[idx].setPressureOversampling(BME680_OS_1X);
     bme[idx].setIIRFilterSize(BME680_FILTER_SIZE_3);
     // bme[idx].setGasHeater(320, 150); // 320*C for 150 ms
+    // I believe this feature is not needed or useful for this application
     bme[idx].setGasHeater(0, 0); // 320*C for 150 ms  
     }
   }
@@ -344,10 +349,18 @@ uint8_t crc8(const uint8_t data, uint8_t crc) {
 
 // This routine was gotten from the Arduino forums and is informal.
 // I may need to improve it; the problem I am currently having is awful.
-float readFlow() {
+float readSensirionFlow(int sensirion_sensor_type) {
+
+  
 // Documentation inconsistent
   int offset = 32768; // Offset for the sensor
-  float scale = 120.0; // Scale factor for Air and N2 is 140.0, O2 is 142.8
+
+    // NOTE: THIS IS DEPENDENT ON SENSOR!!
+    // We may need to use the buttons on the OLED or some other
+    // means for setting this.
+  const float FM3200_SCALE = 120.0;
+  const float FM3400_33_AW_SCALE = 800.0;
+  float scale = (sensirion_sensor_type == SENSIRION_FM3200) ? FM3200_SCALE : FM3400_33_AW_SCALE;
 
   Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
   uint16_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
@@ -432,6 +445,7 @@ void displayPressure(bool max_not_min) {
 }
 
 void loop() {
+// TODO: Need to use buttons to allow Sensirion type to be detected if can't do automatically
 
   if (found_display) {
 // experimental OLED test code
@@ -519,7 +533,7 @@ void loop() {
 
 // our units are slm * 1000, or milliliters per minute.
   float flow = -999.0;
-  flow = readFlow();
+  flow = readSensirionFlow(SENSIRION_FM3200);
 
   signed long flow_milliliters_per_minute = (signed long) (flow * 1000);
   
