@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import time
+import struct
 import serial
 # ser = serial.Serial('/dev/cu.usbmodem141401',57600,timeout=None)  # open serial port
 ser = serial.Serial('/dev/cu.SLAB_USBtoUART',115200,timeout=None)
@@ -16,6 +17,7 @@ import collections
 import itertools
 import threading
 import json
+import jsonpickle
 
 import socket
 import sys
@@ -33,13 +35,13 @@ CORS(app)
 
 DATA_LAKE_HOST = "ventmon.coslabs.com"
 DATA_LAKE_PORT = 6110
-DATA_LAKE_SAMPLES_TO_SEND = 1000
+DATA_LAKE_SAMPLES_TO_SEND = 0
 NUM_SENT_TO_DATA_LAKE = 0
 
 NUMREAD = 0;
 REPORT_MODULUS = 500;
 
-RUN_LIMIT = 1004;
+RUN_LIMIT = 0;
 RUN_CNT = 0;
 
 
@@ -63,7 +65,14 @@ class Measurement:
       b[5] = x[1];
       b[6] = x[2];
       b[7] = x[3];
+      # because the measurementValue can be signed and Python tries
+      # to abstract away the sign bit, we do this from:
+      # https://stackoverflow.com/questions/20766813/how-to-convert-signed-to-unsigned-integer-in-python
       v = self.measurementValue.to_bytes(4, 'big')
+      packed = struct.pack('>l', self.measurementValue)  # Packing a long number.
+      print("packed = " + str(packed)+"\n",sys.stderr)
+      unpacked = struct.unpack('>L', packed)[0]  # Unpacking a packed long number to unsigned long
+      v = unpacked.to_bytes(4, 'big')
       b[8] = v[0];
       b[9] = v[1];
       b[10] = v[2];
@@ -71,6 +80,21 @@ class Measurement:
 #      b[3] = self.deviceLocation.to_bytes(1,'big')
       b[3] = ord(chr(self.deviceLocation))
       return b
+
+
+class MeasurementEncoder(json.JSONEncoder):
+    def default(self, m):
+        if isinstance(m, Measurement):
+            return {
+                "event": "M",
+                "type": m.measurementType,
+                "loc": m.deviceType,
+                "num": m.deviceLocation,
+                "ms": m.measurementTime,
+                "val": m.measurementValue,
+            }
+        return super(RoundTripEncoder, self).default(m)
+# print json.dumps(data, cls=RoundTripEncoder, indent=2)
 
 def read_from_port():
   global NUMREAD
@@ -81,7 +105,7 @@ def read_from_port():
   global RUN_CNT
   global RUN_LINIT
   while True :
-    if (RUN_CNT >= RUN_LIMIT):
+    if ((RUN_LIMIT > 0) and RUN_CNT >= RUN_LIMIT):
       os._exit(os.EX_OK)
     RUN_CNT = RUN_CNT + 1
     if(ser.inWaiting() <= 50):
@@ -100,23 +124,23 @@ def read_from_port():
       thisline = line.decode("utf-8")+"\n"
       # For bizarre reason I'm unable to figure out,
       # printing this here is NECESSARY!!!
-      print(thisline,sys.stderr)
-      my_deque.append(thisline)
+      # print(thisline,sys.stderr)
+      try:
+        m = json.loads(thisline);
 
-      if  NUM_SENT_TO_DATA_LAKE < DATA_LAKE_SAMPLES_TO_SEND:
-        print(f'sending {NUM_SENT_TO_DATA_LAKE} {DATA_LAKE_SAMPLES_TO_SEND}',
-              sys.stderr)
-        try:
-          m = json.loads(thisline);
-          if m["event"] == "M":
-            minst = Measurement(m["type"], m["loc"], int(m["num"]),
-                                m["ms"], m["val"])
-            print('MARK', sys.stderr)
-            print(m["type"]+"\n", sys.stderr)
-            print(m["loc"]+"\n", sys.stderr)
-            print(m["num"]+"\n", sys.stderr)
-            print(str(m["ms"])+"\n", sys.stderr)
-            print(str(m["val"])+"\n", sys.stderr)
+        if m["event"] == "M":
+          minst = Measurement(m["type"], m["loc"], int(m["num"]),
+                              m["ms"], m["val"])
+          my_deque.append(minst)
+#          print('MARK')
+#          print(m["type"])
+#          print(m["loc"])
+#           print(m["num"])
+#          print(str(m["ms"]))
+#          print(str(m["val"])+"\n")
+          if  ((DATA_LAKE_SAMPLES_TO_SEND > 0) and  (NUM_SENT_TO_DATA_LAKE < DATA_LAKE_SAMPLES_TO_SEND)):
+            print(f'sending {NUM_SENT_TO_DATA_LAKE} {DATA_LAKE_SAMPLES_TO_SEND}',
+                  sys.stderr)
             try:
               # Send data
               bytes = minst.asBytes()
@@ -129,45 +153,50 @@ def read_from_port():
                 sock.close()
                 os._exit(os.EX_OK)
             except:
-              print("Unexpected error:", sys.exc_info()[0],sys.stderr)
-              print('AAAAAAAAAAAAAA',sys.stderr)
-        except:
-          print('json error',sys.stderr)
+              print("Unexpected sending error:", sys.exc_info()[0],sys.stderr)
+      except:
+          print('json error',sys.exc_info()[0],sys.stderr)
     except(UnicodeDecodeError):
       print("ERRRRROR\n",sys.stderr)
-
-
 
 thread = threading.Thread(target=read_from_port)
 thread.start()
 
-
 def get_n_samples(n):
   global my_deque
-  n = int(request.args.get('n'))
-  result = ""
+#  n = int(request.args.get('n'))
+#  result = ""
+  result = []
   print("n" + str(n)+"\n",sys.stderr)
   print(str(len(my_deque))+"ready \n",sys.stderr)
   for i in range(0,min(n,len(my_deque))):
     try:
       line = my_deque.popleft()
       print(str(line) + "\n",sys.stderr)
-      result = result + line
+#      result = result + line
+# This is not a line, now, it is a measurement
+      result.append(line);
     except IndexError:
       print("Indexerror\n",sys.stderr)
       break;
-  print("result = " + result + "\n",sys.stderr)
+  print("result = " + json.dumps(result, cls=MeasurementEncoder, indent=2) + "\n",sys.stderr)
   return result
 
-@app.route("/")
+@app.route("/json")
 def getsamples():
   global my_deque
-  result = ""
-  print("len" + str(len(my_deque))+"\n",sys.stderr)
-  for x in my_deque:
-    line = x
-    result = result + line
-  return result
+#  result = ""
+  print("len" + str(len(my_deque))+"\n")
+#  for x in my_deque:
+#    line = x
+#    result = result + line
+  samps = get_n_samples(len(my_deque));
+  response = app.response_class(
+    response=json.dumps(samps, cls=MeasurementEncoder, indent=2),
+    status=200,
+    mimetype='application/json'
+  )
+  return response
 
 # Get at most the earliest n samples.
 @app.route("/s")
@@ -188,6 +217,9 @@ if __name__ == "__main__":
   if len(sys.argv) > 3:
     DATA_LAKE_SAMPLES_TO_SEND = sys.argv[3]
   server_address = (DATA_LAKE_HOST, int(DATA_LAKE_PORT))
-  sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-  sock.connect(server_address)
+  try:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.connect(server_address)
+  except (ConnectionRefusedError):
+   print(f"ConnectionRefuesd{sys.exc_info()[0]}")
   app.run(host='127.0.0.1', port=80, debug=True)

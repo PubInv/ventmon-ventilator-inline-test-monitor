@@ -57,6 +57,7 @@ uint8_t crc8(const uint8_t data, uint8_t crc) {
   return crc;
 }
 
+// None of the Sensirion sensors I have seem to actually have a serial number built in!
 // https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/5_Mass_Flow_Meters/Application_Notes/Sensirion_Mass_Flo_Meters_SFM3xxx_I2C_Functional_Description.pdf
 void requestSerialNumber() {
     Wire.beginTransmission(byte(0x40)); // transmit to device #064 (0x40)
