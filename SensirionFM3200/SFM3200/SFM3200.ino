@@ -44,6 +44,8 @@ void setup()
   Serial.println(c);
 
   delay(5);
+
+  requestSerialNumber();
 }
 
 uint8_t crc8(const uint8_t data, uint8_t crc) {
@@ -65,15 +67,16 @@ void requestSerialNumber() {
   Wire.write(byte(0x31));      //
   Wire.write(byte(0xAE));      //
   Wire.endTransmission(); 
-  Wire.requestFrom(0x40, 4); // read 3 bytes from device with address 0x40
-  uint8_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
+  Wire.requestFrom(0x40, 4); // read 4 bytes from device with address 0x40
+  uint8_t a = Wire.read(); 
   uint8_t b = Wire.read();
-  uint8_t c = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
+  uint8_t c = Wire.read(); 
   uint8_t d = Wire.read(); 
+  Serial.println("Sensirion Serial Number:");
   Serial.println(a,HEX);
-  Serial.println(a,HEX);
-  Serial.println(a,HEX);
-  Serial.println(a,HEX);
+  Serial.println(b,HEX);
+  Serial.println(c,HEX);
+  Serial.println(d,HEX);
 }
 
 void loop() {
