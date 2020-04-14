@@ -22,6 +22,7 @@ import jsonpickle
 import socket
 import sys
 import os
+import traceback
 
 # This makes it a rather short pattern.
 # Up to 10,000 samples seems to work fine.
@@ -68,10 +69,12 @@ class Measurement:
       # because the measurementValue can be signed and Python tries
       # to abstract away the sign bit, we do this from:
       # https://stackoverflow.com/questions/20766813/how-to-convert-signed-to-unsigned-integer-in-python
-      v = self.measurementValue.to_bytes(4, 'big')
+#      v = self.measurementValue.to_bytes(4, 'big')
       packed = struct.pack('>l', self.measurementValue)  # Packing a long number.
-      print("packed = " + str(packed)+"\n",sys.stderr)
+#      print("packed = " + str(packed)+"\n")
       unpacked = struct.unpack('>L', packed)[0]  # Unpacking a packed long number to unsigned long
+
+#      v = struct.pack('>i', p1.measurementValue)
       v = unpacked.to_bytes(4, 'big')
       b[8] = v[0];
       b[9] = v[1];
@@ -95,6 +98,9 @@ class MeasurementEncoder(json.JSONEncoder):
             }
         return super(RoundTripEncoder, self).default(m)
 # print json.dumps(data, cls=RoundTripEncoder, indent=2)
+
+
+def bytes = pack_with_newline(mbytes)
 
 def read_from_port():
   global NUMREAD
@@ -124,38 +130,44 @@ def read_from_port():
       thisline = line.decode("utf-8")+"\n"
       # For bizarre reason I'm unable to figure out,
       # printing this here is NECESSARY!!!
-      # print(thisline,sys.stderr)
+#      print(thisline)
       try:
-        m = json.loads(thisline);
+        m = json.loads(thisline)
 
         if m["event"] == "M":
+          # Warning! This is just a test
+          v = abs(m["val"])
+          # v = m["val"]
           minst = Measurement(m["type"], m["loc"], int(m["num"]),
-                              m["ms"], m["val"])
+                              m["ms"], v)
           my_deque.append(minst)
-#          print('MARK')
-#          print(m["type"])
-#          print(m["loc"])
-#           print(m["num"])
-#          print(str(m["ms"]))
-#          print(str(m["val"])+"\n")
-          if  ((DATA_LAKE_SAMPLES_TO_SEND > 0) and  (NUM_SENT_TO_DATA_LAKE < DATA_LAKE_SAMPLES_TO_SEND)):
-            print(f'sending {NUM_SENT_TO_DATA_LAKE} {DATA_LAKE_SAMPLES_TO_SEND}',
-                  sys.stderr)
+          if  ((DATA_LAKE_SAMPLES_TO_SEND > 0) and (NUM_SENT_TO_DATA_LAKE < DATA_LAKE_SAMPLES_TO_SEND)):
+            print(f'sending {NUM_SENT_TO_DATA_LAKE} {DATA_LAKE_SAMPLES_TO_SEND}')
             try:
               # Send data
-              bytes = minst.asBytes()
-              print('MARK 2', sys.stderr)
-              print('sending "%s"' % str(bytes), sys.stderr)
+              mbytes = minst.asBytes()
+              # now pack with a newline!!
+              bytes = pack_with_newline(mbytes)
+              print('sending "%s"' % str(bytes))
               return_value = sock.sendall(bytes)
-              print('sendall returned' + str(return_value), sys.stderr)
               NUM_SENT_TO_DATA_LAKE = NUM_SENT_TO_DATA_LAKE+1
               if NUM_SENT_TO_DATA_LAKE >= DATA_LAKE_SAMPLES_TO_SEND:
                 sock.close()
                 os._exit(os.EX_OK)
+            except OverflowError:
+              print("Overflow error:", sys.exc_info()[0],sys.stderr)
+              traceback.print_exc(file=sys.stdout)
+              os._exit(os.EX_OK)
+            except BrokenPipeError:
+              traceback.print_exc(file=sys.stdout)
+              os._exit(os.EX_OK)
             except:
               print("Unexpected sending error:", sys.exc_info()[0],sys.stderr)
+      except TypeError as err:
+        print("Type error: {0}".format(err),sys.stderr)
       except:
-          print('json error',sys.exc_info()[0],sys.stderr)
+        print("Unexpected error:", sys.exc_info()[0],sys.stderr)
+        traceback.print_exc(file=sys.stdout)
     except(UnicodeDecodeError):
       print("ERRRRROR\n",sys.stderr)
 
@@ -164,17 +176,13 @@ thread.start()
 
 def get_n_samples(n):
   global my_deque
-#  n = int(request.args.get('n'))
-#  result = ""
   result = []
   print("n" + str(n)+"\n",sys.stderr)
   print(str(len(my_deque))+"ready \n",sys.stderr)
   for i in range(0,min(n,len(my_deque))):
     try:
-      line = my_deque.popleft()
+      line = my_deque.pop()
       print(str(line) + "\n",sys.stderr)
-#      result = result + line
-# This is not a line, now, it is a measurement
       result.append(line);
     except IndexError:
       print("Indexerror\n",sys.stderr)
@@ -182,15 +190,7 @@ def get_n_samples(n):
   print("result = " + json.dumps(result, cls=MeasurementEncoder, indent=2) + "\n",sys.stderr)
   return result
 
-@app.route("/json")
-def getsamples():
-  global my_deque
-#  result = ""
-  print("len" + str(len(my_deque))+"\n")
-#  for x in my_deque:
-#    line = x
-#    result = result + line
-  samps = get_n_samples(len(my_deque));
+def construct_result(samps):
   response = app.response_class(
     response=json.dumps(samps, cls=MeasurementEncoder, indent=2),
     status=200,
@@ -198,13 +198,22 @@ def getsamples():
   )
   return response
 
+@app.route("/")
+@app.route("/json")
+def getsamples():
+  global my_deque
+  print("len" + str(len(my_deque))+"\n")
+  samps = get_n_samples(len(my_deque));
+  return construct_result(samps)
+
 # Get at most the earliest n samples.
-@app.route("/s")
+@app.route("/json/s")
 def get_limit_samples():
   n = int(request.args.get('n'))
+  global my_deque
   print("len" + str(n) + " of " + str(len(my_deque))+"\n",sys.stderr)
-  result = get_n_samples(n);
-  return result
+  samps = get_n_samples(len(my_deque));
+  return construct_result(samps)
 
 if __name__ == "__main__":
   print(f"Arguments count: {len(sys.argv)}")
@@ -215,7 +224,7 @@ if __name__ == "__main__":
   if len(sys.argv) > 2:
     DATA_LAKE_PORT = sys.argv[2]
   if len(sys.argv) > 3:
-    DATA_LAKE_SAMPLES_TO_SEND = sys.argv[3]
+    DATA_LAKE_SAMPLES_TO_SEND = int(sys.argv[3])
   server_address = (DATA_LAKE_HOST, int(DATA_LAKE_PORT))
   try:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

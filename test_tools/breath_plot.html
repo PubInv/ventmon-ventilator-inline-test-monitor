@@ -62,7 +62,7 @@ device that streams PIRDS events.
 
 // This sould be better as time, but is easier
 // to do as number of samples.
-const MAX_SAMPLES_TO_STORE_S = 3000;
+const MAX_SAMPLES_TO_STORE_S = 2000;
 var samples = [];
 var INITS_ONLY = true;
 
@@ -267,26 +267,12 @@ function plot(samples, trans, breaths) {
 
 
 $("#plot").click(function(){
-// The "s?n=1000" part is giving a bad request for some reason		     
-    //  var url =  DSERVER_URL +"/json/s?n="+ NUM_TO_READ;
-  var url =  DSERVER_URL +"/json";    
+// The "s?n=1000" part is giving a bad request for some reason
+    //  var url =  DSERVER_URL +;
+  var url =  DSERVER_URL +"/json/s?n="+ NUM_TO_READ;
   $.ajax({url: url,
           success: function(result){
-	      // Note: Geoff is corectly setting the header type to JSON
-	      // I think so this is not needed!
-	      //            var lines = result.split("\n").filter( x => (x.length > 0) && (x[0] == '{') );
-//	      var lines = result;
-            // var cur_sam = lines.map(line =>
-            //                     {
-            //                       try {
-            //                         return JSON.parse(line);
-            //                       } catch {
-            //                         return null;
-            //                       }
-            //                     });
-            // cur_sam = cur_sam.filter( s => s != null);
-              // now we want to append these sample...
-	      var cur_sam = result;
+	    var cur_sam = result;
             if (INITS_ONLY) {
               samples = cur_sam;
               INITS_ONLY = false;
@@ -294,6 +280,9 @@ $("#plot").click(function(){
               samples = samples.slice(cur_sam.length-1);
             }
             samples = samples.concat(cur_sam);
+            // We are not guaranteeed to get samples in order
+            // we sort them....
+            samples = samples.sort((a,b) => a.ms - b.ms);
             plot(samples);
             plotBreathes();
           },

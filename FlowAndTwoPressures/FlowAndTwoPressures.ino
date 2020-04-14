@@ -86,6 +86,9 @@ bool found_display = false;
 #define SENSIRION_FM3200 0
 #define SENSIRION_SFM3400 1
 int sensirion_sensor_type = SENSIRION_SFM3400;
+// At present we have to install the SENSIRION_SFM3400 backwards
+// because of the physical mounting!!!
+bool SENSOR_INSTALLED_BACKWARD = true;
 
 // we will ust this as a pressure to display to make the OLED useful...
 // Eventually we will put this into running window
@@ -226,9 +229,9 @@ void outputNumFieldNoSep(char *name,signed long v) {
 void outputByteField(char *name,unsigned short v) {
   Serial.print("\"");
   Serial.print(name);
-  Serial.print("\" : \"");
+  Serial.print("\" : ");
   Serial.print((unsigned short int) v);
-  Serial.print("\", ");
+  Serial.print(", ");
 }
 
 void outputMeasurment(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
@@ -533,7 +536,8 @@ void loop() {
 
 // our units are slm * 1000, or milliliters per minute.
   float flow = -999.0;
-  flow = readSensirionFlow(SENSIRION_FM3200);
+  float raw_flow = readSensirionFlow(sensirion_sensor_type);
+  flow = (SENSOR_INSTALLED_BACKWARD) ? -raw_flow : raw_flow;
 
   signed long flow_milliliters_per_minute = (signed long) (flow * 1000);
   
