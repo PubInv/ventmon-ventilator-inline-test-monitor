@@ -33,8 +33,8 @@ constexpr bool ambient_pressure {0};
 constexpr bool internal_pressure {1};
 
 
-bool setupFlowSensor(Stream* eventChannel, Meta* meta);
-bool setupPressureSensors(Stream* eventChannel, Meta* meta);
+bool setupFlowSensor(Meta* meta);
+bool setupPressureSensors(Meta* meta);
 
 void samplePressure(Measurement* measurement, bool sensor);
 void sampleFlow(Measurement* measurement);
