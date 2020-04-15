@@ -70,16 +70,17 @@ class Measurement:
       # to abstract away the sign bit, we do this from:
       # https://stackoverflow.com/questions/20766813/how-to-convert-signed-to-unsigned-integer-in-python
 #      v = self.measurementValue.to_bytes(4, 'big')
-      packed = struct.pack('>l', self.measurementValue)  # Packing a long number.
+      packed = struct.pack('!l', self.measurementValue)  # Packing a long number.
 #      print("packed = " + str(packed)+"\n")
-      unpacked = struct.unpack('>L', packed)[0]  # Unpacking a packed long number to unsigned long
+      unpacked = struct.unpack('!l', packed)[0]  # Unpacking a packed long number to unsigned long
 
-#      v = struct.pack('>i', p1.measurementValue)
-      v = unpacked.to_bytes(4, 'big')
-      b[8] = v[0];
-      b[9] = v[1];
-      b[10] = v[2];
-      b[11] = v[3];
+#      v = struct.pack('>i', self.measurementValue)
+#      v = unpacked.to_bytes(4, 'big')
+      struct.pack_into('>i',b,8,self.measurementValue)
+#      b[8] = v[0];
+#      b[9] = v[1];
+#      b[10] = v[2];
+#      b[11] = v[3];
 #      b[3] = self.deviceLocation.to_bytes(1,'big')
       b[3] = ord(chr(self.deviceLocation))
       return b
@@ -100,7 +101,12 @@ class MeasurementEncoder(json.JSONEncoder):
 # print json.dumps(data, cls=RoundTripEncoder, indent=2)
 
 
-def bytes = pack_with_newline(mbytes)
+def terminate_with_newline(mbytes):
+      b = bytearray(len(mbytes)+1)
+      for i in range(len(mbytes)):
+        b[i] = mbytes[i]
+      b[12] = ord('\n')
+      return b;
 
 def read_from_port():
   global NUMREAD
@@ -136,8 +142,8 @@ def read_from_port():
 
         if m["event"] == "M":
           # Warning! This is just a test
-          v = abs(m["val"])
-          # v = m["val"]
+          # v = abs(m["val"])
+          v = m["val"]
           minst = Measurement(m["type"], m["loc"], int(m["num"]),
                               m["ms"], v)
           my_deque.append(minst)
@@ -147,22 +153,25 @@ def read_from_port():
               # Send data
               mbytes = minst.asBytes()
               # now pack with a newline!!
-              bytes = pack_with_newline(mbytes)
+              bytes = terminate_with_newline(mbytes)
               print('sending "%s"' % str(bytes))
+
               return_value = sock.sendall(bytes)
+
               NUM_SENT_TO_DATA_LAKE = NUM_SENT_TO_DATA_LAKE+1
               if NUM_SENT_TO_DATA_LAKE >= DATA_LAKE_SAMPLES_TO_SEND:
                 sock.close()
                 os._exit(os.EX_OK)
             except OverflowError:
-              print("Overflow error:", sys.exc_info()[0],sys.stderr)
+              print("Overflow error:", sys.exc_info()[0])
               traceback.print_exc(file=sys.stdout)
               os._exit(os.EX_OK)
             except BrokenPipeError:
               traceback.print_exc(file=sys.stdout)
               os._exit(os.EX_OK)
             except:
-              print("Unexpected sending error:", sys.exc_info()[0],sys.stderr)
+              traceback.print_exc(file=sys.stdout)
+              print("Unexpected sending error:", sys.exc_info()[0])
       except TypeError as err:
         print("Type error: {0}".format(err),sys.stderr)
       except:

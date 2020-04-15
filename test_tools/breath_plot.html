@@ -56,6 +56,20 @@ device that streams PIRDS events.
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
   <script>
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+  var TRACE_ID = urlParams.get('i')
   var DSERVER_URL = "http://localhost:80";
   var NUM_TO_READ = 1000;
 
@@ -268,8 +282,9 @@ function plot(samples, trans, breaths) {
 
 $("#plot").click(function(){
 // The "s?n=1000" part is giving a bad request for some reason
-    //  var url =  DSERVER_URL +;
-  var url =  DSERVER_URL +"/json/s?n="+ NUM_TO_READ;
+  //  var url =  DSERVER_URL +;
+  var trace_piece = (TRACE_ID) ? "/" + TRACE_ID : "";
+  var url =  DSERVER_URL + trace_piece + "/json/s?n="+ NUM_TO_READ;
   $.ajax({url: url,
           success: function(result){
 	    var cur_sam = result;
