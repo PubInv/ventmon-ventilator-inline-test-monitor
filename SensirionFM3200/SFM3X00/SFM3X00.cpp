@@ -18,6 +18,10 @@
 
 #include "SFM3X00.h"
 
+// TODO: This should be re-re-factored based on the Sensirion GitHub.
+// https://github.com/Sensirion/embedded-sfm
+// This is by no means the corret implementation of sensor functionality, howveer it works for now. 
+
 uint32_t requestSerialNumber()
 {
   // transmit to device #064 (0x40)
