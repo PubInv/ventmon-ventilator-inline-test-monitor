@@ -18,9 +18,9 @@
 
 #include "VentMon.h"
 
-bool setupFlowSensor(Stream* eventChannel, Meta* meta)
+bool setupFlowSensor(Meta* meta)
 {
-  eventChannel->println("setting up flow sensor...");
+//   eventChannel->println("setting up flow sensor...");
    
   meta->setValues('M', "flow sensor initialized");
 
@@ -39,9 +39,9 @@ bool setupFlowSensor(Stream* eventChannel, Meta* meta)
   return 0;
 }
 
-bool setupPressureSensors(Stream* eventChannel, Meta* meta)
+bool setupPressureSensors(Meta* meta)
 {
-  eventChannel->println("setting up pressure sensors...");
+//   eventChannel->println("setting up pressure sensors...");
 
   meta->setValues('M', "pressure sensors initialized");
   
