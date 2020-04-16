@@ -44,8 +44,6 @@ void setup()
   Serial.println(c);
 
   delay(5);
-
-  requestSerialNumber();
 }
 
 uint8_t crc8(const uint8_t data, uint8_t crc) {
@@ -82,6 +80,7 @@ void requestSerialNumber() {
 void loop() {
 // Documentation inconsistent
   int offset = 32768; // Offset for the sensor
+  // use scale of 800 for SFM3400 and 120 for SFM3200
   float scale = 120.0; // Scale factor for Air and N2 is 140.0, O2 is 142.8
   
  
