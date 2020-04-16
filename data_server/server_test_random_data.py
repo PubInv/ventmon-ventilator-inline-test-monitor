@@ -7,6 +7,7 @@
 #     Description         :
 #################################################################################
 
+import threading
 import time
 import struct
 import random
@@ -20,6 +21,7 @@ import socket
 import sys
 import os
 import traceback
+
 
 # This makes it a rather short pattern.
 # Up to 10,000 samples seems to work fine.
