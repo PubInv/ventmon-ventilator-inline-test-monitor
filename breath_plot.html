@@ -1,0 +1,471 @@
+  <!--
+Breath Plot: COVID-19 VentMon analysis software
+    Copyright (C) 2022  Robert L. Read
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+  <head>
+	<!-- Load plotly.js into the DOM -->
+	<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+</head>
+<label for="dserver">PIRDS data server url:</label>
+  <input type="text" id="dserverurl" name="dserverurl" size="50"><br><br>
+<label for="num_to_read">Number of samples to Read and Plot:</label>
+  <input type="text" id="num_to_read" name="num_to_read" size="10"><br><br>
+
+<body>
+  <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
+<div>
+  <button id="plot">Read from Server and Plot</button>
+  <button id="breath">Find breath points</button>
+</div>
+<div>
+  <button id="import">Import Trace</button>
+  <button id="export">Export Trace</button>
+  </div>
+<div>
+  <textarea id="json_trace" rows="30" cols="80"></textarea>
+  </div>
+
+<p>
+This is a work in progress of <a href="https://www.pubinv.org">Public Invention</a>.
+
+<p>
+This is a tester tool for open-source ventilators.
+  It uses the <a href="https://github.com/PubInv/respiration-data-standard">PIRDS data format</a>.
+
+<p>
+The basic operation is receive data from web server specified in the URL above.
+  Probably for now that will be the VentMon Python web server that
+listens on a serial port for the VentMon device or any other
+device that streams PIRDS events.
+
+</body>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+  <script>
+
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+  var TRACE_ID = urlParams.get('i')
+  var DSERVER_URL = "http://localhost:80";
+  var NUM_TO_READ = 1000;
+
+
+// This sould be better as time, but is easier
+// to do as number of samples.
+const MAX_SAMPLES_TO_STORE_S = 2000;
+var samples = [];
+var INITS_ONLY = true;
+
+// This is just to get the party started!
+function init_samples() {
+  return [
+  {
+    "event": "M",
+    "type": "P",
+    "ms": 19673310,
+    "loc": "A",
+    "num": "0",
+    "val": 10111
+  },
+  {
+    "event": "M",
+    "type": "D",
+    "ms": 19673310,
+    "loc": "A",
+    "num": "0",
+    "val": 4
+  },
+  {
+    "event": "M",
+    "type": "F",
+    "ms": 19673310,
+    "loc": "A",
+    "num": "0",
+    "val": 0
+  },
+  {
+    "event": "M",
+    "type": "P",
+    "ms": 19673376,
+    "loc": "A",
+    "num": "0",
+    "val": 10111
+  },
+  {
+    "event": "M",
+    "type": "D",
+    "ms": 19673376,
+    "loc": "A",
+    "num": "0",
+    "val": 4
+  },
+  {
+    "event": "M",
+    "type": "F",
+    "ms": 19673376,
+    "loc": "A",
+    "num": "0",
+    "val": 0
+  },
+  {
+    "event": "M",
+    "type": "P",
+    "ms": 19673442,
+    "loc": "A",
+    "num": "0",
+    "val": 10110
+  },
+  {
+    "event": "M",
+    "type": "D",
+    "ms": 19673442,
+    "loc": "A",
+    "num": "0",
+    "val": 3
+  },
+  ];
+}
+
+
+
+function unpack(rows, key) {
+  return rows.map(function(row) { return row[key]; });
+}
+
+const CONVERT_PIRDS_TO_SLM = 1/1000;
+
+// we have now changed this, there will be flow and
+// pressure in the same samples, and we should filter.
+function samplesToLine(samples) {
+  var flows = samples.filter(s => s.event == 'M' && s.type == 'F');
+
+  // These are slm/1000, or ml/minute...
+  // so we multiply by 1000 to get liters per minute
+  var flow_values = unpack(flows,"val").map(v => v * CONVERT_PIRDS_TO_SLM);
+  var fmillis = unpack(flows, 'ms');
+  // Convert to seconds...
+  var fmin = Math.min(...fmillis);
+  var fzeroed = fmillis.map(m =>(m-fmin)/1000.0);
+
+  var pressures = samples.filter(s => s.event == 'M' && s.type == 'D' && s.loc == 'A');
+
+  var pmillis = unpack(pressures, 'ms');
+  var pmin = Math.min(...pmillis);
+  var pzeroed = pmillis.map(m =>(m-pmin)/1000.0);
+  // the PIRDS standard is integral mm H2O, so we divide by 10
+  var delta_p = unpack(pressures, 'val').map(p => p / 10);
+  var flow = {type: "scatter", mode: "lines",
+            name: "flow",
+            x: fzeroed,
+            y: flow_values,
+            line: {color: '#0000FF'}
+             };
+  var diff_p = {type: "scatter", mode: "lines",
+            name: "pressure",
+            x: pzeroed,
+            y: delta_p,
+            line: {color: "#FF0000"}
+             };
+  return [flow,diff_p];
+}
+function plot(samples, trans, breaths) {
+  var new_data = samplesToLine(samples);
+  var millis = unpack(samples, 'millis');
+  var min = Math.min(...millis);
+  var zeroed = millis.map(m =>(m-min)/1000.0);
+  if (trans) {
+    var tmillis = unpack(trans, 'ms');
+    var tzeroed = tmillis.map(m =>(m)/1000.0);
+    var tstates = unpack(trans, 'state');
+    var tstates_amped = tstates.map(m =>m*4);
+    var transPlot = {type: "scatter", mode: "lines",
+                     name: "trans",
+                     x: tzeroed,
+            y: tstates_amped,
+            line: {color: '#00FF00'}
+            };
+    new_data.push(transPlot);
+  }
+  if (breaths) {
+    var bmillis = unpack(breaths, 'ms');
+    var bzeroed = bmillis.map(m =>(m)/1000.0);
+    var ys = breaths.map( b => 0);
+    var breathPlot = {type: "scatter", mode: "markers",
+                     name: "breaths",
+                     x: bzeroed,
+                      y: ys,
+                      marker: { size: 12, color: "red" }
+            };
+    new_data.push(breathPlot);
+    // Now I attempt to extract volumes...
+    // Our breaths mark the END of a breath..
+    // so we want to draw the volumes that way.
+    const volume_ht_factor = 20;
+    var exh_v = unpack(breaths, 'vol_e').map(e => e * volume_ht_factor);
+    var t_exh_v =  unpack(breaths, 'vol_e').map(e => Math.round(e*1000.0)+"ml exh");
+    var inh_v = unpack(breaths, 'vol_i').map(i => i * volume_ht_factor);
+    var t_inh_v = unpack(breaths, 'vol_i').map(e => Math.round(e*1000.0)+"ml inh");
+    var inhPlot = {type: "scatter", mode: "markers+text",
+                   name: "inhales",
+                   textposition: 'top center',
+                   x: bzeroed,
+                   y: inh_v,
+                   text: t_inh_v,
+                   marker: { size: 12, color: "black" }
+                  };
+    var exhPlot = {type: "scatter", mode: "markers+text",
+                   name: "exhales",
+                   textposition: 'bottom center',
+                   x: bzeroed,
+                   y: exh_v,
+                   text: t_exh_v,
+                   marker: { size: 12, color: "green" }
+                  };
+    new_data.push(inhPlot);
+    new_data.push(exhPlot);
+  }
+
+  var layout = {
+    title: 'VentMon Breath Analysis',
+    xaxis: {domain: [0.1, 0.9]},
+   yaxis: {
+    title: 'Flow (slm)',
+    titlefont: {color: 'blue'},
+    tickfont: {color: 'blue'}
+  },
+  yaxis2: {
+    title: 'airway pressure (cm H2O)',
+    titlefont: {color: 'red'},
+    tickfont: {color: 'red'},
+    anchor: 'free',
+    overlaying: 'y',
+    side: 'left',
+    position: -0.1
+  },
+  };
+
+  // TODO: move to making all axes fixed....
+  new_data[1].yaxis = 'y2';
+  // If we have done a breath analysis, we need to push onto
+  // the "y" axis...this could be more elegant...
+  for(var i = 2; i < new_data.length; i++)
+    new_data[i].yaxis = 'y';
+
+  Plotly.newPlot('myDiv', new_data, layout);
+ // Plotly.newPlot('myDiv', [trace1,trace2], layout);
+}
+
+
+$("#plot").click(function(){
+// The "s?n=1000" part is giving a bad request for some reason
+  //  var url =  DSERVER_URL +;
+  var trace_piece = (TRACE_ID) ? "/" + TRACE_ID : "";
+  var url =  DSERVER_URL + trace_piece + "/json/s?n="+ NUM_TO_READ;
+  $.ajax({url: url,
+          success: function(result){
+	    var cur_sam = result;
+            if (INITS_ONLY) {
+              samples = cur_sam;
+              INITS_ONLY = false;
+            } else {
+              samples = samples.slice(cur_sam.length-1);
+            }
+            samples = samples.concat(cur_sam);
+            // We are not guaranteeed to get samples in order
+            // we sort them....
+            samples = samples.sort((a,b) => a.ms - b.ms);
+            plot(samples);
+            plotBreathes();
+          },
+          error: function(xhr, ajaxOptions, thrownError) {
+            alert("Error!" + xhr.status);
+            alert(thrownError);
+          }
+         });
+});
+
+
+
+
+// A simple computation of a moving window trace
+// computing [A + -B], where A is volume to left
+// of sample int time window t, and B is volume to right
+// t is in milliseconds
+function computeMovingWindowTrace(samples,t,v) {
+
+  var flows = samples.filter(s => s.event == 'M' && s.type == 'F');
+  var first_time = flows[0].ms;
+  var last_time = flows[flows.length - 1].ms;
+  var duration = last_time - first_time;
+
+  // Here is an idea...
+  // We define you to be in one of three states:
+  // Inspiring, expiring, or neither.
+  // Every transition between these states is logged.
+  // Having two inspirations between an expiration is
+  // weird but could happen.
+  // We record transitions.
+  // When the time series crossed a fixed threshold
+  // or zero, it causes a transition. If you are inspiring,
+  // you have to cross zero to transition to neither,
+  // and you start expiring when you cross the treshold.
+  const vm = 4;
+
+  // We will model this as a list of transitions.
+  // A breath is any number of inspirations followed by
+  // any number of expirations. (I+)(E+)
+
+  var transitions = [];
+  var state = 0; // Let 1 mean inspiration, -1 mean expiration, 0 neither
+  for(var i = 0; i < flows.length; i++) {
+    var f = flows[i].val * CONVERT_PIRDS_TO_SLM;
+    var ms = flows[i].ms-first_time;
+    if (state == 0) {
+      if (f > vm) {
+        state = 1;
+        transitions.push({ state: 1, sample: i, ms: ms})
+      } else if (f < -vm) {
+        state = -1;
+        transitions.push({ state: -1, sample: i, ms: ms})
+      }
+    } else if (state == 1) {
+      if (f < -vm) {
+        state = -1;
+        transitions.push({ state: -1, sample: i, ms: ms})
+      } else if (f < 0) {
+        state = 0;
+        transitions.push({ state: 0, sample: i, ms: ms})
+      }
+    } else if (state == -1) {
+      if (f > vm) {
+        state = 1;
+        transitions.push({ state: 1, sample: i, ms: ms})
+      } else if (f > 0) {
+        state = 0;
+        transitions.push({ state: 0, sample: i, ms: ms})
+      }
+    }
+  }
+
+  // Now that we have transitions, we can apply a
+  // diferent algorithm to try to define "breaths".
+  // Because a breath is defined as an inspiration
+  // and then an expiration, we will define a breath
+  // as from the first inspiration, until there has
+  // been one expiration, until the next inspiration.
+  var breaths = []
+  var expiring = false;
+  var last = 0;
+  var voli = 0;
+  var vole = 0;
+
+  // This should be in liters...
+  function integrateSamples(a,z) {
+    // -1 for quadilateral approximation
+    var vol = 0;
+    for(var j = a; j < z-1; j++) {
+      // I'll use qadrilateral approximation.
+      // We'll form each quadrilateral between two samples.
+      var ms = flows[j+1].ms - flows[j].ms;
+      var ht = ((flows[j+1].val + flows[j].val )/2) * CONVERT_PIRDS_TO_SLM;
+      // Flow is actually in standard liters per minute,
+      // so to get liters we divide by 60 to it l/s,
+      // and and divde by 1000 to convert ms to seconds.
+      // We could do that here, but will move constants
+      // to end...
+      vol += ms * ht;
+    }
+    return vol/(60*1000);
+  }
+  for(var i = 0; i < transitions.length; i++) {
+    if (expiring && transitions[i].state == 1) {
+      breaths.push({ ms: transitions[i].ms,
+                     sample: transitions[i].sample,
+                     vol_e: vole,
+                     vol_i: voli
+                   }
+                  );
+      expiring = false;
+      vole = integrateSamples(last,transitions[i].sample);
+      last = transitions[i].sample;
+    }
+    if (!expiring && transitions[i].state == -1) {
+      expiring = true;
+      voli = integrateSamples(last,transitions[i].sample);
+      last = transitions[i].sample;
+    }
+    // At this point we can in theory compute an inspiratory volume..
+
+  }
+
+  console.log(breaths);
+
+  return [transitions,breaths];
+}
+
+
+function plotBreathes() {
+  const t = 200; // size of the window is 200ms
+  const v = 50; // min volume in ml
+  var [transitions,breaths] = computeMovingWindowTrace(samples,t,v);
+  plot(samples,transitions,breaths);
+}
+$("#breath").click(function(){
+  plotBreathes();
+});
+
+$("#import").click(function() {
+  var input_trace = $("#json_trace").val();
+  samples = JSON.parse(input_trace);
+  plotBreathes();
+});
+
+$("#export").click(function() {
+  $("#json_trace").val(JSON.stringify(samples,null,2));
+});
+
+$( document ).ready(function() {
+
+  $( "#dserverurl" ).val( DSERVER_URL );
+  $('#dserverurl').change(function () {
+    alert("changed");
+    DSERVER_URL = $("#dserverurl").val();
+  });
+
+  $( "#num_to_read" ).val( NUM_TO_READ );
+  $('#num_to_read').change(function () {
+    alert("changed");
+    NUM_TO_READ = $("#num_to_read").val();
+  });
+
+
+  samples = init_samples();
+  plotBreathes();
+});
+
+
+  </script>
