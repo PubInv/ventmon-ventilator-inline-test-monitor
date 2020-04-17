@@ -196,7 +196,10 @@ def get_n_samples(n):
     except IndexError:
       print("Indexerror\n",sys.stderr)
       break;
-  print("result = " + json.dumps(result, cls=MeasurementEncoder, indent=2) + "\n",sys.stderr)
+#  print("result = " + json.dumps(result, cls=MeasurementEncoder, indent=2) + "\n",sys.stderr)
+# WARNING: I don't know why, but I have to print something here or it
+# fails---possibly a timing issue!
+  print("result!",sys.stderr)
   return result
 
 def construct_result(samps):
@@ -208,7 +211,6 @@ def construct_result(samps):
   return response
 
 @app.route("/")
-@app.route("/json")
 def getsamples():
   global my_deque
   print("len" + str(len(my_deque))+"\n")
@@ -216,9 +218,12 @@ def getsamples():
   return construct_result(samps)
 
 # Get at most the earliest n samples.
-@app.route("/json/s")
+@app.route("/json")
 def get_limit_samples():
-  n = int(request.args.get('n'))
+  if request.args.get('n') == None:
+    n = 0
+  else:
+    n = int(request.args.get('n'))
   global my_deque
   print("len" + str(n) + " of " + str(len(my_deque))+"\n",sys.stderr)
   samps = get_n_samples(len(my_deque));

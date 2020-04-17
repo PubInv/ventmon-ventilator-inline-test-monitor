@@ -30,6 +30,9 @@ Breath Plot: COVID-19 VentMon analysis software
 <label for="num_to_read">Number of samples to Read and Plot:</label>
   <input type="text" id="num_to_read" name="num_to_read" size="10"><br><br>
 
+  <button id="startoperation">Start Interactive Plot</button>
+  <button id="stopoperation">Stop Interactive Plot</button>
+
 <body>
   <div id='PFGraph'><!-- Pressure and Flow Graph --></div>
   <div id='EventsGraph'><!-- Events --></div>
@@ -78,7 +81,11 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 var TRACE_ID = urlParams.get('i')
 var DSERVER_URL = window.location.protocol + "//" + window.location.host;
-var NUM_TO_READ = 1000;
+var NUM_TO_READ = 2000;
+
+var DATA_RETRIEVAL_PERIOD = 50;
+
+var intervalID;
 
 
 // This sould be better as time, but is easier
@@ -355,16 +362,20 @@ function plot(samples, trans, breaths) {
 }
 
 function retrieveAndPlot(){
-    var trace_piece = (TRACE_ID) ? "/" + TRACE_ID : "";
-    var url =  DSERVER_URL + trace_piece + "/json?n="+ NUM_TO_READ;
+  var trace_piece = (TRACE_ID) ? "/" + TRACE_ID : "";
+  DSERVER_URL = $("#dserverurl").val();
+  NUM_TO_READ = $("#num_to_read").val();
+  var url =  DSERVER_URL + trace_piece + "/json?n="+ NUM_TO_READ;
+
     $.ajax({url: url,
-            success: function(result){
-		var cur_sam = result;
+            success: function(cur_sam){
 		if (INITS_ONLY) {
 		    samples = cur_sam;
 		    INITS_ONLY = false;
 		} else {
-		    samples = samples.slice(cur_sam.length-1);
+                  var discard = Math.max(0,
+                                         samples.length + cur_sam.length - MAX_SAMPLES_TO_STORE_S);
+		    samples = samples.slice(discard);
 		}
 		samples = samples.concat(cur_sam);
 		// We are not guaranteeed to get samples in order
@@ -374,8 +385,8 @@ function retrieveAndPlot(){
 		plotBreathes();
             },
             error: function(xhr, ajaxOptions, thrownError) {
-		alert("Error!" + xhr.status);
-		alert(thrownError);
+		console.log("Error!" + xhr.status);
+		console.log(thrownError);
             }
            });
 }
@@ -536,27 +547,53 @@ $("#export").click(function() {
 
 $("#plot").click(retrieveAndPlot);
 
+
+  // Experimental timing against the data server
+
+
+
+  // clearInterval(intervalID);
+$("#startoperation").click( () => {
+  if (typeof intervalID === 'undefined') {
+    intervalID = setInterval(
+      function() {
+        retrieveAndPlot();
+      },
+      DATA_RETRIEVAL_PERIOD) }
+}
+                          );
+$("#stopoperation").click( () =>
+  clearInterval(intervalID)
+);
+
 $( document ).ready(function() {
 
-    $( "#dserverurl" ).val( DSERVER_URL );
-    $('#dserverurl').change(function () {
-	DSERVER_URL = $("#dserverurl").val();
-    });
+  if (window.location.protocol == "http:")
+    DSERVER_URL = window.location.protocol + "//" + window.location.host;
+  else
+    DSERVER_URL = "http://localhost";
 
-    $( "#num_to_read" ).val( NUM_TO_READ );
-    $('#num_to_read').change(function () {
-	alert("changed");
-	NUM_TO_READ = $("#num_to_read").val();
-    });
 
-    $( "#traceid" ).val( TRACE_ID );
-    $('#traceid').change(function () {
-	TRACE_ID = $("#traceid").val();
-    });
+  $( "#dserverurl" ).val( DSERVER_URL );
+  $('#dserverurl').change(function () {
+    DSERVER_URL = $("#dserverurl").val();
+  });
 
-    samples = init_samples();
-    retrieveAndPlot();
-    plotBreathes();
+  $( "#num_to_read" ).val( NUM_TO_READ );
+  $('#num_to_read').change(function () {
+    NUM_TO_READ = $("#num_to_read").val();
+  });
+
+  $( "#traceid" ).val( TRACE_ID );
+  $('#traceid').change(function () {
+    TRACE_ID = $("#traceid").val();
+  });
+
+  samples = init_samples();
+  retrieveAndPlot();
+  plotBreathes();
+
+
 });
 
 
