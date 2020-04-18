@@ -1,4 +1,3 @@
-
 // hardcoded sensor values can be found in SFM3X00.h
 #include <SFM3X00.h>
 
@@ -17,18 +16,22 @@ void setup()
   Serial.println();
  
   uint16_t scaleFactor = requestScaleFactor(sensor_address);
-  Serial.print("scale factor (HEX, DEC): ");
+  Serial.print("read scale factor (HEX, DEC): ");
   Serial.print(scaleFactor, HEX);
   Serial.print(", ");
   Serial.println(scaleFactor, DEC);
+  Serial.print("hardcoded scale factor (DEC): ");
+  Serial.println((uint16_t) flow_scale, DEC);
   Serial.println();
 
 
   uint16_t offset = requestOffset(sensor_address);
-  Serial.print("flow offset (HEX, DEC): ");
+  Serial.print("read flow offset (HEX, DEC): ");
   Serial.print(offset, HEX);
   Serial.print(", ");
   Serial.println(offset, DEC);
+  Serial.print("hardcoded flow offset (DEC): ");
+  Serial.println((uint16_t) flow_offset, DEC);
   Serial.println();
 
 
