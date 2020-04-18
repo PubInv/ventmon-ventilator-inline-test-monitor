@@ -22,11 +22,24 @@
 #include <Wire.h>
 #include <Arduino.h>
 
-#define SFM3400 1
-#define SFM3200 0
 
-uint32_t requestSerialNumber();
-void startContinuousMeasurement();
-float readFlow(bool sensorType);
+constexpr uint8_t sensor_address {0x40};
+constexpr float   flow_offset    {32768.0};
+constexpr float   flow_scale     {800.0};
+
+
+void sendCommand(uint8_t address, uint16_t command);
+
+uint16_t readData(uint8_t address);
+
+uint32_t requestSerialNumber(uint8_t address);
+
+uint16_t requestScaleFactor(uint8_t address);
+
+uint16_t requestOffset(uint8_t address);
+
+void startContinuousMeasurement(uint8_t address);
+
+float readFlow(uint8_t address);
 
 #endif 
