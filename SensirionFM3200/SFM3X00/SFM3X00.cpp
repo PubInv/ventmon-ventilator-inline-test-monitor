@@ -22,62 +22,91 @@
 // https://github.com/Sensirion/embedded-sfm
 // This is by no means the corret implementation of sensor functionality, howveer it works for now. 
 
-uint32_t requestSerialNumber()
+void sendCommand(uint8_t address, uint16_t command)
 {
-  // transmit to device #064 (0x40)
-  Wire.beginTransmission(byte(0x40)); 
-  // 0x31AE is the command to read the serial number
-  Wire.write(byte(0x31));    
-  Wire.write(byte(0xAE));   
-  Wire.endTransmission();
-  // read 4 bytes from device with address 0x40
-  Wire.requestFrom(0x40, 4); 
+  //Serial.println();
+  //Serial.println(command, HEX);
+  uint8_t b1 = (command & 0xFF00) >> 8;
+  //Serial.println(b1, HEX);
+  uint8_t b0 = command & 0x00FF;
+  //Serial.println(b0, HEX);
 
-  // print serial number
-  uint8_t b[4];
+  Wire.beginTransmission(byte(address)); 
+  Wire.write(byte(b1));      
+  Wire.write(byte(b0));     
+  Wire.endTransmission();
+}
+
+uint16_t readData(uint8_t address)
+{
+  uint8_t b[2];
+
+  Wire.requestFrom(0x40, 2); 
+
+  b[1] = Wire.read();
+  b[0] = Wire.read();
+
+  uint16_t c {0};
+  c = (b[1] << 8) | b[0];
+
+  //Serial.println(c, HEX);
+  //Serial.println(c, DEC);
+
+  return c;
+}
+
+
+uint32_t requestSerialNumber(uint8_t address)
+{
+  sendCommand(address, 0x31AE);
+
+  uint16_t upperBytes = readData(address);
+
+  sendCommand(address, 0x31AF);
+
+  uint16_t lowerBytes = readData(address);
+
   uint32_t serialNumber {0};
-  Wire.readBytes(b, 4);
-  for (int i = 0; i < 4; i++)
-  {
-    serialNumber = serialNumber | ((long)b[i] << (8UL * i));
-  }
+  
+  serialNumber = ((uint32_t)upperBytes << 16) | lowerBytes;
   
  return serialNumber;
 }
 
 
-void startContinuousMeasurement()
+
+uint16_t requestScaleFactor(uint8_t address)
 {
-  Wire.beginTransmission(byte(0x40)); 
-  Wire.write(byte(0x10));      
-  Wire.write(byte(0x00));     
-  Wire.endTransmission();
+  sendCommand(address, 0x30DE);
+
+  int16_t scaleFactor = readData(address);
+  
+  return scaleFactor;
 }
 
 
-float readFlow(bool sensorType)
+uint16_t requestOffset(uint8_t address)
 {
-  const float FM3200_SCALE = 120.0;
-  const float FM3400_33_AW_SCALE = 800.0;
-  float scale = (sensorType == SFM3200) ? FM3200_SCALE : FM3400_33_AW_SCALE;
+  sendCommand(address, 0x30DF);
+
+  uint16_t offset = readData(address);
   
-  // Offset for the sensor
-  int offset = 32768;
+  return offset;
+}
 
-  // read 3 bytes from device with address 0x40
-  Wire.requestFrom(0x40, 2); 
-  // first received byte stored here.
-  uint8_t a = Wire.read(); 
-  // second received byte stored here
-  uint8_t b = Wire.read(); 
 
-  // combine the two received bytes to a 16bit integer value
-  uint16_t c = (a << 8) | b;
-  // remove the two least significant bits
-  c >>= 2;
+void startContinuousMeasurement(uint8_t address)
+{
+  sendCommand(address, 0x1000);
+}
 
-  float Flow = ((float)c - 8192) / scale;
-  // print the calculated flow to the serial interface
-  return Flow;
+
+float readFlow(uint8_t address)
+{
+  uint16_t rawFlow = readData(address);
+   
+  float flow = ((float)rawFlow - flow_offset) / flow_scale;
+  
+  return flow;
 }
 
