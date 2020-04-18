@@ -33,8 +33,17 @@ Breath Plot: COVID-19 VentMon analysis software
   <button id="startoperation">Start Interactive Plot</button>
   <button id="stopoperation">Stop Interactive Plot</button>
 
-  <label for="bpm"> BPM: </label>
+  <label for="bpm">BPM: </label>
   <label id="bpm"> </label>
+
+  <label for="tv">Tidal Volume: </label>
+  <label id="tv"> </label>
+
+  <label for="mv">Mintue Volume: </label>
+  <label id="mv"> </label>
+
+  <label for="ier">I:E ratio: </label>
+  <label id="ier"> </label>
 
 <body>
   <div id='PFGraph'><!-- Pressure and Flow Graph --></div>
@@ -368,22 +377,47 @@ function plot(samples, trans, breaths) {
 // This is probably the dumbest possible respriation rate...
 // it counts breaths but makes no attempt to comute the avergae,
 // which would allow a smoother change...
-function compute_respiration_rate(s,samples,transitions,breaths) {
+function compute_respiration_rate(secs,samples,transitions,breaths) {
   // In order to compute the number of breaths
   // in the last s seconds, I compute those breaths
   // whose time stamp is s seconds from the most recent sample
+
   if (breaths.length == 0) {
-    return 0;
+    return [0,0,0,"NA"];
   } else {
     const recent_ms = samples[samples.length - 1].ms;
     var cur_ms = recent_ms;
     var cnt = 0.0;
+    var vol_i = 0.0;
+    var vol_e = 0.0;
     var i = breaths.length - 1;
-    while((i >=0) && (breaths[i].ms > (cur_ms - s*1000))) {
+    var time_inh = 0;
+    var time_exh = 0;
+    while((i >=0) && (breaths[i].ms > (cur_ms - secs*1000))) {
       cnt++;
+      vol_i += breaths[i].vol_i;
+      time_inh +=
+        (transitions[breaths[i].trans_cross_zero].ms -
+        transitions[breaths[i].trans_begin_inhale].ms);
+
+      vol_e += breaths[i].vol_e;
+      time_exh +=
+        (transitions[breaths[i].trans_end_exhale].ms -
+        transitions[breaths[i].trans_cross_zero].ms);
       i--;
     }
-    return  (cnt * 60.0) / s;
+    if (cnt > 1) {
+      var duration_minutes = secs / 60.0;
+      var minute_volume = (1000) * vol_i / duration_minutes;
+      var tidal_volume = (1000) * vol_i / cnt;
+
+      var EIratio = (time_inh == 0) ? null : time_exh / time_inh;
+      return  [(cnt * 60.0) / secs,
+               tidal_volume, minute_volume,
+               EIratio];
+    } else {
+      return [0,0,0,"NA"];
+    }
   }
 }
 
@@ -393,8 +427,15 @@ function process(samples) {
   var [transitions,breaths] = computeMovingWindowTrace(samples,t,v);
   plot(samples,transitions,breaths);
   // How many seconds backwards should we look? Perhaps 20?
-  var bpm = compute_respiration_rate(RESPIRATION_RATE_WINDOW_SECONDS,samples,transitions,breaths);
+  var [bpm,tv,mv,EIratio] = compute_respiration_rate(RESPIRATION_RATE_WINDOW_SECONDS,samples,transitions,breaths);
   $("#bpm").text(bpm.toFixed(1));
+  $("#tv").text(tv.toFixed(1));
+  $("#mv").text(mv.toFixed(1));
+  if (EIratio == "NA") {
+    $("#ier").text("NA");
+  } else {
+    $("#ier").text((1.0 / EIratio).toFixed(1));
+  }
 }
 
 function retrieveAndPlot(){
