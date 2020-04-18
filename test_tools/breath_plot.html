@@ -33,12 +33,14 @@ Breath Plot: COVID-19 VentMon analysis software
   <button id="startoperation">Start Interactive Plot</button>
   <button id="stopoperation">Stop Interactive Plot</button>
 
+  <label for="bpm"> BPM: </label>
+  <label id="bpm"> </label>
+
 <body>
   <div id='PFGraph'><!-- Pressure and Flow Graph --></div>
   <div id='EventsGraph'><!-- Events --></div>
 <div>
   <button id="plot">Read from Server and Plot</button>
-  <button id="breath">Find breath points</button>
 </div>
 <div>
   <button id="import">Import Trace</button>
@@ -85,12 +87,14 @@ var NUM_TO_READ = 2000;
 
 var DATA_RETRIEVAL_PERIOD = 50;
 
+var RESPIRATION_RATE_WINDOW_SECONDS = 20;
+
 var intervalID;
 
 
 // This sould be better as time, but is easier
 // to do as number of samples.
-const MAX_SAMPLES_TO_STORE_S = 2000;
+const MAX_SAMPLES_TO_STORE_S = 4000;
 var samples = [];
 var INITS_ONLY = true;
 
@@ -228,7 +232,7 @@ function samplesToLine(samples) {
 }
 function plot(samples, trans, breaths) {
   var new_data = samplesToLine(samples);
-  var millis = unpack(samples, 'millis');
+  var millis = unpack(samples, 'ms');
   var min = Math.min(...millis);
   var zeroed = millis.map(m =>(m-min)/1000.0);
 
@@ -269,7 +273,7 @@ function plot(samples, trans, breaths) {
     if (trans) {
       // Transitions are simply scaled to 50%.
       var tmillis = unpack(trans, 'ms');
-      var tzeroed = tmillis.map(m =>(m)/1000.0);
+      var tzeroed = tmillis.map(m =>(m-min)/1000.0);
       var tstates = unpack(trans, 'state');
       var tstates_amped = tstates.map(m =>m*50);
       var transPlot = {type: "scatter", mode: "lines",
@@ -287,7 +291,7 @@ function plot(samples, trans, breaths) {
 
     if (breaths) {
       var bmillis = unpack(breaths, 'ms');
-      var bzeroed = bmillis.map(m =>(m)/1000.0);
+      var bzeroed = bmillis.map(m =>(m-min)/1000.0);
       // I'm goint to a add start and end transition to make the plot
       // come out right
       var ys = breaths.map( b => 0);
@@ -324,8 +328,8 @@ function plot(samples, trans, breaths) {
       var t_inh_v = unpack(breaths, 'vol_i').map(e => Math.round(e*1000.0)+"ml inh");
       // now to graph properly, I must find the center of an inhalation.
       // I have packed these into the breaths...
-      var inhale_centers = breaths.map(b => (trans[b.trans_begin_inhale].ms + trans[b.trans_cross_zero].ms) / (2.0 * 1000.0));
-      var exhale_centers = breaths.map(b => (trans[b.trans_cross_zero].ms + trans[b.trans_end_exhale].ms) / (2.0 * 1000.0));
+      var inhale_centers = breaths.map(b => (trans[b.trans_begin_inhale].ms + trans[b.trans_cross_zero].ms - 2*min) / (2.0 * 1000.0));
+      var exhale_centers = breaths.map(b => (trans[b.trans_cross_zero].ms + trans[b.trans_end_exhale].ms - 2*min) / (2.0 * 1000.0));
 
       var inhPlot = {type: "scatter", mode: "markers+text",
                      name: "Inh. ml",
@@ -361,34 +365,65 @@ function plot(samples, trans, breaths) {
   }
 }
 
+// This is probably the dumbest possible respriation rate...
+// it counts breaths but makes no attempt to comute the avergae,
+// which would allow a smoother change...
+function compute_respiration_rate(s,samples,transitions,breaths) {
+  // In order to compute the number of breaths
+  // in the last s seconds, I compute those breaths
+  // whose time stamp is s seconds from the most recent sample
+  if (breaths.length == 0) {
+    return 0;
+  } else {
+    const recent_ms = samples[samples.length - 1].ms;
+    var cur_ms = recent_ms;
+    var cnt = 0.0;
+    var i = breaths.length - 1;
+    while((i >=0) && (breaths[i].ms > (cur_ms - s*1000))) {
+      cnt++;
+      i--;
+    }
+    return  (cnt * 60.0) / s;
+  }
+}
+
+function process(samples) {
+  const t = 200; // size of the window is 200ms
+  const v = 50; // min volume in ml
+  var [transitions,breaths] = computeMovingWindowTrace(samples,t,v);
+  plot(samples,transitions,breaths);
+  // How many seconds backwards should we look? Perhaps 20?
+  var bpm = compute_respiration_rate(RESPIRATION_RATE_WINDOW_SECONDS,samples,transitions,breaths);
+  $("#bpm").text(bpm.toFixed(1));
+}
+
 function retrieveAndPlot(){
   var trace_piece = (TRACE_ID) ? "/" + TRACE_ID : "";
   DSERVER_URL = $("#dserverurl").val();
   NUM_TO_READ = $("#num_to_read").val();
   var url =  DSERVER_URL + trace_piece + "/json?n="+ NUM_TO_READ;
 
-    $.ajax({url: url,
-            success: function(cur_sam){
-		if (INITS_ONLY) {
-		    samples = cur_sam;
-		    INITS_ONLY = false;
-		} else {
-                  var discard = Math.max(0,
-                                         samples.length + cur_sam.length - MAX_SAMPLES_TO_STORE_S);
-		    samples = samples.slice(discard);
-		}
-		samples = samples.concat(cur_sam);
-		// We are not guaranteeed to get samples in order
-		// we sort them....
-		samples = samples.sort((a,b) => a.ms - b.ms);
-		plot(samples);
-		plotBreathes();
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-		console.log("Error!" + xhr.status);
-		console.log(thrownError);
-            }
-           });
+  $.ajax({url: url,
+          success: function(cur_sam){
+	    if (INITS_ONLY) {
+	      samples = cur_sam;
+	      INITS_ONLY = false;
+	    } else {
+              var discard = Math.max(0,
+                                     samples.length + cur_sam.length - MAX_SAMPLES_TO_STORE_S);
+	      samples = samples.slice(discard);
+	    }
+	    samples = samples.concat(cur_sam);
+	    // We are not guaranteeed to get samples in order
+	    // we sort them....
+	    samples = samples.sort((a,b) => a.ms - b.ms);
+            process(samples);
+          },
+          error: function(xhr, ajaxOptions, thrownError) {
+	    console.log("Error!" + xhr.status);
+	    console.log(thrownError);
+          }
+         });
 }
 
 
@@ -425,7 +460,8 @@ function computeMovingWindowTrace(samples,t,v) {
   var state = 0; // Let 1 mean inspiration, -1 mean expiration, 0 neither
   for(var i = 0; i < flows.length; i++) {
     var f = flows[i].val * CONVERT_PIRDS_TO_SLM;
-    var ms = flows[i].ms-first_time;
+    //    var ms = flows[i].ms-first_time;
+    var ms = flows[i].ms;
     if (state == 0) {
       if (f > vm) {
 	state = 1;
@@ -454,7 +490,7 @@ function computeMovingWindowTrace(samples,t,v) {
   }
 
   // Now that we have transitions, we can apply a
-  // diferent algorithm to try to define "breaths".
+  // diferrent algorithm to try to define "breaths".
   // Because a breath is defined as an inspiration
   // and then an expiration, we will define a breath
   // as from the first inspiration, until there has
@@ -514,21 +550,9 @@ function computeMovingWindowTrace(samples,t,v) {
 
   }
 
-  console.log(breaths);
-
   return [transitions,breaths];
 }
 
-
-function plotBreathes() {
-    const t = 200; // size of the window is 200ms
-    const v = 50; // min volume in ml
-    var [transitions,breaths] = computeMovingWindowTrace(samples,t,v);
-    plot(samples,transitions,breaths);
-}
-$("#breath").click(function(){
-    plotBreathes();
-});
 
 $("#useofficial").click(function() {
     DSERVER_URL = VENTMON_DATA_LAKE;
@@ -538,7 +562,6 @@ $("#useofficial").click(function() {
 $("#import").click(function() {
     var input_trace = $("#json_trace").val();
     samples = JSON.parse(input_trace);
-    plotBreathes();
 });
 
 $("#export").click(function() {
@@ -591,8 +614,6 @@ $( document ).ready(function() {
 
   samples = init_samples();
   retrieveAndPlot();
-  plotBreathes();
-
 
 });
 

@@ -542,6 +542,7 @@ void loop() {
   signed long flow_milliliters_per_minute = (signed long) (flow * 1000);
   
   outputMeasurment('M', 'F', 'A', 0, ms, flow_milliliters_per_minute);
+
   Serial.println();
   Serial.flush();
 }

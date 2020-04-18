@@ -199,7 +199,7 @@ def get_n_samples(n):
 #  print("result = " + json.dumps(result, cls=MeasurementEncoder, indent=2) + "\n",sys.stderr)
 # WARNING: I don't know why, but I have to print something here or it
 # fails---possibly a timing issue!
-  print("result!",sys.stderr)
+#  print("result!",sys.stderr)
   return result
 
 def construct_result(samps):
