@@ -15,37 +15,111 @@ Breath Plot: COVID-19 VentMon analysis software
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-
+<!doctype html>
+<html lang="en">
   <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
 	<!-- Load plotly.js into the DOM -->
-	<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+
+    <title>Public Invention VentMon</title>
+
 </head>
-<label for="dserver">PIRDS data server url:</label>
-<input type="text" id="dserverurl" name="dserverurl" size="50">
-  <button id="useofficial">Use Ventmon Data Lake: ventmon.coslabs.com</button>
-<br><br>
-<label for="traceid">Trace ID             :</label>
-<input type="text" id="traceid" name="traceidinput" size="50">
-<br><br>
-<label for="num_to_read">Number of samples to Read and Plot:</label>
-  <input type="text" id="num_to_read" name="num_to_read" size="10"><br><br>
+  <body>
 
-  <button id="startoperation">Start Interactive Plot</button>
-  <button id="stopoperation">Stop Interactive Plot</button>
+  <div class="container-fluid">
 
-  <label for="bpm">BPM: </label>
+<div class="jumbotron">
+  <h1 class="display-4">VentMon Respiration Analysis</h1>
+  <p class="lead">This is a work in progress of <a href="https://www.pubinv.org">Public Invention</a>. It can be attached to a data server to produce
+an interactive or static analysis of a respiration. It's primary purpose is to test pandemic ventilators.
+</p>
+  </div>
+
+
+<div class="input-group mb-3">
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="basic-addon3">PIRDS data server url:</span>
+  </div>
+  <input type="text" class="form-control" id="dserverurl" aria-describedby="basic-addon3">
+
+<div class="input-group-append">
+    <a class="btn btn-outline-dark btn-sm" href="#" role="button" id="useofficial">Use Ventmon Data Lake: ventmon.coslabs.com</a>
+  </div>
+</div>
+
+<div class="input-group mb-3">
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="basic-addon3">Trace ID:</span>
+  </div>
+  <input type="text" class="form-control" id="traceid" aria-describedby="basic-addon3">
+</div>
+
+
+<div class="input-group mb-3">
+  <div class="input-group-prepend">
+    <span class="input-group-text" id="num_to_read">Number of samples to Read and Plot:</span>
+  </div>
+  <input type="text" class="form-control" id="num_to_read" aria-describedby="basic-addon3">
+</div>
+
+
+<button type="button" class="btn btn-success" id="startoperation">Start Interactive Plot</button>
+<button type="button" class="btn btn-danger" id="stopoperation">Stop Interactive Plot</button>
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm">
+       <label for="bpm">BPM: </label>
   <label id="bpm"> </label>
-
-  <label for="tv">Tidal Volume: </label>
-  <label id="tv"> </label>
-
-  <label for="mv">Mintue Volume: </label>
-  <label id="mv"> </label>
-
+    </div>
+    <div class="col-sm">
   <label for="ier">I:E ratio: </label>
   <label id="ier"> </label>
+    </div>
+    <div class="col-sm">
+    </div>
+  </div>
+</div>
+  <div class="row">
+    <div class="col-sm">
+  <label for="tv">Tidal Volume (ml): </label>
+  <label id="tv"> </label>
+    </div>
+    <div class="col-sm">
+  <label for="mv">Mintue Volume (l/min): </label>
+  <label id="mv"> </label>
+    </div>
+    <div class="col-sm">
+    </div>
+  </div>
+</div>
+  <div class="row">
+    <div class="col-sm">
+  <label for="min">PEEP (min): </label>
+  <label id="min"> </label>
+    </div>
+    <div class="col-sm">
+  <label for="avg">P. Mean: </label>
+  <label id="avg"> </label>
+    </div>
+    <div class="col-sm">
+  <label for="max">PIP (max): </label>
+  <label id="max"> </label>
+    </div>
+  </div>
+</div>
+<div>
+  </div>
 
-<body>
+
   <div id='PFGraph'><!-- Pressure and Flow Graph --></div>
   <div id='EventsGraph'><!-- Events --></div>
 <div>
@@ -72,6 +146,7 @@ The basic operation is receive data from web server specified in the URL above.
 listens on a serial port for the VentMon device or any other
 device that streams PIRDS events.
 
+</div>
 </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
@@ -374,9 +449,34 @@ function plot(samples, trans, breaths) {
   }
 }
 
-// This is probably the dumbest possible respriation rate...
-// it counts breaths but makes no attempt to comute the avergae,
-// which would allow a smoother change...
+// Return, [min,avg,max] pressures (no smoothing)!
+function compute_pressures(secs,samples) {
+  var pressures = samples.filter(s => s.event == 'M' && s.type == 'D' && s.loc == 'A');
+
+  const recent_ms = pressures[pressures.length - 1].ms;
+  var cur_ms = recent_ms;
+  var cnt = 0.0;
+  var i = pressures.length - 1;
+  var cur_sample = pressures[i];
+
+  var min = Number.MAX_VALUE;
+  var max = Number.MIN_VALUE;
+  var sum = 0;
+  while((i >=0) && (pressures[i].ms > (cur_ms - secs*1000))) {
+    var p = pressures[i].val / 10.0;  // this is now cm H2O
+    if (p < min ) {
+      min = p;
+    }
+    if (p > max) {
+      max = p;
+    }
+    sum += p;
+    cnt++;
+    i--;
+  }
+  return [min,sum/cnt,max];
+}
+
 function compute_respiration_rate(secs,samples,transitions,breaths) {
   // In order to compute the number of breaths
   // in the last s seconds, I compute those breaths
@@ -428,14 +528,22 @@ function process(samples) {
   plot(samples,transitions,breaths);
   // How many seconds backwards should we look? Perhaps 20?
   var [bpm,tv,mv,EIratio] = compute_respiration_rate(RESPIRATION_RATE_WINDOW_SECONDS,samples,transitions,breaths);
+
   $("#bpm").text(bpm.toFixed(1));
-  $("#tv").text(tv.toFixed(1));
-  $("#mv").text(mv.toFixed(1));
+  $("#tv").text(tv.toFixed(0));
+  $("#mv").text((mv/1000).toFixed(2));
   if (EIratio == "NA") {
     $("#ier").text("NA");
   } else {
     $("#ier").text((1.0 / EIratio).toFixed(1));
   }
+
+  var [min,avg,max] = compute_pressures(RESPIRATION_RATE_WINDOW_SECONDS,samples);
+
+  $("#min").text(min.toFixed(1));
+  $("#avg").text(avg.toFixed(1));
+  $("#max").text(max.toFixed(1));
+
 }
 
 function retrieveAndPlot(){
