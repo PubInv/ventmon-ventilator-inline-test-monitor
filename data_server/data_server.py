@@ -199,7 +199,7 @@ def get_n_samples(n):
 #  print("result = " + json.dumps(result, cls=MeasurementEncoder, indent=2) + "\n",sys.stderr)
 # WARNING: I don't know why, but I have to print something here or it
 # fails---possibly a timing issue!
-#  print("result!",sys.stderr)
+  print("result!",sys.stderr)
   return result
 
 def construct_result(samps):
@@ -213,20 +213,21 @@ def construct_result(samps):
 @app.route("/")
 def getsamples():
   global my_deque
-  print("len" + str(len(my_deque))+"\n")
+  print("len (from full)" + str(len(my_deque))+"\n")
   samps = get_n_samples(len(my_deque));
   return construct_result(samps)
 
 # Get at most the earliest n samples.
 @app.route("/json")
 def get_limit_samples():
+  global my_deque
+  print("size of deque from json): " + str(len(my_deque))+"\n",sys.stderr)
   if request.args.get('n') == None:
     n = 0
   else:
     n = int(request.args.get('n'))
-  global my_deque
-  print("len" + str(n) + " of " + str(len(my_deque))+"\n",sys.stderr)
-  samps = get_n_samples(len(my_deque));
+  print("len (from json)" + str(n) + " of " + str(len(my_deque))+"\n",sys.stderr)
+  samps = get_n_samples(min(n,len(my_deque)))
   return construct_result(samps)
 
 if __name__ == "__main__":

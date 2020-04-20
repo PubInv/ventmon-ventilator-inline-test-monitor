@@ -1,6 +1,6 @@
 # VentMon 0.1 - Inline Ventilator Test Fixture and Monitor
 
-Since March 16th, I've been working full time on this. Along with volunteers at [EndCornaVirus.org](https://www.endcoronavirus.org/) and [Public Invention](https:\\www.pubinv.org), we have been 
+Since March 16th, I've been working full time on this. Along with volunteers at [EndCornaVirus.org](https://www.endcoronavirus.org/) and [Public Invention](https:\\www.pubinv.org), we have been
 [tracking and analyzing](https://github.com/PubInv/covid19-vent-list)
 all [open-source ventilator projects]((https://medium.com/@RobertLeeRead/analysis-of-open-source-covid-19-pandemic-ventilator-projects-27acf9075f7e)) we can find. It has become apparent that the biggest piece
 they are missing and the place Public Invention can most help is not in designing a new ventilator,
@@ -13,9 +13,16 @@ At the moment, this repo is for that work, and also our overall strategic plan f
 enough confidence to actually deploy an open-source ventilator. Our goal is to certify, in a certain limited, last-resort
 sense, ventilators in the case of a shortfall of commercial and professional equipment. That Strategy is discussed lower in this document.
 
-This includes rapidly doing high-quality tests, but also includes burn-in and multi-day tests, of 
-ventilators. Perhaps we can produce a benchmark for the [multiple efforts](https://github.com/PubInv/covid19-vent-list) going on right now to try to develop a 
+This includes rapidly doing high-quality tests, but also includes burn-in and multi-day tests, of
+ventilators. Perhaps we can produce a benchmark for the [multiple efforts](https://github.com/PubInv/covid19-vent-list) going on right now to try to develop a
 Free-libre Open Source ventilator design.
+
+## Using as of April 20,2020
+
+This prooject is changing rapidly. At present, to use the VentMon, you have to use a library
+that Lauria Clarke is working on which is in SensirionFM3200/SFM3X00.  It uses the simple Arduino Wire.h
+library, and connects to Sensirion sensors from their documention.
+We intend to move this to its own repo soon.
 
 ## Volunteering
 
@@ -23,8 +30,8 @@ This project is co-led by Robert L. Read <read.robert@gmail.com> and Geoff Mulli
 
 Righ now we have several needs. People need to be experienced, have read the [essential reading](https://github.com/PubInv/covid19-vent-list) list, be able to work at
 least 20 hours a week, and able to work with limited supervision.  They also must be able to tolerate the chaos
-produced by the pandemic itself, and the chaos produced by my own mistakes. Finally, they must accept and 
-hope for the possibility that industry will increase production and the disease will be controlled so that this 
+produced by the pandemic itself, and the chaos produced by my own mistakes. Finally, they must accept and
+hope for the possibility that industry will increase production and the disease will be controlled so that this
 solution is not required.
 
 Righ now, we could use:
@@ -38,7 +45,7 @@ Righ now, we could use:
 
 ## Licensing
 
-All code in this repo is licensed under the GNU 3 public license. All documents and diagrams and licensed under CC0.
+All code in this repo is licensed under the MIT License. All documents and diagrams and licensed under CC0.
 
 
 ## Initial Design Idea
@@ -50,18 +57,12 @@ The idea is to make a standalone inline device plugged into the airway. It serve
 ![](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/Block%20Architecture.svg)
 
 ## Status
+As of April 20th, we:
 
-This is an emergeny project in response to the COVID-19 pandemic. We are in a learning mode.
-
-Got the SensirionFM3200 flow meter working. Documentation on this hard to find---had to guess a bit.
-
-Saturday Night (March 28th): Can record a breath trace and accurately identify transitions. Now must try integration to compute volume!
-
-![Screen Shot 2020-03-29 at 12 30 14 PM](https://user-images.githubusercontent.com/5296671/77855904-2319c000-71b9-11ea-81c9-3f8eff32330a.png)
-
-Sunday morning: The first two VentMon units are loosely promised to the teams lead by Ethan Chaleff and John Bennett.
-
-Diagrams of the current system architechure and electrical design are below.
+1) Have a working ESP32 board with pressure sensors and Sensirion flow sensors.
+1) This code outputs a stream of PIRDS respiratory standard events on the serial port.
+1) These are read by data_server.py which presents a web server for retrieving this data.
+1) test_tools/breath_plot.html makes AJAX calls to this server and renders the results dynamically.
 
 ![SystemDiagram](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/VentMonSystemDiagram.png)
 
@@ -102,7 +103,7 @@ The Free Software and Maker communities know how to form teams; our plan is to f
 To deploy a ventilator, extensive testing is *absolutely* required. This repo is an attempt to build a "test fixture" capable of running a 48-hour test on any ventilator design and collecting data on many important parameters.  We hope to create a "gold standard" test that all DIY teams can work to; but this project will proceed in parallel with that.
 
 As part of extensive testings, in combination with BreathOfLife (thanks to Jonathan Orban) and with help from Juan E. Villacres Perez, biomedical engineering student at UT, we have create a [Google Sheet](https://docs.google.com/spreadsheets/d/17EJ9TN6O1wqP4c-lIn5hbmuMRrto7M_KXHf17zjNSLk/edit?usp=sharing)
-downloaded as an OpenDocument Calc and Microsoft Excel [spreadsheet](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/ValidationTestSuites) of user tests which attempt to 
+downloaded as an OpenDocument Calc and Microsoft Excel [spreadsheet](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/ValidationTestSuites) of user tests which attempt to
 match the [RMVS](https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/876167/RMVS001_v3.1.pdf) standard for Rapidly Manufactured Ventilator Systems.  (There are checkboxes in the Google Sheet that don't look nice in the other two formats.)
 The spreadsheet is licenced under CC0, so you can make a copy of it and use it for testing your own ventilators.
 

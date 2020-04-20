@@ -26,6 +26,7 @@
 
 #include <Wire.h>
 #include <SPI.h>
+#include <SFM3X00.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
 
@@ -83,12 +84,12 @@ uint8_t addr[2] = {0x76,0x77};
 
 bool found_display = false;
 
-#define SENSIRION_FM3200 0
-#define SENSIRION_SFM3400 1
-int sensirion_sensor_type = SENSIRION_SFM3400;
+#define PIRDS_SENSIRION_SFM3200 0
+#define PIRDS_SENSIRION_SFM3400 1
+int sensirion_sensor_type = PIRDS_SENSIRION_SFM3400;
 // At present we have to install the SENSIRION_SFM3400 backwards
 // because of the physical mounting!!!
-bool SENSOR_INSTALLED_BACKWARD = true;
+bool SENSOR_INSTALLED_BACKWARD = false;
 
 // we will ust this as a pressure to display to make the OLED useful...
 // Eventually we will put this into running window
@@ -363,7 +364,18 @@ float readSensirionFlow(int sensirion_sensor_type) {
     // means for setting this.
   const float FM3200_SCALE = 120.0;
   const float FM3400_33_AW_SCALE = 800.0;
-  float scale = (sensirion_sensor_type == SENSIRION_FM3200) ? FM3200_SCALE : FM3400_33_AW_SCALE;
+
+// We have to adjust the Library to add the other scale.
+  if (sensirion_sensor_type == PIRDS_SENSIRION_SFM3400) {
+    float flow = readFlow(sensor_address);
+    return flow;
+  }
+
+// We currently cannot implement FM3200
+  return -99.0;
+  
+  float scale = (sensirion_sensor_type == PIRDS_SENSIRION_SFM3200) ? FM3200_SCALE : FM3400_33_AW_SCALE;
+
 
   Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
   uint16_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later

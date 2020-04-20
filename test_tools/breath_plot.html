@@ -554,19 +554,23 @@ function retrieveAndPlot(){
 
   $.ajax({url: url,
           success: function(cur_sam){
-	    if (INITS_ONLY) {
-	      samples = cur_sam;
-	      INITS_ONLY = false;
-	    } else {
-              var discard = Math.max(0,
-                                     samples.length + cur_sam.length - MAX_SAMPLES_TO_STORE_S);
-	      samples = samples.slice(discard);
-	    }
-	    samples = samples.concat(cur_sam);
-	    // We are not guaranteeed to get samples in order
-	    // we sort them....
-	    samples = samples.sort((a,b) => a.ms - b.ms);
-            process(samples);
+            if (cur_sam.length == 0) {
+              console.log("no samples; potential misconfiguration!");
+            } else {
+	      if (INITS_ONLY) {
+	        samples = cur_sam;
+	        INITS_ONLY = false;
+	      } else {
+                var discard = Math.max(0,
+                                       samples.length + cur_sam.length - MAX_SAMPLES_TO_STORE_S);
+	        samples = samples.slice(discard);
+	      }
+	      samples = samples.concat(cur_sam);
+	      // We are not guaranteeed to get samples in order
+	      // we sort them....
+	      samples = samples.sort((a,b) => a.ms - b.ms);
+              process(samples);
+            }
           },
           error: function(xhr, ajaxOptions, thrownError) {
 	    console.log("Error!" + xhr.status);
@@ -724,16 +728,15 @@ $("#plot").click(retrieveAndPlot);
 
 
 
-  // clearInterval(intervalID);
 $("#startoperation").click( () => {
-  if (typeof intervalID === 'undefined') {
-    intervalID = setInterval(
-      function() {
-        retrieveAndPlot();
-      },
-      DATA_RETRIEVAL_PERIOD) }
+  intervalID = setInterval(
+    function() {
+      retrieveAndPlot();
+    },
+    DATA_RETRIEVAL_PERIOD);
 }
                           );
+
 $("#stopoperation").click( () =>
   clearInterval(intervalID)
 );
@@ -762,7 +765,7 @@ $( document ).ready(function() {
   });
 
   samples = init_samples();
-  retrieveAndPlot();
+  process(samples);
 
 });
 
