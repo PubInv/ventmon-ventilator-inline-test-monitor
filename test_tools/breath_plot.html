@@ -191,7 +191,7 @@ var DATA_RETRIEVAL_PERIOD = 50;
 
 var RESPIRATION_RATE_WINDOW_SECONDS = 20;
 
-var intervalID;
+var intervalID = null;
 
 
 // This sould be better as time, but is easier
@@ -595,6 +595,7 @@ function retrieveAndPlot(){
           error: function(xhr, ajaxOptions, thrownError) {
 	    console.log("Error!" + xhr.status);
 	    console.log(thrownError);
+            clearInterval(intervalID);
           }
          });
 }
@@ -744,20 +745,24 @@ $("#export").click(function() {
 
   // Experimental timing against the data server
 
-
-
-$("#startoperation").click( () => {
+function stop_interval_timer() {
+  clearInterval(intervalID);
+  intervalID = null;
+}
+function start_interval_timer() {
+  if (intervalID) {
+    stop_interval_timer();
+  }
   intervalID = setInterval(
     function() {
       retrieveAndPlot();
     },
     DATA_RETRIEVAL_PERIOD);
 }
-                          );
 
-$("#stopoperation").click( () =>
-  clearInterval(intervalID)
-);
+$("#startoperation").click(start_interval_timer);
+
+$("#stopoperation").click(stop_interval_timer);
 
 $( document ).ready(function() {
 
@@ -784,6 +789,7 @@ $( document ).ready(function() {
 
   samples = init_samples();
   process(samples);
+  start_interval_timer();
 
 });
 
