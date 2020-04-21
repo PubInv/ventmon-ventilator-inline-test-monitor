@@ -31,120 +31,138 @@ Breath Plot: COVID-19 VentMon analysis software
     <title>Public Invention VentMon</title>
 
 </head>
+  <style>
+#calcarea {
+  flex-direction:column;
+  background: AliceBlue;
+}
+  .calcnum {
+    color: blue;
+    font-size: xx-large;
+  }
+  </style>
   <body>
 
-  <div class="container-fluid">
+    <div class="container-fluid">
 
-<div class="jumbotron">
-  <h1 class="display-4">VentMon Respiration Analysis</h1>
-  <p class="lead">This is a work in progress of <a href="https://www.pubinv.org">Public Invention</a>. It can be attached to a data server to produce
-an interactive or static analysis of a respiration. It's primary purpose is to test pandemic ventilators.
-</p>
-  </div>
+      <div class="jumbotron">
+        <h1 class="display-4">VentMon Respiration Analysis</h1>
+        <p class="lead">This is a work in progress of <a href="https://www.pubinv.org">Public Invention</a>. It can be attached to a data server to produce
+          an interactive or static analysis of a respiration. It's primary purpose is to test pandemic ventilators.
+        </p>
+      </div>
 
 
-<div class="input-group mb-3">
-  <div class="input-group-prepend">
-    <span class="input-group-text" id="basic-addon3">PIRDS data server url:</span>
-  </div>
-  <input type="text" class="form-control" id="dserverurl" aria-describedby="basic-addon3">
 
-<div class="input-group-append">
-    <a class="btn btn-outline-dark btn-sm" href="#" role="button" id="useofficial">Use Ventmon Data Lake: ventmon.coslabs.com</a>
-  </div>
+
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon3">PIRDS data server url:</span>
+        </div>
+        <input type="text" class="form-control" id="dserverurl" aria-describedby="basic-addon3">
+
+        <div class="input-group-append">
+          <a class="btn btn-outline-dark btn-sm" href="#" role="button" id="useofficial">Use Ventmon Data Lake: ventmon.coslabs.com</a>
+        </div>
+      </div>
+
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon3">Trace ID:</span>
+        </div>
+        <input type="text" class="form-control" id="traceid" aria-describedby="basic-addon3">
+      </div>
+
+
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="num_to_read">Number of samples to Read and Plot:</span>
+        </div>
+        <input type="text" class="form-control" id="num_to_read" aria-describedby="basic-addon3">
+      </div>
+
+
+
+      <button type="button" class="btn btn-success" id="startoperation">Start Interactive Plot</button>
+      <button type="button" class="btn btn-danger" id="stopoperation">Stop Interactive Plot</button>
+
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-9">
+            <div id='PFGraph'><!-- Pressure and Flow Graph --></div>
+            <div id='EventsGraph'><!-- Events --></div>
+          </div>
+          <div class="col-3">
+            <div class="container" id="calcarea">
+              <div>
+                <label for="max">PIP (max): </label>
+                <div class="calcnum">
+                  <label id="max"> </label>
+                </div>
+              </div>
+              <div>
+                <label for="avg">P. Mean: </label>
+                <div class="calcnum">
+                  <label id="avg"> </label>
+                </div>
+              </div>
+              <div>
+                <label for="min">PEEP (min): </label>
+                <div class="calcnum">
+                  <label id="min"> </label>
+                </div>
+              </div>
+              <div>
+                <label for="mv">MVs (l/min): </label>
+                <div class="calcnum">
+                  <label id="mv"> </label>
+                </div>
+              </div>
+              <div>
+                <label for="bpm">RR: </label>
+                <div class="calcnum">
+                  <label id="bpm"> </label>
+                </div>
+              </div>
+              <div>
+                <label for="ier">I:E ratio: </label>
+                <div class="calcnum">
+                  <label id="ier"> </label>
+                </div>
+              </div>
+              <div>
+                <label for="tv">VTd (ml): </label>
+                <div class="calcnum">
+                  <label id="tv"> </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- end main area -->
 </div>
 
-<div class="input-group mb-3">
-  <div class="input-group-prepend">
-    <span class="input-group-text" id="basic-addon3">Trace ID:</span>
-  </div>
-  <input type="text" class="form-control" id="traceid" aria-describedby="basic-addon3">
-</div>
-
-
-<div class="input-group mb-3">
-  <div class="input-group-prepend">
-    <span class="input-group-text" id="num_to_read">Number of samples to Read and Plot:</span>
-  </div>
-  <input type="text" class="form-control" id="num_to_read" aria-describedby="basic-addon3">
-</div>
-
-
-<button type="button" class="btn btn-success" id="startoperation">Start Interactive Plot</button>
-<button type="button" class="btn btn-danger" id="stopoperation">Stop Interactive Plot</button>
-
-
-<div class="container">
-  <div class="row">
-    <div class="col-sm">
-       <label for="bpm">BPM: </label>
-  <label id="bpm"> </label>
-    </div>
-    <div class="col-sm">
-  <label for="ier">I:E ratio: </label>
-  <label id="ier"> </label>
-    </div>
-    <div class="col-sm">
-    </div>
-  </div>
-</div>
-  <div class="row">
-    <div class="col-sm">
-  <label for="tv">Tidal Volume (ml): </label>
-  <label id="tv"> </label>
-    </div>
-    <div class="col-sm">
-  <label for="mv">Mintue Volume (l/min): </label>
-  <label id="mv"> </label>
-    </div>
-    <div class="col-sm">
-    </div>
-  </div>
-</div>
-  <div class="row">
-    <div class="col-sm">
-  <label for="min">PEEP (min): </label>
-  <label id="min"> </label>
-    </div>
-    <div class="col-sm">
-  <label for="avg">P. Mean: </label>
-  <label id="avg"> </label>
-    </div>
-    <div class="col-sm">
-  <label for="max">PIP (max): </label>
-  <label id="max"> </label>
-    </div>
-  </div>
-</div>
-<div>
-  </div>
-
-
-  <div id='PFGraph'><!-- Pressure and Flow Graph --></div>
-  <div id='EventsGraph'><!-- Events --></div>
-<div>
-  <button id="plot">Read from Server and Plot</button>
-</div>
 <div>
   <button id="import">Import Trace</button>
   <button id="export">Export Trace</button>
-  </div>
+</div>
 <div>
   <textarea id="json_trace" rows="30" cols="80"></textarea>
-  </div>
+</div>
 
 <p>
-This is a work in progress of <a href="https://www.pubinv.org">Public Invention</a>.
+  This is a work in progress of <a href="https://www.pubinv.org">Public Invention</a>.
 
 <p>
-This is a tester tool for open-source ventilators.
+  This is a tester tool for open-source ventilators.
   It uses the <a href="https://github.com/PubInv/respiration-data-standard">PIRDS data format</a>.
 
 <p>
-The basic operation is receive data from web server specified in the URL above.
+  The basic operation is receive data from web server specified in the URL above.
   Probably for now that will be the VentMon Python web server that
-listens on a serial port for the VentMon device or any other
-device that streams PIRDS events.
+  listens on a serial port for the VentMon device or any other
+  device that streams PIRDS events.
 
 </div>
 </body>
@@ -323,13 +341,14 @@ function plot(samples, trans, breaths) {
   {
     var layout = {
       title: 'VentMon Breath Analysis',
-      xaxis: {domain: [0.1, 0.9]},
+      showlegend: false,
+      xaxis: {domain: [0.0,1.0]},
       yaxis: {
         title: 'Airway P(cm H2O)',
         titlefont: {color: 'red'},
         tickfont: {color: 'red'},
       },
-      xaxis2: {domain: [0.1, 0.9]},
+      xaxis2: {domain: [0.0,1.0]},
       yaxis2: {
         title: 'Flow l/minute',
         titlefont: {color: 'blue'},
@@ -440,7 +459,8 @@ function plot(samples, trans, breaths) {
 
     var event_layout = {
       title: 'Events',
-      xaxis: {domain: [0.1, 0.9]},
+      showlegend: false,
+      xaxis: {domain: [0.0,1.0]},
       yaxis: {
         range: [-100.0, 100.0]
       },
@@ -720,8 +740,6 @@ $("#import").click(function() {
 $("#export").click(function() {
     $("#json_trace").val(JSON.stringify(samples,null,2));
 });
-
-$("#plot").click(retrieveAndPlot);
 
 
   // Experimental timing against the data server
