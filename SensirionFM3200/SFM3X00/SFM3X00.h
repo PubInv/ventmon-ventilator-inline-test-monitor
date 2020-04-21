@@ -22,11 +22,18 @@
 #include <Wire.h>
 #include <Arduino.h>
 
+// pick which sensor you're using
+#define SFM3400
+// #define SFM3200
 
-constexpr uint8_t sensor_address {0x40};
-constexpr float   flow_offset    {32768.0};
-constexpr float   flow_scale     {800.0};
+constexpr uint8_t FLOW_SENSOR_ADDRESS {0x40};
+constexpr float   FLOW_OFFSET         {32768.0};
 
+#ifdef SFM3200
+constexpr float   FLOW_SCALE          {120.0};
+#else
+constexpr float   FLOW_SCALE          {800.0};
+#endif
 
 void sendCommand(uint8_t address, uint16_t command);
 

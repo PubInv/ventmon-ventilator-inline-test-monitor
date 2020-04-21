@@ -3,35 +3,34 @@
 
 #define SAMPLE_DELAY   550
 
-
 void setup()
 {
   Wire.begin();
   Serial.begin(9600);
 
-  long serialNo = requestSerialNumber(sensor_address);
+  long serialNo = requestSerialNumber(SENSOR_ADDRESS);
   Serial.println();
   Serial.print("sensor serial number: ");
   Serial.println(serialNo, HEX);
   Serial.println();
  
-  uint16_t scaleFactor = requestScaleFactor(sensor_address);
+  uint16_t scaleFactor = requestScaleFactor(SENSOR_ADDRESS);
   Serial.print("read scale factor (HEX, DEC): ");
   Serial.print(scaleFactor, HEX);
   Serial.print(", ");
   Serial.println(scaleFactor, DEC);
   Serial.print("hardcoded scale factor (DEC): ");
-  Serial.println((uint16_t) flow_scale, DEC);
+  Serial.println((uint16_t) FLOW_SCALE, DEC);
   Serial.println();
 
 
-  uint16_t offset = requestOffset(sensor_address);
+  uint16_t offset = requestOffset(SENSOR_ADDRESS);
   Serial.print("read flow offset (HEX, DEC): ");
   Serial.print(offset, HEX);
   Serial.print(", ");
   Serial.println(offset, DEC);
   Serial.print("hardcoded flow offset (DEC): ");
-  Serial.println((uint16_t) flow_offset, DEC);
+  Serial.println((uint16_t) FLOW_OFFSET, DEC);
   Serial.println();
 
 
@@ -40,7 +39,7 @@ void setup()
   Serial.println(" Hz");
   Serial.println();
 
-  startContinuousMeasurement(sensor_address);
+  startContinuousMeasurement(SENSOR_ADDRESS);
   
   delay(5);
 }
@@ -48,7 +47,7 @@ void setup()
 
 void loop()
 {
-  float flow = readFlow(sensor_address);
+  float flow = readFlow(SENSOR_ADDRESS);
   Serial.print("flow (slm): ");
   Serial.println(flow);
   delay(SAMPLE_DELAY);

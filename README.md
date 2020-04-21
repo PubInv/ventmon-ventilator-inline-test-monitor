@@ -57,6 +57,13 @@ The idea is to make a standalone inline device plugged into the airway. It serve
 ![](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/Block%20Architecture.svg)
 
 ## Status
+
+April 21st:
+
+Initial prototype is fully assembled!
+
+![Prototype](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/prototype_0.JPG)
+
 As of April 20th, we:
 
 1) Have a working ESP32 board with pressure sensors and Sensirion flow sensors.
@@ -79,8 +86,6 @@ We are moving fast and Agile; expect this to change.
 [JST ZH 1.5MM 4 Pin Female connectors](https://smile.amazon.com/gp/product/B07FCCWS96/ref=ppx_yo_dt_b_asin_title_o03_s00?ie=UTF8&psc=1)
 
 Obviously, Arduinos, with control shield, and probably speakers, but I haven't selected them yet.
-
-## Progress
 
 
 

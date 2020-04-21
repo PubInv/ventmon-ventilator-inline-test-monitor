@@ -105,7 +105,7 @@ float readFlow(uint8_t address)
 {
   uint16_t rawFlow = readData(address);
    
-  float flow = ((float)rawFlow - flow_offset) / flow_scale;
+  float flow = ((float)rawFlow - FLOW_OFFSET) / FLOW_SCALE;
   
   return flow;
 }
