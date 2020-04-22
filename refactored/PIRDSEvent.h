@@ -40,13 +40,13 @@ class PIRDSEvent
 
 class Measurement: public PIRDSEvent
 {
-  char          measurementType;
-  char          deviceType;
-  unsigned char deviceLocation;
-  unsigned long measurementTime;
-  long          measurementValue;
-
   public:
+    char          measurementType;
+    char          deviceType;
+    unsigned char deviceLocation;
+    unsigned long measurementTime;
+    long          measurementValue;
+
     Measurement() = default;
     Measurement(char measurement, char device, char location, long time, long value) :
       measurementType {measurement},

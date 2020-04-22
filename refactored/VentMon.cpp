@@ -20,42 +20,69 @@
 
 bool setupFlowSensor(Meta* meta)
 {
-//   eventChannel->println("setting up flow sensor...");
-   
-  meta->setValues('M', "flow sensor initialized");
+  long serialNo = requestSerialNumber(FLOW_SENSOR_ADDRESS);
+ 
+  uint16_t scale = requestScaleFactor(FLOW_SENSOR_ADDRESS);
+
+  uint16_t offset = requestOffset(FLOW_SENSOR_ADDRESS);
 
 
-  // if setup is sucessful send a message, else return 1
-  //if(sucessful)
-  //{
-    //Meta flowSucsess(25, 'M', "Flow Sensor Initialized");
-    //flowSucess.sendEvent(eventChannel);
-    //return 0
-  //}
-  //else
-  //{
-    //return 1;
-  //}
+  if(offset != FLOW_OFFSET)
+  {
+    meta->setValues('M', "OFFSET mismatch!");
+    // DEBUG_PRINT("OFFSET mismatch!");
+    return 1;
+  }
+  else if(scale != FLOW_SCALE)
+  {
+    meta->setValues('M', "SCALE mismatch!");
+    // DEBUG_PRINT("SCALE mismatch!");
+    return 1;
+  }
+  else
+  {
+    meta->setValues('M', "flow sensor initialized");
+    // DEBUG_PRINT("flow sensor initialized!");
+    startContinuousMeasurement(FLOW_SENSOR_ADDRESS);
+  }
+
   return 0;
 }
 
-bool setupPressureSensors(Meta* meta)
+bool setupPressureSensors(Meta* meta, Adafruit_BME680* airwayPressure, Adafruit_BME680* ambientPressure)
 {
-//   eventChannel->println("setting up pressure sensors...");
-
-  meta->setValues('M', "pressure sensors initialized");
   
-  // if setup is sucessful send a message, else return 1
-  //if(sucessful)
-  //{
-    //Meta flowSucsess(25, 'M', "Flow Sensor Initialized");
-    //flowSucess.sendEvent(eventChannel);
-    //return 0
-  //}
-  //else
-  //{
-    //return 1;
-  //}
+  // AIRWAY SENSOR - 0X77
+  if (!airwayPressure->begin(BME680_AIRWAY_ADDRESS, true))     
+  {
+    meta->setValues('M', "could not find AIRWAY pressure sensor");
+    return 1;
+  }
+
+  // Set up oversampling and filter initialization
+  airwayPressure->setTemperatureOversampling(BME680_OS_8X);
+  airwayPressure->setHumidityOversampling(BME680_OS_2X);
+  airwayPressure->setPressureOversampling(BME680_OS_4X);
+  airwayPressure->setIIRFilterSize(BME680_FILTER_SIZE_3);
+  airwayPressure->setGasHeater(320, 150); // 320*C for 150 ms
+
+
+  // AMBIENT SENSOR - 0X76
+  if (!ambientPressure->begin(BME680_AMBIENT_ADDRESS, true))     
+  {
+    meta->setValues('M', "could not find AMBIENT pressure sensor");
+    return 1;
+  }
+
+  // Set up oversampling and filter initialization
+  ambientPressure->setTemperatureOversampling(BME680_OS_8X);
+  ambientPressure->setHumidityOversampling(BME680_OS_2X);
+  ambientPressure->setPressureOversampling(BME680_OS_4X);
+  ambientPressure->setIIRFilterSize(BME680_FILTER_SIZE_3);
+  ambientPressure->setGasHeater(320, 150); // 320*C for 150 ms
+  
+  meta->setValues('M', "pressure sensors initialized");
+
   return 0;
 }
 
@@ -76,7 +103,9 @@ void samplePressure(Measurement* measurement, bool sensor)
 
 void sampleFlow(Measurement* measurement)
 {
-  measurement->setValues('F', 'A', 4, millis(), 3333);
+  uint16_t flow = readFlow(FLOW_SENSOR_ADDRESS);
+  
+  measurement->setValues('F', 'A', 4, millis(), flow);
 }
 
 bool sendPIRDSEvents(Stream* eventChannel, PIRDSEvent** events, int eventCount)
@@ -99,6 +128,151 @@ bool sendPIRDSEvents(Stream* eventChannel, PIRDSEvent** events, int eventCount)
 
   return 0;
 }
+
+
+void setupEthernet(char* logHost, IPAddress* logHostAddr, byte* macAddress, char* macAddressString, EthernetUDP* udpClient) 
+{
+  byte ip[] = { 124, 103, 1, 1 }; 
+  // ESP32 with Adafruit Featherwing Ethernet
+  Ethernet.init(33);
+  // Get MAC address of wifi chip for ethernet address
+  WiFi.macAddress(macAddress); 
+  snprintf(macAddressString, sizeof macAddressString, "%02X:%02X:%02X:%02X:%02X:%02X",
+           macAddress[0], macAddress[1], macAddress[2], macAddress[3], macAddress[4], macAddress[5]);
+  Serial.print(F("Mac: "));
+  Serial.print(macAddressString);
+  Serial.println();
+
+  while (1) 
+  {
+    // start the Ethernet connection:
+    Serial.println(F("Initialize Ethernet with DHCP:"));
+    if (Ethernet.begin(macAddress) == 0) 
+    {
+      Serial.println(F("Failed to configure Ethernet using DHCP"));
+      // Check for Ethernet hardware present
+      if (Ethernet.hardwareStatus() == EthernetNoHardware) 
+      {
+        // should this throw more of an error
+        Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
+        while (1) 
+        {
+          // do nothing, no point running without Ethernet hardware
+          delay(1); 
+        }
+      }
+      if (Ethernet.linkStatus() == LinkOFF) 
+      {
+        Serial.println(F("Ethernet cable is not connected."));
+        delay(5000);
+      }
+      delay(5000);
+    } 
+    else 
+    {
+      Serial.print(F("  DHCP assigned IP "));
+      Serial.println(Ethernet.localIP());
+      break;
+    }
+  }
+
+  // give the Ethernet shield a second to initialize:
+  delay(1000);
+
+#ifdef UDP
+  udpClient->begin(PARAMPORT);
+#endif
+
+  DNSClient dns;
+  dns.begin(Ethernet.dnsServerIP());
+  
+  if (dns.getHostByName(logHost, *logHostAddr) == 1) 
+  {
+    Serial.print("host is ");
+    Serial.println(*logHostAddr);
+  }
+
+}
+
+
+bool sendDataUDP(EthernetUDP* udpClient, Measurement* measurement, IPAddress* logHostAddr) 
+{
+  union 
+  {
+    struct 
+    {
+      char first;
+      char mtype;
+      char stype;
+      uint8_t loc;
+      uint32_t ms;
+      int32_t value;
+      char nl;
+    } a;
+    byte m[13];
+  } message;
+
+  uint8_t *mm = message.m;
+  message.a.first = measurement->eventType;
+  message.a.mtype = measurement->measurementType;
+  message.a.stype = measurement->deviceType;
+  message.a.loc   = 0 + measurement->deviceLocation;
+  message.a.ms    = htonl(measurement->measurementTime);
+  message.a.value = htonl(measurement->measurementValue);
+  message.a.nl = '\n';
+
+  Serial.print("Value: ");
+  Serial.println(message.a.value;
+  
+  //Serial.print(F(" UDP send to "));
+  //Serial.println(*logHostAddr);
+
+  if (udpClient->beginPacket(*logHostAddr, PARAMPORT) != 1)
+    return false;
+
+  udpClient->write(message.m, 13);
+
+  if (udpClient->endPacket() != 1)
+    return false;
+
+  return true;
+}
+
+
+
+void pushData(packet_t* packets, uint8_t* cbuf_head, Measurement* measurement) 
+{
+  //Serial.print("pushData - head: ");
+  //Serial.println(*cbuf_head);
+
+  packets[*cbuf_head].mtype = measurement->measurementType;
+  packets[*cbuf_head].stype = measurement->deviceType;            
+  packets[*cbuf_head].loc   = measurement->deviceLocation;
+  packets[*cbuf_head].ms    = measurement->measurementTime;
+  packets[*cbuf_head].value = measurement->measurementValue;
+  (*cbuf_head)++;
+
+  if (*cbuf_head > CSIZE) *cbuf_head = 0;
+}
+
+uint8_t popData(uint8_t* cbuf_tail, uint8_t* cbuf_head, EthernetUDP* udpClient, Measurement* measurement, IPAddress* logHostAddr) 
+{
+  //Serial.print("popData - head: ");
+  //Serial.print(*cbuf_head);
+  //Serial.print(" tail: ");
+  //Serial.println(*cbuf_tail);
+
+  while (*cbuf_head != *cbuf_tail) 
+  {
+    sendDataUDP(udpClient, measurement, logHostAddr);
+
+    (*cbuf_tail)++;
+    if ((*cbuf_tail) > CSIZE)
+      (*cbuf_tail) = 0;
+  }
+  return 1;
+}
+
 /*
 
 bool receivePIRDSEvents(Stream* eventChannel, PIRDSEvent** events, int eventCount)
