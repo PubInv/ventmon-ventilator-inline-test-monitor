@@ -89,7 +89,7 @@ bool found_display = false;
 int sensirion_sensor_type = PIRDS_SENSIRION_SFM3400;
 // At present we have to install the SENSIRION_SFM3400 backwards
 // because of the physical mounting!!!
-bool SENSOR_INSTALLED_BACKWARD = false;
+bool SENSOR_INSTALLED_BACKWARD = true;
 
 // we will ust this as a pressure to display to make the OLED useful...
 // Eventually we will put this into running window
@@ -191,8 +191,8 @@ void seekBME(int idx) {
       bme[idx].setTemperatureOversampling(BME680_OS_1X);
       bme[idx].setHumidityOversampling(BME680_OS_1X);
       bme[idx].setPressureOversampling(BME680_OS_1X);
-    bme[idx].setIIRFilterSize(BME680_FILTER_SIZE_3);
-    // bme[idx].setGasHeater(320, 150); // 320*C for 150 ms
+//    bme[idx].setIIRFilterSize(BME680_FILTER_SIZE_3);
+//     bme[idx].setGasHeater(320, 150); // 320*C for 150 ms
     // I believe this feature is not needed or useful for this application
     bme[idx].setGasHeater(0, 0); // 320*C for 150 ms  
     }
@@ -254,7 +254,7 @@ void outputMeasurment(char e, char t, char loc, unsigned short int n, unsigned l
 // is not jitter.
 int amb_wc = 0;
 #define AMB_WINDOW_SIZE 4
-#define AMB_SAMPLES_PER_WINDOW_ELEMENT 100 
+#define AMB_SAMPLES_PER_WINDOW_ELEMENT 200 
 // sea level starting pressure.
 signed long ambient_window[AMB_WINDOW_SIZE];
 

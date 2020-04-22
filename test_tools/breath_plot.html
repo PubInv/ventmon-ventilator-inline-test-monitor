@@ -48,7 +48,7 @@ Breath Plot: COVID-19 VentMon analysis software
       <div class="jumbotron">
         <h1 class="display-4">VentMon Respiration Analysis</h1>
         <p class="lead">This is a work in progress of <a href="https://www.pubinv.org">Public Invention</a>. It can be attached to a data server to produce
-          an interactive or static analysis of a respiration. It's primary purpose is to test pandemic ventilators.
+an interactive or static analysis of a respiration. It&#39;s primary purpose is to test pandemic ventilators, but it is free software meant to be reused for other purposes.
         </p>
       </div>
 
@@ -185,7 +185,7 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 var TRACE_ID = urlParams.get('i')
 var DSERVER_URL = window.location.protocol + "//" + window.location.host;
-var NUM_TO_READ = 2000;
+var NUM_TO_READ = 500;
 
 var DATA_RETRIEVAL_PERIOD = 50;
 
@@ -196,7 +196,7 @@ var intervalID = null;
 
 // This sould be better as time, but is easier
 // to do as number of samples.
-const MAX_SAMPLES_TO_STORE_S = 4000;
+const MAX_SAMPLES_TO_STORE_S = 1000;
 var samples = [];
 var INITS_ONLY = true;
 
@@ -383,8 +383,6 @@ function plot(samples, trans, breaths) {
 		       name: "trans",
 		       x: tzeroed,
 		       y: tstates_amped,
-//                       xaxis: 'x2',
-//                       yaxis: 'y2',
 		       line: {color: 'dkGreen'}
 		      };
       // We add a hollow flow line to see in position..
@@ -402,9 +400,7 @@ function plot(samples, trans, breaths) {
 		        name: "Transitions",
 		        x: bzeroed,
 		        y: ys,
-//                       xaxis: 'x3',
-//                       yaxis: 'y3',
-		        marker: { size: 12, color: "red" },
+		        marker: { size: 4, color: "red",symbol: "diamond" },
                         textposition: 'bottom center',
                         text: bzeroed
 		       };
@@ -431,28 +427,116 @@ function plot(samples, trans, breaths) {
       var t_inh_v = unpack(breaths, 'vol_i').map(e => Math.round(e*1000.0)+"ml inh");
       // now to graph properly, I must find the center of an inhalation.
       // I have packed these into the breaths...
-      var inhale_centers = breaths.map(b => (trans[b.trans_begin_inhale].ms + trans[b.trans_cross_zero].ms - 2*min) / (2.0 * 1000.0));
-      var exhale_centers = breaths.map(b => (trans[b.trans_cross_zero].ms + trans[b.trans_end_exhale].ms - 2*min) / (2.0 * 1000.0));
+      var inhale_centers = breaths.map(b => ((trans[b.trans_begin_inhale].ms + trans[b.trans_cross_zero].ms) - 2*min) / (2.0 * 1000.0));
+      var exhale_centers = breaths.map(b => ((trans[b.trans_cross_zero].ms + trans[b.trans_end_exhale].ms) - 2*min) / (2.0 * 1000.0));
 
+      console.log("b,i,e");
+      console.log(bzeroed);
+      console.log(inhale_centers);
+      console.log(exhale_centers);
+      console.log(breaths);
+      console.log(trans);
       var inhPlot = {type: "scatter", mode: "markers+text",
                      name: "Inh. ml",
                      textposition: 'bottom center',
                      x: inhale_centers,
                      y: inh_v,
                      text: t_inh_v,
-                     marker: { size: 12, color: "black" }
+                     marker: { size: 8,
+                               color: 'black',
+                               symbol: 'triangle-down'}
                     };
       var exhPlot = {type: "scatter", mode: "markers+text",
                      name: "Exh. ml",
                      textposition: 'top center',
+                     marker : {
+                       sizer: 12,
+                       color: 'green',
+                       symbol: 'triangle-up' },
                      x: exhale_centers,
                      y: exh_v,
                      text: t_exh_v,
-                     marker: { size: 12, color: "green" }
+
                     };
       event_graph.push(inhPlot);
       event_graph.push(exhPlot);
     }
+
+    // Now I will attempt to add other markers, such as Humidity, Altitude, and other events,
+    // including possible warning events.
+
+    function gen_graph(samples,name,color, textposition, tp,lc,vf,tf) {
+      var selected = samples.filter(s => s.event == 'M' && s.type == tp && s.loc == lc);
+      var millis = unpack(selected, 'ms');
+      var zeroed = millis.map(m =>(m-min)/1000.0);
+      var vs = selected.map(vf);
+      var vs_t = vs.map(tf);
+      var plot = {type: "scatter", mode: "markers+text",
+                     name: name,
+                     textposition: textposition,
+                     x: zeroed,
+                     y: vs,
+                     text: vs_t,
+                     marker: { size: 10, color: color }
+                    };
+      return plot;
+
+    }
+    {
+      var humAirwayPlot = gen_graph(samples,"Hum (%)","Aqua",'top center','H','A',
+                              (s => s.val/100.0),
+                              (v =>  "H2O (A): "+v.toFixed(0)+"%"));
+      event_graph.push(humAirwayPlot);
+    }
+
+    {
+      var humAmbientPlot = gen_graph(samples,"Hum (%)","CornflowerBlue",'bottom center','H','B',
+                              (s => -s.val/100.0),
+                                      (v =>  "H2O (B): "+(-v).toFixed(0)+"%"));
+      event_graph.push(humAmbientPlot);
+    }
+
+    {
+      var tempAirwayPlot = gen_graph(samples,"Temp A","red",'bottom center','T','A',
+                              (s => s.val/100.0),
+                              (v =>  "T (A): "+v.toFixed(1)+"C"));
+      event_graph.push(tempAirwayPlot);
+    }
+
+    {
+      var tempAmbientPlot = gen_graph(samples,"Temp B","orange",'top center','T','B',
+                              (s => -s.val/100.0),
+                                      (v =>  "T (B): "+(-v).toFixed(1)+"C"));
+      event_graph.push(tempAmbientPlot);
+    }
+
+    // Altitude is really just a check that the system is working
+     {
+      var altAmbientPlot = gen_graph(samples,"Altitude","purple",'right','A','B',
+                              (s => s.val/20.0),
+                                      (v =>  "Alt: "+(v*20.0).toFixed(0)+"m"));
+      event_graph.push(altAmbientPlot);
+    }
+
+
+    // The BME680 sensor detects VOC gases. I don't think has any clinical value
+    // compared
+
+    // {
+    //   var gasAirwayPlot = gen_graph(samples,"Gas A","yellow",'bottom center','G','A',
+    //                           (s => s.val/1000.0),
+    //                                 (v =>  "G (A): "+(v*100).toFixed(1)+"Ohms"));
+    //   event_graph.push(gasAirwayPlot);
+    // }
+
+    // {
+    //   var gasAmbientPlot = gen_graph(samples,"Gas B","gold",'top center','G','B',
+    //                           (s => -s.val/1000.0),
+    //                                   (v =>  "G (B): "+(-v*100).toFixed(1)+"Ohms"));
+    //   event_graph.push(gasAmbientPlot);
+    // }
+
+
 
     // I'm going to try putting the pressure
     // in faintly to make the graphs match
@@ -697,7 +781,7 @@ function computeMovingWindowTrace(samples,t,v) {
   var zero = 0;
   for(var i = 0; i < transitions.length; i++) {
     // We're looking for the end of the inhalation here!!
-    if (((i -1) >= 0) && transitions[i-1].state == 1 && transitions[i].state == 0) {
+    if (((i -1) >= 0) && transitions[i-1].state == 1 && (transitions[i].state == 0 || transitions[i].state == -1 )) {
       zero = i;
     }
     if (expiring && transitions[i].state == 1) {
