@@ -32,7 +32,7 @@
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
- 
+
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
  
 // OLED FeatherWing buttons map to different pins depending on board:
@@ -85,8 +85,9 @@ uint8_t addr[2] = {0x76,0x77};
 bool found_display = false;
 
 #define PIRDS_SENSIRION_SFM3200 0
-#define PIRDS_SENSIRION_SFM3400 1
+#define PIRDS_SENSIRION_SFM3400 11
 int sensirion_sensor_type = PIRDS_SENSIRION_SFM3400;
+// int sensirion_sensor_type = PIRDS_SENSIRION_SFM3200;
 // At present we have to install the SENSIRION_SFM3400 backwards
 // because of the physical mounting!!!
 bool SENSOR_INSTALLED_BACKWARD = true;
@@ -366,39 +367,14 @@ float readSensirionFlow(int sensirion_sensor_type) {
   const float FM3400_33_AW_SCALE = 800.0;
 
 // We have to adjust the Library to add the other scale.
+// When Lauria improves the library, we will be able to make this better.
   if (sensirion_sensor_type == PIRDS_SENSIRION_SFM3400) {
     float flow = readFlow(sensor_address);
     return flow;
+  } else if (sensirion_sensor_type == PIRDS_SENSIRION_SFM3200) {
+    float flow = readFlow(sensor_address);
+    return flow * FM3400_33_AW_SCALE / FM3200_SCALE;
   }
-
-// We currently cannot implement FM3200
-  return -99.0;
-  
-  float scale = (sensirion_sensor_type == PIRDS_SENSIRION_SFM3200) ? FM3200_SCALE : FM3400_33_AW_SCALE;
-
-
-  Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
-  uint16_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
-  uint8_t b = Wire.read(); // second received byte stored here
-  uint8_t crc = Wire.read(); // crc value stored here
-  uint8_t mycrc = 0xFF; // initialize crc variable
-  mycrc = crc8(a, mycrc); // let first byte through CRC calculation
-  mycrc = crc8(b, mycrc); // and the second byte too
-  if (mycrc != crc) { // check if the calculated and the received CRC byte matches
-  //  Serial.println("Error: wrong CRC");
-  }
-  a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
-  a >>= 2; // remove the two least significant bits
-
-//  Serial.println("combined");
-//  Serial.println(a);
-//  Serial.println(a - 8192);
-  float Flow = ((float)a - 8192) / scale;
-  //Serial.println(a); // print the raw data from the sensor to the serial interface
-  //Serial.print("Flow in spm: ");
-  //Serial.println(Flow); // print the calculated flow to the serial interface
-  //Serial.println();
-  return Flow;
 }
 
 // My lame-o attempt to get the flow sensor working
@@ -412,18 +388,6 @@ void initSensirionFM3200Measurement() {
   Wire.write(byte(0x00)); // sends instruction byte    Wire.write(val);             // sends potentiometer value byte  
   Wire.endTransmission();     // stop transmitting
   delay(5);
-  {
-   Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
-   delay(110);
-   Serial.println(Wire.available());
-  uint16_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
-  uint8_t b = Wire.read();
-  uint8_t c = Wire.read();
-  Serial.println("a,b,c");
-  Serial.println(a,HEX);
-  Serial.println(b,HEX);
-    Serial.println(c,HEX);
-  }
 }
 
 void buttonA() {
@@ -462,87 +426,87 @@ void displayPressure(bool max_not_min) {
 void loop() {
 // TODO: Need to use buttons to allow Sensirion type to be detected if can't do automatically
 
-  if (found_display) {
-// experimental OLED test code
-    if(!digitalRead(BUTTON_A)) {
-      buttonA();
-    } else if(!digitalRead(BUTTON_B)) {
-      buttonB();
-    } else if(!digitalRead(BUTTON_C)) { 
-      buttonC();
-    } else {
-      display.clearDisplay();
-
-      display.setCursor(0, 0);
-      displayPressure(true);
-      display.setCursor(0,10);
-      displayPressure(false);  
-
-    }
-  //  delay(10);
-  //  yield();
-    display.display();
-  
-  }
-  
-  unsigned long m = millis();
-  if (m > sample_millis) {
-    sample_millis = m;
-  } else {
-    Serial.println("unticked");
-    return;
-  }
-
+//  if (found_display) {
+//// experimental OLED test code
+//    if(!digitalRead(BUTTON_A)) {
+//      buttonA();
+//    } else if(!digitalRead(BUTTON_B)) {
+//      buttonB();
+//    } else if(!digitalRead(BUTTON_C)) { 
+//      buttonC();
+//    } else {
+//      display.clearDisplay();
+//
+//      display.setCursor(0, 0);
+//      displayPressure(true);
+//      display.setCursor(0,10);
+//      displayPressure(false);  
+//
+//    }
+//  //  delay(10);
+//  //  yield();
+//    display.display();
+//  
+//  }
+//  
+//  unsigned long m = millis();
+//  if (m > sample_millis) {
+//    sample_millis = m;
+//  } else {
+//    Serial.println("unticked");
+//    return;
+//  }
+//
   unsigned long ms = millis();
-  seekUnfoundBME();
-
-
-  // We need to use a better sentinel...this is a legal value!
-  // units for pressure are cm H2O * 100 (integer 10ths of mm)
-  signed long ambient_pressure = -999; 
-  signed long internal_pressure = -999;  // Inspiratory Pathway pressure
-  
-  if (found_bme[0]) {
-    internal_pressure = readPressureOnly(0);
-  }
-  if (((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0) && found_bme[1]) {
-      ambient_pressure = readPressureOnly(1);
-      ambient_counter = 1;
-
-      // experimentally we will report everything in the stream from 
-      // both sensor; sadly the BM# 680 is to slow to do this every sample.
-      report_full(0);
-      report_full(1);
-      
-      if (ambient_pressure != -999) {    
-        outputMeasurment('M', 'P', 'B', 1, ms, ambient_pressure);
-        ambient_window[amb_wc] = ambient_pressure;
-        amb_wc = (amb_wc +1) % AMB_WINDOW_SIZE;
-        Serial.println();
-      } else {
-        Serial.print("\"NA\"");  
-      }
-  } else {
-   ambient_counter++;
-  }
-  signed long smooth_ambient = 0;
-  for(int i = 0; i < AMB_WINDOW_SIZE; i++) {
-    smooth_ambient += ambient_window[i];
-  }
-  smooth_ambient = (signed long) (smooth_ambient / AMB_WINDOW_SIZE);
-
-
-  if (internal_pressure != -999) {    
-    outputMeasurment('M', 'P', 'A', 0, ms, internal_pressure);
-    Serial.println();
-     // really this should be a running max, for now it is instantaneous
-    display_max_pressure = internal_pressure - smooth_ambient;
-    outputMeasurment('M', 'D', 'A', 0, ms, internal_pressure - smooth_ambient);  
-    Serial.println();
-  } else {
-    // This is not actually part of the format!!!
-    Serial.print("\"NA\"");  
-  }
+//  seekUnfoundBME();
+//
+//
+//  // We need to use a better sentinel...this is a legal value!
+//  // units for pressure are cm H2O * 100 (integer 10ths of mm)
+//  signed long ambient_pressure = -999; 
+//  signed long internal_pressure = -999;  // Inspiratory Pathway pressure
+//  
+//  if (found_bme[0]) {
+//    internal_pressure = readPressureOnly(0);
+//  }
+//  if (((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0) && found_bme[1]) {
+//      ambient_pressure = readPressureOnly(1);
+//      ambient_counter = 1;
+//
+//      // experimentally we will report everything in the stream from 
+//      // both sensor; sadly the BM# 680 is to slow to do this every sample.
+//      report_full(0);
+//      report_full(1);
+//      
+//      if (ambient_pressure != -999) {    
+//        outputMeasurment('M', 'P', 'B', 1, ms, ambient_pressure);
+//        ambient_window[amb_wc] = ambient_pressure;
+//        amb_wc = (amb_wc +1) % AMB_WINDOW_SIZE;
+//        Serial.println();
+//      } else {
+//        Serial.print("\"NA\"");  
+//      }
+//  } else {
+//   ambient_counter++;
+//  }
+//  signed long smooth_ambient = 0;
+//  for(int i = 0; i < AMB_WINDOW_SIZE; i++) {
+//    smooth_ambient += ambient_window[i];
+//  }
+//  smooth_ambient = (signed long) (smooth_ambient / AMB_WINDOW_SIZE);
+//
+//
+//  if (internal_pressure != -999) {    
+//    outputMeasurment('M', 'P', 'A', 0, ms, internal_pressure);
+//    Serial.println();
+//     // really this should be a running max, for now it is instantaneous
+//    display_max_pressure = internal_pressure - smooth_ambient;
+//    outputMeasurment('M', 'D', 'A', 0, ms, internal_pressure - smooth_ambient);  
+//    Serial.println();
+//  } else {
+//    // This is not actually part of the format!!!
+//    Serial.print("\"NA\"");  
+//  }
 
 
 
