@@ -23,9 +23,18 @@
 
  ***************************************************************************/
 
+/***************************************************************************
+  Networking code by Geoff Mulligan 2020
+  designed to support ethernet using esp wifi chip
+ ***************************************************************************/
 
 #include <Wire.h>
 #include <SPI.h>
+#include <Ethernet.h>
+#include <WiFi.h>
+#include <EthernetUdp.h>
+#include <Dns.h>
+
 #include <SFM3X00.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
@@ -97,6 +106,65 @@ bool SENSOR_INSTALLED_BACKWARD = true;
 signed long display_max_pressure = 0;
 signed long display_min_pressure = 0;
 
+#ifndef htonl
+#define htonl(x) ( ((x)<<24 & 0xFF000000UL) | \
+                   ((x)<< 8 & 0x00FF0000UL) | \
+                   ((x)>> 8 & 0x0000FF00UL) | \
+                   ((x)>>24 & 0x000000FFUL) )
+#endif
+
+byte mac[6];
+char macs[18];
+
+#define PARAMHOST "ventmon.coslabs.com"
+#define PARAMPORT 6111
+#define LOCALPORT 6111
+
+char *Loghost = strdup(PARAMHOST);
+uint16_t Logport = PARAMPORT;
+IPAddress LoghostAddr;
+
+EthernetUDP udpclient;
+
+//#define CIRCBUFF
+#ifdef CIRCBUFF
+#define CSIZE 500
+
+struct packet_t {
+  char event;
+  char mtype;
+  char loc;
+  uint8_t num;
+  uint32_t ms;
+  int32_t value;
+} packets[CSIZE];
+
+uint8_t cbuf_head = 0;
+uint8_t cbuf_tail = 0;
+
+void push_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32_t value) {
+  packets[cbuf_head].event = event;
+  packets[cbuf_head].mtype = mtype;
+  packets[cbuf_head].log = loc;
+  packets[cbuf_head].num = num;
+  packets[cbuf_head].ms = ms;
+  packets[cbuf_head].value = value;
+  cbuf_head++;
+  if (cbuf_head > CSIZE) cbuf_head = 0;
+}
+
+uint8_t pop_data() {
+  while (cbuf_head != cbuf_tail) {
+    send_data('M', packets[cbuf_tail].event, packets[cbuf_tail].mtype, packets[cbuf_tail].loc, packets[cbuf_tail].num,
+	      packets[cbuf_tail].ms, packets[cbuf_tail].value);
+    cbuf_tail++;
+    if (cbuf_tail > CSIZE)
+      cbuf_tail = 0;
+  }
+  return 1;
+}
+#endif
+
 void setupOLED() {
  // Here we initialize the OLED...
   Serial.println("OLED FeatherWing test");
@@ -141,14 +209,62 @@ void setupOLED() {
   display.display(); // actually display all of the above 
 }
 
+void ethernet_setup() {
+  Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
+  
+  WiFi.macAddress(mac); // Get MAC address of wifi chip for ethernet address
+  snprintf(macs, sizeof macs, "%02X:%02X:%02X:%02X:%02X:%02X",
+    mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  Serial.print(F("Mac: "));
+  Serial.print(macs);
+  Serial.println();
+  
+  while (1) {
+    // start the Ethernet connection:
+    Serial.println(F("Initialize Ethernet with DHCP:"));
+    if (Ethernet.begin(mac) == 0) {
+      Serial.println(F("Failed to configure Ethernet using DHCP"));
+      // Check for Ethernet hardware present
+      if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+	Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
+	while (1) {
+	  delay(1); // do nothing, no point running without Ethernet hardware
+	}
+      }
+      if (Ethernet.linkStatus() == LinkOFF) {
+	Serial.println(F("Ethernet cable is not connected."));
+	delay(5000);
+      }
+      delay(5000);
+    } else {
+      Serial.print(F("  DHCP assigned IP "));
+      Serial.println(Ethernet.localIP());
+      break;
+    }
+  }
+
+  // give the Ethernet shield a second to initialize:
+  delay(1000);
+
+  udpclient.begin(LOCALPORT);
+  
+  DNSClient dns;
+  dns.begin(Ethernet.dnsServerIP());
+  if (dns.getHostByName(Loghost, LoghostAddr) == 1) {
+    Serial.print("host is ");
+    Serial.println(LoghostAddr);
+  }
+}
+
 void setup() {
 
   Serial.begin(115200);
   Wire.begin();
 
+  ethernet_setup();
+
   setupOLED();
   initSensirionFM3200Measurement();
-
 
   int a = 0;
   int b = 0;
@@ -161,6 +277,42 @@ void setup() {
   //Serial.println(F("BME680 test"));
   seekBME(0);
   seekBME(1);
+}
+
+bool send_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32_t value) {
+  union {
+    struct {
+      char first;
+      char mtype;
+      char loc;
+      uint8_t num;
+      uint32_t ms;
+      int32_t value;
+      char nl;
+    } a;
+    byte m[13];
+  } message;
+  uint8_t *mm = message.m;
+  message.a.first = 'M';
+  message.a.mtype = mtype;
+  message.a.loc = loc;
+  message.a.num = 0 + num;
+  message.a.ms = htonl(ms);
+  message.a.value = htonl(value);
+  message.a.nl = '\n';
+
+  Serial.print(F(" UDP send to "));
+  Serial.print(LoghostAddr);
+  Serial.print(F(" "));
+  Serial.println(Logport);
+
+  if (udpclient.beginPacket(LoghostAddr, Logport) != 1)
+    return false;
+  udpclient.write(message.m, 13);
+  if (udpclient.endPacket() != 1)
+    return false;
+
+  return true;
 }
 
 void seekUnfoundBME() {
@@ -245,6 +397,8 @@ void outputMeasurment(char e, char t, char loc, unsigned short int n, unsigned l
   outputByteField("num",n);
   outputNumFieldNoSep("val",val);
   Serial.print(" }");
+
+  send_data(e, t, loc, n, ms, val);
 }
 
 // We could send out only raw data, and let more powerful computers process thing.
@@ -311,11 +465,6 @@ void report_full(int idx)
 
   Serial.println();
 }
-
-
-
-
-
 
 // the parameter idx here numbers our pressure sensors.
 // The sensors may be better, for as per the PIRDS we are returning integer 10ths of a mm of H2O
