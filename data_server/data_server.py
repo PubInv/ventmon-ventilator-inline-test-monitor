@@ -28,6 +28,7 @@ import traceback
 # Up to 10,000 samples seems to work fine.
 # Managing the continuity of time in the samples can be tedious, however.
 SAMPLES = 3000
+deqLock = threading.Lock()
 my_deque = collections.deque(maxlen=SAMPLES)
 
 app = Flask(__name__)
@@ -119,13 +120,19 @@ def read_from_port():
   while True :
     if ((RUN_LIMIT > 0) and RUN_CNT >= RUN_LIMIT):
       os._exit(os.EX_OK)
-    RUN_CNT = RUN_CNT + 1
+      RUN_CNT = RUN_CNT + 1
     if(ser.inWaiting() <= 50):
       pass
     line = ser.readline()   # read a '\n' terminated line
+    if (line[0] != 'M'):
+      pass;
     NUMREAD = NUMREAD + 1;
     if (NUMREAD % REPORT_MODULUS) == 0:
-      print(str(len(my_deque)) + " ready!\n",sys.stderr)
+      try:
+        deqLock.acquire()
+        print(str(len(my_deque)) + " ready!\n",sys.stderr)
+      finally:
+        deqLock.release()
       print(str(line) + "\n",sys.stderr)
 
       NUMREAD = 0;
@@ -136,7 +143,7 @@ def read_from_port():
       thisline = line.decode("utf-8")+"\n"
       # For bizarre reason I'm unable to figure out,
       # printing this here is NECESSARY!!!
-#      print(thisline)
+      #      print(thisline)
       try:
         m = json.loads(thisline)
 
@@ -146,7 +153,11 @@ def read_from_port():
           v = m["val"]
           minst = Measurement(m["type"], m["loc"], int(m["num"]),
                               m["ms"], v)
-          my_deque.append(minst)
+          try:
+            deqLock.acquire()
+            my_deque.append(minst)
+          finally:
+            deqLock.release();
           if  ((DATA_LAKE_SAMPLES_TO_SEND > 0) and (NUM_SENT_TO_DATA_LAKE < DATA_LAKE_SAMPLES_TO_SEND)):
             print(f'sending {NUM_SENT_TO_DATA_LAKE} {DATA_LAKE_SAMPLES_TO_SEND}')
             try:
@@ -179,6 +190,7 @@ def read_from_port():
         traceback.print_exc(file=sys.stdout)
     except(UnicodeDecodeError):
       print("ERRRRROR\n",sys.stderr)
+
 
 thread = threading.Thread(target=read_from_port)
 thread.start()
@@ -213,22 +225,30 @@ def construct_result(samps):
 @app.route("/")
 def getsamples():
   global my_deque
-  print("len (from full)" + str(len(my_deque))+"\n")
-  samps = get_n_samples(len(my_deque));
-  return construct_result(samps)
+  try:
+    deqLock.acquire()
+    print("len (from full)" + str(len(my_deque))+"\n")
+    samps = get_n_samples(len(my_deque));
+    return construct_result(samps)
+  finally:
+    deqLock.release();
 
 # Get at most the earliest n samples.
 @app.route("/json")
 def get_limit_samples():
   global my_deque
-  print("size of deque from json): " + str(len(my_deque))+"\n",sys.stderr)
-  if request.args.get('n') == None:
-    n = 0
-  else:
-    n = int(request.args.get('n'))
-  print("len (from json)" + str(n) + " of " + str(len(my_deque))+"\n",sys.stderr)
-  samps = get_n_samples(min(n,len(my_deque)))
-  return construct_result(samps)
+  try:
+    deqLock.acquire()
+    print("size of deque from json): " + str(len(my_deque))+"\n",sys.stderr)
+    if request.args.get('n') == None:
+      n = 0
+    else:
+      n = int(request.args.get('n'))
+      print("len (from json)" + str(n) + " of " + str(len(my_deque))+"\n",sys.stderr)
+      samps = get_n_samples(min(n,len(my_deque)))
+      return construct_result(samps)
+  finally:
+    deqLock.release();
 
 if __name__ == "__main__":
   print(f"Arguments count: {len(sys.argv)}")
