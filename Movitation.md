@@ -55,3 +55,7 @@ The idea is to make a standalone inline device plugged into the airway. It serve
 
 ![](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/Block%20Architecture.svg)
 
+Electrical block diagram showing VentMon
+
+![ElectricalBlockDiagram](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/images/PressureSensorElectricalBlockDiagram.png)
+
