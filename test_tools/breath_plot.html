@@ -196,25 +196,61 @@ an interactive or static analysis of a respiration. It&#39;s primary purpose is 
                     </div>
                     </div>
                   </div>
-              </div>
-              <div>
+             </div>
+             <div>
                 <label for="avg">P. Mean: </label>
-                <div class="calcnum">
-                  <label id="avg"> </label>
-                </div>
-              </div>
-              <div>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="avg"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="avg_h">H:</label>
+                      <input class="fence" id="avg_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="avg_l">L:</label>
+                      <input class="fence" id="avg_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
+             </div>
+             <div>
                 <label for="min">PEEP (min): </label>
-                <div class="calcnum">
-                  <label id="min"> </label>
-                </div>
-              </div>
-              <div>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="min"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="min_h">H:</label>
+                      <input class="fence" id="min_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="min_l">L:</label>
+                      <input class="fence" id="min_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
+             </div>
+             <div>
                 <label for="mv">MVs (l/min): </label>
-                <div class="calcnum">
-                  <label id="mv"> </label>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="mv"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="mv_h">H:</label>
+                      <input class="fence" id="mv_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="mv_l">L:</label>
+                      <input class="fence" id="mv_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
               <div>
                 <label for="bpm">RR: </label>
                   <div class="value_and_fences">
@@ -232,7 +268,7 @@ an interactive or static analysis of a respiration. It&#39;s primary purpose is 
                     </div>
                     </div>
                   </div>
-  </div>
+                </div>
                 <div>
                   <label for="ier">I:E ratio: </label>
                   <div class="value_and_fences">
@@ -250,12 +286,6 @@ an interactive or static analysis of a respiration. It&#39;s primary purpose is 
                     </div>
                     </div>
                   </div>
-              </div>
-              <div>
-                <label for="ier">I:E ratio: </label>
-                <div class="calcnum">
-                  <label id="ier"> </label>
-                </div>
               </div>
                 <div>
                 <label for="tv">VTd (ml): </label>
@@ -782,17 +812,17 @@ function compute_respiration_rate(secs,samples,transitions,breaths) {
 
 var LIMITS = {
   max: { h: 40,
-         l: 5},
+         l: 0},
   avg: { h: 30,
          l: 0},
   min: { h: 10,
          l: -10},
   mv: { h: 10,
          l: 1},
-  bpm: { h: 25,
+  bpm: { h: 40,
          l: 5},
   ier: { h: 4,
-         l: 0.8},
+         l: 0.25},
   tv: { h: 1000,
          l: 200},
 }
@@ -848,28 +878,16 @@ function process(samples) {
   } else {
     b_ms = final_ms;
   }
-  {
-    var al1 = check_alarms(LIMITS,"bpm","h",bpm.toFixed(1),(a,b) =>(a > b),b_ms);
-    var al2 = check_alarms(LIMITS,"bpm","l",bpm.toFixed(1),(a,b) =>(a < b),b_ms);
+  function check_high_and_low(limits,key,v,ms) {
+    var al1 = check_alarms(limits,key,"h",v,(a,b) =>(a > b),ms);
+    var al2 = check_alarms(limits,key,"l",v,(a,b) =>(a < b),ms);
 
-    alarms = alarms.concat(al1);
-    alarms = alarms.concat(al2);
+    return al1.concat(al2);
   }
-
-  {
-    var al1 = check_alarms(LIMITS,"tv","h",tv.toFixed(0),(a,b) =>(a > b),b_ms);
-    var al2 = check_alarms(LIMITS,"tv","l",tv.toFixed(0),(a,b) =>(a < b),b_ms);
-
-    alarms = alarms.concat(al1);
-    alarms = alarms.concat(al2);
-  }
-  {
-    var al1 = check_alarms(LIMITS,"ier","h",(1.0 / EIratio).toFixed(1),(a,b) =>(a > b),b_ms);
-    var al2 = check_alarms(LIMITS,"ier","l",(1.0 / EIratio).toFixed(1),(a,b) =>(a < b),b_ms);
-
-    alarms = alarms.concat(al1);
-    alarms = alarms.concat(al2);
-  }
+  alarms = alarms.concat(check_high_and_low(LIMITS,"bpm",bpm.toFixed(1),b_ms));
+  alarms = alarms.concat(check_high_and_low(LIMITS,"tv",tv.toFixed(0),b_ms));
+  alarms = alarms.concat(check_high_and_low(LIMITS,"mv",(mv/1000).toFixed(2),b_ms));
+  alarms = alarms.concat(check_high_and_low(LIMITS,"ier",(1.0 / EIratio).toFixed(1),b_ms));
 
   var [min,avg,max,palarms] = compute_pressures(RESPIRATION_RATE_WINDOW_SECONDS,samples);
   alarms = alarms.concat(palarms);
