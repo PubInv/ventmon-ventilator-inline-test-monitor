@@ -278,23 +278,6 @@ void SFM3X00_setup() {
   Serial.print("read flow offset: ");
   Serial.println(flowSensor.flowOffset);
 }
-void setup() {
-
-  Serial.begin(115200);
-  Wire.begin();
-
-  ethernet_setup();
-
-  setupOLED();
-  SFM3X00_setup();
-  delay(1000);
-
-  init_ambient();
-  while (!Serial);
-  //Serial.println(F("BME680 test"));
-  seekBME(0);
-  seekBME(1);
-}
 
 bool send_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32_t value) {
   union {
@@ -318,10 +301,10 @@ bool send_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32
   message.a.value = htonl(value);
   message.a.nl = '\n';
 
-  Serial.print(F(" UDP send to "));
-  Serial.print(LoghostAddr);
-  Serial.print(F(" "));
-  Serial.println(Logport);
+//  Serial.print(F(" UDP send to "));
+//  Serial.print(LoghostAddr);
+//  Serial.print(F(" "));
+//  Serial.println(Logport);
 
   if (udpclient.beginPacket(LoghostAddr, Logport) != 1)
     return false;
@@ -547,6 +530,24 @@ void displayPressure(bool max_not_min) {
       int abs_pressure = (pressure_sign == -1) ? - display_pressure : display_pressure;
       sprintf(buffer, "%d.1", display_pressure/10);  
       display.println(buffer);
+}
+
+void setup() {
+
+  Serial.begin(115200);
+  Wire.begin();
+
+  ethernet_setup();
+
+  setupOLED();
+  SFM3X00_setup();
+  delay(1000);
+
+  init_ambient();
+  while (!Serial);
+  //Serial.println(F("BME680 test"));
+  seekBME(0);
+  seekBME(1);
 }
 
 void loop() {
