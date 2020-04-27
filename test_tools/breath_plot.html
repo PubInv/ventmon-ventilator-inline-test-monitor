@@ -36,10 +36,30 @@ Breath Plot: COVID-19 VentMon analysis software
   flex-direction:column;
   background: AliceBlue;
 }
-  .calcnum {
+.calcnum {
     color: blue;
     font-size: xx-large;
+}
+.fence {
+width: 3em;
+}
+.value_and_fences {
+  display: flex;
+flex-direction: row;
+justify-content: space-between;
+}
+.limit {
+  display: flex;
+  flex-direction: row;
+}
+.limit  label {
+   width: 1em;
+}
+
+  .alarmred {
+    background: red;
   }
+
 </style>
 
 <!-- Style for toggle switch -->
@@ -161,9 +181,21 @@ an interactive or static analysis of a respiration. It&#39;s primary purpose is 
             <div class="container" id="calcarea">
               <div>
                 <label for="max">PIP (max): </label>
-                <div class="calcnum">
-                  <label id="max"> </label>
-                </div>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="max"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="max_h">H:</label>
+                      <input class="fence" id="max_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="max_l">L:</label>
+                      <input class="fence" id="max_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
               </div>
               <div>
                 <label for="avg">P. Mean: </label>
@@ -185,9 +217,39 @@ an interactive or static analysis of a respiration. It&#39;s primary purpose is 
               </div>
               <div>
                 <label for="bpm">RR: </label>
-                <div class="calcnum">
-                  <label id="bpm"> </label>
-                </div>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="bpm"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="bmp_h">H:</label>
+                      <input class="fence" id="bpm_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="bpm_l">L:</label>
+                      <input class="fence" id="bpm_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
+  </div>
+                <div>
+                  <label for="ier">I:E ratio: </label>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="ier"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="ier_h">H:</label>
+                      <input class="fence" id="ier_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="ier_l">L:</label>
+                      <input class="fence" id="ier_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
               </div>
               <div>
                 <label for="ier">I:E ratio: </label>
@@ -195,12 +257,31 @@ an interactive or static analysis of a respiration. It&#39;s primary purpose is 
                   <label id="ier"> </label>
                 </div>
               </div>
-              <div>
+                <div>
+                <label for="tv">VTd (ml): </label>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="tv"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="tv_h">H:</label>
+                      <input class="fence" id="tv_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="tv_l">L:</label>
+                      <input class="fence" id="tv_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
+              </div>
+<!--              <div>
                 <label for="tv">VTd (ml): </label>
                 <div class="calcnum">
                   <label id="tv"> </label>
                 </div>
-              </div>
+  </div>
+  -->
             </div>
           </div>
         </div>
@@ -495,12 +576,6 @@ function plot(samples, trans, breaths) {
       var inhale_centers = breaths.map(b => ((trans[b.trans_begin_inhale].ms + trans[b.trans_cross_zero].ms) - 2*min) / (2.0 * 1000.0));
       var exhale_centers = breaths.map(b => ((trans[b.trans_cross_zero].ms + trans[b.trans_end_exhale].ms) - 2*min) / (2.0 * 1000.0));
 
-      console.log("b,i,e");
-      console.log(bzeroed);
-      console.log(inhale_centers);
-      console.log(exhale_centers);
-      console.log(breaths);
-      console.log(trans);
       var inhPlot = {type: "scatter", mode: "markers+text",
                      name: "Inh. ml",
                      textposition: 'bottom center',
@@ -618,6 +693,17 @@ function plot(samples, trans, breaths) {
   }
 }
 
+function check_alarms(limits,key,limit,val,f,ms) {
+  var alarms = [];
+  if (limits[key][limit] && (f(val,limits[key][limit]))) {
+    alarms.push({param: key,
+                 limit: limit,
+                 val: val,
+                 ms: ms});
+  }
+  return alarms;
+}
+
 // Return, [min,avg,max] pressures (no smoothing)!
 function compute_pressures(secs,samples) {
   var pressures = samples.filter(s => s.event == 'M' && s.type == 'D' && s.loc == 'A');
@@ -631,6 +717,7 @@ function compute_pressures(secs,samples) {
   var min = Number.MAX_VALUE;
   var max = Number.MIN_VALUE;
   var sum = 0;
+  var alarms = [];
   while((i >=0) && (pressures[i].ms > (cur_ms - secs*1000))) {
     var p = pressures[i].val / 10.0;  // this is now cm H2O
     if (p < min ) {
@@ -641,9 +728,12 @@ function compute_pressures(secs,samples) {
     }
     sum += p;
     cnt++;
+    //    console.log(LIMITS["max"]["h"]);
+    alarms = alarms.concat(check_alarms(LIMITS,"max","h",p,(a,b) =>(a > b),pressures[i].ms));
+    alarms = alarms.concat(check_alarms(LIMITS,"max","l",p,(a,b) =>(a < b),pressures[i].ms));
     i--;
   }
-  return [min,sum/cnt,max];
+  return [min,sum/cnt,max,alarms];
 }
 
 function compute_respiration_rate(secs,samples,transitions,breaths) {
@@ -688,6 +778,49 @@ function compute_respiration_rate(secs,samples,transitions,breaths) {
       return [0,0,0,"NA"];
     }
   }
+      }
+
+var LIMITS = {
+  max: { h: 40,
+         l: 5},
+  avg: { h: 30,
+         l: 0},
+  min: { h: 10,
+         l: -10},
+  mv: { h: 10,
+         l: 1},
+  bpm: { h: 25,
+         l: 5},
+  ier: { h: 4,
+         l: 0.8},
+  tv: { h: 1000,
+         l: 200},
+}
+
+function load_ui_with_defaults(limits) {
+  var Lkeys = Object.keys(limits);
+  Lkeys.forEach((key,index) => {
+    ["h","l"].forEach(limit => {
+      console.log(key,limit,limits[key][limit]);
+      $("#"+key+"_"+limit).val(limits[key][limit]);
+    })
+  });
+}
+
+function reflectAlarmsInGUI(alarms) {
+  var Lkeys = Object.keys(LIMITS);
+  Lkeys.forEach((key,index) => {
+    ["h","l"].forEach(limit => {
+      var alarms_for_key = alarms.filter(s => s.param == key && s.limit == limit);
+      if (alarms_for_key.length > 0) {
+        $("#"+key).addClass("alarmred");
+        $("#"+key+"_"+limit).addClass("alarmred");
+      } else {
+        $("#"+key).removeClass("alarmred");
+        $("#"+key+"_"+limit).removeClass("alarmred");
+      }
+    })
+  });
 }
 
 function process(samples) {
@@ -698,6 +831,8 @@ function process(samples) {
   // How many seconds backwards should we look? Perhaps 20?
   var [bpm,tv,mv,EIratio] = compute_respiration_rate(RESPIRATION_RATE_WINDOW_SECONDS,samples,transitions,breaths);
 
+  var alarms = [];
+
   $("#bpm").text(bpm.toFixed(1));
   $("#tv").text(tv.toFixed(0));
   $("#mv").text((mv/1000).toFixed(2));
@@ -706,13 +841,44 @@ function process(samples) {
   } else {
     $("#ier").text((1.0 / EIratio).toFixed(1));
   }
+  var final_ms = samples[samples.length -1].ms;
+  var b_ms = 0;
+  if (breaths.length > 0) {
+    b_ms = breaths[breaths.length -1].ms;
+  } else {
+    b_ms = final_ms;
+  }
+  {
+    var al1 = check_alarms(LIMITS,"bpm","h",bpm.toFixed(1),(a,b) =>(a > b),b_ms);
+    var al2 = check_alarms(LIMITS,"bpm","l",bpm.toFixed(1),(a,b) =>(a < b),b_ms);
 
-  var [min,avg,max] = compute_pressures(RESPIRATION_RATE_WINDOW_SECONDS,samples);
+    alarms = alarms.concat(al1);
+    alarms = alarms.concat(al2);
+  }
+
+  {
+    var al1 = check_alarms(LIMITS,"tv","h",tv.toFixed(0),(a,b) =>(a > b),b_ms);
+    var al2 = check_alarms(LIMITS,"tv","l",tv.toFixed(0),(a,b) =>(a < b),b_ms);
+
+    alarms = alarms.concat(al1);
+    alarms = alarms.concat(al2);
+  }
+  {
+    var al1 = check_alarms(LIMITS,"ier","h",(1.0 / EIratio).toFixed(1),(a,b) =>(a > b),b_ms);
+    var al2 = check_alarms(LIMITS,"ier","l",(1.0 / EIratio).toFixed(1),(a,b) =>(a < b),b_ms);
+
+    alarms = alarms.concat(al1);
+    alarms = alarms.concat(al2);
+  }
+
+  var [min,avg,max,palarms] = compute_pressures(RESPIRATION_RATE_WINDOW_SECONDS,samples);
+  alarms = alarms.concat(palarms);
 
   $("#min").text(min.toFixed(1));
   $("#avg").text(avg.toFixed(1));
   $("#max").text(max.toFixed(1));
 
+  reflectAlarmsInGUI(alarms);
 }
 
 function retrieveAndPlot(){
@@ -916,6 +1082,18 @@ function toggle_interval_timer() {
   }
 }
 
+function setLimit(ed) {
+  if(ed.which == 13) {
+    var id = ed.target.id;
+    var v = $("#"+id).val();
+    var vf = parseFloat(v);
+    var destruct = id.split("_");
+    LIMITS[destruct[0]][destruct[1]] = isNaN(vf) ? null : vf;
+  }
+}
+
+$(".fence").keypress(setLimit);
+
 $("#livetoggle").change(toggle_interval_timer);
 
 $("#startoperation").click(start_interval_timer);
@@ -948,6 +1126,8 @@ $( document ).ready(function() {
   samples = init_samples();
   process(samples);
   start_interval_timer();
+
+  load_ui_with_defaults(LIMITS);
 
 });
 
