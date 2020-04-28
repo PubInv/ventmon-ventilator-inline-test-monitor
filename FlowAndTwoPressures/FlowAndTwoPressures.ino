@@ -121,8 +121,10 @@ byte mac[6];
 char macs[18];
 
 #define PARAMHOST "ventmon.coslabs.com"
-#define PARAMPORT 5858 // 6111
-#define LOCALPORT 5858 // 6111
+// #define PARAMPORT 5858 // 6111
+// #define LOCALPORT 5858 // 6111
+#define PARAMPORT 6111
+#define LOCALPORT 6111
 
 char *Loghost = strdup(PARAMHOST);
 uint16_t Logport = PARAMPORT;
@@ -270,7 +272,6 @@ void setup() {
   flowSensor.begin();
 
   setupOLED();
-  initSensirionFM3200Measurement();
 
   int a = 0;
   int b = 0;
@@ -307,10 +308,10 @@ bool send_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32
   message.a.value = htonl(value);
   message.a.nl = '\n';
 
-  Serial.print(F(" UDP send to "));
-  Serial.print(LoghostAddr);
-  Serial.print(F(" "));
-  Serial.println(Logport);
+//  Serial.print(F(" UDP send to "));
+//  Serial.print(LoghostAddr);
+//  Serial.print(F(" "));
+//  Serial.println(Logport);
 
   if (udpclient.beginPacket(LoghostAddr, Logport) != 1)
     return false;
@@ -331,7 +332,8 @@ void seekUnfoundBME() {
 }
 
 void seekBME(int idx) {
-  found_bme[idx] = bme[idx].begin(addr[idx], true);
+//  found_bme[idx] = bme[idx].begin(addr[idx], true);
+  found_bme[idx] = bme[idx].begin(addr[idx]);
   if (!found_bme[idx]) {
     Serial.println("Could not find a valid BME680 sensor, check wiring for:");
     Serial.println(addr[idx],HEX);
@@ -506,83 +508,6 @@ uint8_t crc8(const uint8_t data, uint8_t crc) {
   return crc;
 }
 
-/*
-// This routine was gotten from the Arduino forums and is informal.
-// I may need to improve it; the problem I am currently having is awful.
-float readSensirionFlow(int sensirion_sensor_type) {
-
-  
-// Documentation inconsistent
-  int offset = 32768; // Offset for the sensor
-
-    // NOTE: THIS IS DEPENDENT ON SENSOR!!
-    // We may need to use the buttons on the OLED or some other
-    // means for setting this.
-  const float FM3200_SCALE = 120.0;
-  const float FM3400_33_AW_SCALE = 800.0;
-
-// We have to adjust the Library to add the other scale.
-  if (sensirion_sensor_type == PIRDS_SENSIRION_SFM3400) {
-    float flow = readFlow(sensor_address);
-    return flow;
-  }
-
-// We currently cannot implement FM3200
-  return -99.0;
-  
-  float scale = (sensirion_sensor_type == PIRDS_SENSIRION_SFM3200) ? FM3200_SCALE : FM3400_33_AW_SCALE;
-
-
-  Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
-  uint16_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
-  uint8_t b = Wire.read(); // second received byte stored here
-  uint8_t crc = Wire.read(); // crc value stored here
-  uint8_t mycrc = 0xFF; // initialize crc variable
-  mycrc = crc8(a, mycrc); // let first byte through CRC calculation
-  mycrc = crc8(b, mycrc); // and the second byte too
-  if (mycrc != crc) { // check if the calculated and the received CRC byte matches
-  //  Serial.println("Error: wrong CRC");
-  }
-  a = (a << 8) | b; // combine the two received bytes to a 16bit integer value
-  a >>= 2; // remove the two least significant bits
-
-//  Serial.println("combined");
-//  Serial.println(a);
-//  Serial.println(a - 8192);
-  float Flow = ((float)a - 8192) / scale;
-  //Serial.println(a); // print the raw data from the sensor to the serial interface
-  //Serial.print("Flow in spm: ");
-  //Serial.println(Flow); // print the calculated flow to the serial interface
-  //Serial.println();
-  return Flow;
-}
-*/
-
-// My lame-o attempt to get the flow sensor working
-// https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/5_Mass_Flow_Meters/Application_Notes/Sensirion_Mass_Flo_Meters_SFM3xxx_I2C_Functional_Description.pdf
-//
-
-void initSensirionFM3200Measurement() {
-// Trying to explicitly send an instruction byte:
-  Wire.beginTransmission(0x40); 
-  Wire.write(byte(0x10));
-  Wire.write(byte(0x00)); // sends instruction byte    Wire.write(val);             // sends potentiometer value byte  
-  Wire.endTransmission();     // stop transmitting
-  delay(5);
-  {
-   Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
-   delay(110);
-   Serial.println(Wire.available());
-  uint16_t a = Wire.read(); // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
-  uint8_t b = Wire.read();
-  uint8_t c = Wire.read();
-  Serial.println("a,b,c");
-  Serial.println(a,HEX);
-  Serial.println(b,HEX);
-    Serial.println(c,HEX);
-  }
-}
-
 void buttonA() {
     display.clearDisplay();
     display.setCursor(0, 0);
@@ -704,13 +629,10 @@ void loop() {
 
 
 // our units are slm * 1000, or milliliters per minute.
-  float flow = -999.0;
-  flow = flowSensor.readFlow();
-
-  /*
-  float raw_flow = readSensirionFlow(sensirion_sensor_type);
-  flow = (SENSOR_INSTALLED_BACKWARD) ? -raw_flow : raw_flow;
-*/
+  float raw_flow = -999.0;
+  raw_flow = flowSensor.readFlow();
+  
+  float flow = (SENSOR_INSTALLED_BACKWARD) ? -raw_flow : raw_flow;
 
   signed long flow_milliliters_per_minute = (signed long) (flow * 1000);
 
