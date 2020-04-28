@@ -41,7 +41,10 @@
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
- 
+
+#include <SFM3X00.h>
+
+
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
  
 // OLED FeatherWing buttons map to different pins depending on board:
@@ -78,6 +81,8 @@ Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 #define BME_CS 10
 
 #define SEALEVELPRESSURE_HPA (1013.25)
+
+SFM3X00 flowSensor(0x40);
 
 // It would be nice to support more than one,
 // but the BME680 only has two addresses (0x77, and 0x76 when SD0 tied to GND).
@@ -116,8 +121,8 @@ byte mac[6];
 char macs[18];
 
 #define PARAMHOST "ventmon.coslabs.com"
-#define PARAMPORT 6111
-#define LOCALPORT 6111
+#define PARAMPORT 5858 // 6111
+#define LOCALPORT 5858 // 6111
 
 char *Loghost = strdup(PARAMHOST);
 uint16_t Logport = PARAMPORT;
@@ -262,6 +267,8 @@ void setup() {
 
   ethernet_setup();
 
+  flowSensor.begin();
+
   setupOLED();
   initSensirionFM3200Measurement();
 
@@ -324,7 +331,7 @@ void seekUnfoundBME() {
 }
 
 void seekBME(int idx) {
-  found_bme[idx] = bme[idx].begin(addr[idx]);
+  found_bme[idx] = bme[idx].begin(addr[idx], true);
   if (!found_bme[idx]) {
     Serial.println("Could not find a valid BME680 sensor, check wiring for:");
     Serial.println(addr[idx],HEX);
@@ -499,7 +506,7 @@ uint8_t crc8(const uint8_t data, uint8_t crc) {
   return crc;
 }
 
-
+/*
 // This routine was gotten from the Arduino forums and is informal.
 // I may need to improve it; the problem I am currently having is awful.
 float readSensirionFlow(int sensirion_sensor_type) {
@@ -549,6 +556,7 @@ float readSensirionFlow(int sensirion_sensor_type) {
   //Serial.println();
   return Flow;
 }
+*/
 
 // My lame-o attempt to get the flow sensor working
 // https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/5_Mass_Flow_Meters/Application_Notes/Sensirion_Mass_Flo_Meters_SFM3xxx_I2C_Functional_Description.pdf
@@ -697,10 +705,15 @@ void loop() {
 
 // our units are slm * 1000, or milliliters per minute.
   float flow = -999.0;
+  flow = flowSensor.readFlow();
+
+  /*
   float raw_flow = readSensirionFlow(sensirion_sensor_type);
   flow = (SENSOR_INSTALLED_BACKWARD) ? -raw_flow : raw_flow;
+*/
 
   signed long flow_milliliters_per_minute = (signed long) (flow * 1000);
+
   
   outputMeasurment('M', 'F', 'A', 0, ms, flow_milliliters_per_minute);
 
