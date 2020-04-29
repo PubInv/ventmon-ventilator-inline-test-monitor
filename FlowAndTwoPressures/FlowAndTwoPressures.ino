@@ -396,7 +396,15 @@ void outputByteField(char *name,unsigned short v) {
   Serial.print(", ");
 }
 
-void outputMeasurment(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
+void outputStringFieldNoComma(char *name, char *str) {
+  Serial.print("\"");
+  Serial.print(name);
+  Serial.print("\" : \"");
+  Serial.print(str);
+  Serial.print("\""); 
+}
+
+void outputMeasurement(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
   Serial.print("{ ");
   outputChrField("event",e);
   outputChrField("type",t);
@@ -407,6 +415,23 @@ void outputMeasurment(char e, char t, char loc, unsigned short int n, unsigned l
   Serial.print(" }");
 
   send_data(e, t, loc, n, ms, val);
+}
+
+// This needs to have a version of send_data which we have not yet 
+// written and which the server code is not yet prepared to read!
+void outputMetaEvent(char *msg, unsigned long ms) {
+  Serial.print("{ ");
+  outputChrField("event", 'E');
+  int n = strlen(msg);
+  if (n > 255) {
+    Serial.println("INTERNAL ERROR, STRING TOO LONG!");
+    return;
+  }
+  outputByteField("len",n);
+  outputNumField("ms",ms);
+  outputStringFieldNoComma("msg",msg);
+  Serial.print(" }");
+
 }
 
 // We could send out only raw data, and let more powerful computers process thing.
@@ -439,7 +464,7 @@ void report_full(int idx)
 
   char loc = (idx == 0) ? 'A' : 'B';
 
-  outputMeasurment('M', 'T', loc, 0, ms, (signed long) (0.5 + (bme[idx].temperature * 100)));
+  outputMeasurement('M', 'T', loc, 0, ms, (signed long) (0.5 + (bme[idx].temperature * 100)));
   Serial.println();
 
 // This code is useful for debugging 
@@ -453,23 +478,23 @@ void report_full(int idx)
 //  Serial.print(bme[idx].pressure / 1000.0);
 //  Serial.println(" kPa");
 
-  outputMeasurment('M', 'P', loc, 0, ms, (signed long) (0.5 + (bme[idx].pressure / (98.0665 / 10))));
+  outputMeasurement('M', 'P', loc, 0, ms, (signed long) (0.5 + (bme[idx].pressure / (98.0665 / 10))));
   Serial.println(); 
 // Serial.print("Humidity = ");
 // Serial.print(bme[idx].humidity);
 // Serial.println(" %");
 
- outputMeasurment('M', 'H', loc, 0, ms, (signed long) (0.5 + (bme[idx].humidity * 100)));
+ outputMeasurement('M', 'H', loc, 0, ms, (signed long) (0.5 + (bme[idx].humidity * 100)));
   Serial.println();
 //  Serial.print("Gas = ");
 //  Serial.print(bme[idx].gas_resistance / 1000.0);
 //  Serial.println(" KOhms");
-  outputMeasurment('M', 'G', loc, 0, ms, (signed long) (0.5 + bme[idx].gas_resistance));
+  outputMeasurement('M', 'G', loc, 0, ms, (signed long) (0.5 + bme[idx].gas_resistance));
   Serial.println();
 //  Serial.print("Approx. Altitude = ");
 //  Serial.print(bme[idx].readAltitude(SEALEVELPRESSURE_HPA));
 //  Serial.println(" m");
-  outputMeasurment('M', 'A', loc, 0, ms, (signed long) (0.5 + bme[idx].readAltitude(SEALEVELPRESSURE_HPA)));
+  outputMeasurement('M', 'A', loc, 0, ms, (signed long) (0.5 + bme[idx].readAltitude(SEALEVELPRESSURE_HPA)));
 
   Serial.println();
 }
@@ -494,18 +519,6 @@ signed long readPressureOnly(int idx)
     // internal error! Ideally would publish and internal error event
   }
 
-}
-
-
-uint8_t crc8(const uint8_t data, uint8_t crc) {
-  crc ^= data;
-
-  for ( uint8_t i = 8; i; --i ) {
-    crc = ( crc & 0x80 )
-      ? (crc << 1) ^ 0x31
-      : (crc << 1);
-  }
-  return crc;
 }
 
 void buttonA() {
@@ -597,7 +610,7 @@ void loop() {
       report_full(1);
       
       if (ambient_pressure != -999) {    
-        outputMeasurment('M', 'P', 'B', 1, ms, ambient_pressure);
+        outputMeasurement('M', 'P', 'B', 1, ms, ambient_pressure);
         ambient_window[amb_wc] = ambient_pressure;
         amb_wc = (amb_wc +1) % AMB_WINDOW_SIZE;
         Serial.println();
@@ -615,11 +628,11 @@ void loop() {
 
 
   if (internal_pressure != -999) {    
-    outputMeasurment('M', 'P', 'A', 0, ms, internal_pressure);
+    outputMeasurement('M', 'P', 'A', 0, ms, internal_pressure);
     Serial.println();
      // really this should be a running max, for now it is instantaneous
     display_max_pressure = internal_pressure - smooth_ambient;
-    outputMeasurment('M', 'D', 'A', 0, ms, internal_pressure - smooth_ambient);  
+    outputMeasurement('M', 'D', 'A', 0, ms, internal_pressure - smooth_ambient);  
     Serial.println();
   } else {
     // This is not actually part of the format!!!
@@ -631,13 +644,21 @@ void loop() {
 // our units are slm * 1000, or milliliters per minute.
   float raw_flow = -999.0;
   raw_flow = flowSensor.readFlow();
+  if (flowSensor.checkRange(raw_flow)) {
+    if (raw_flow > 0) {
+     outputMetaEvent("FLOW OUT OF RANGE HIGH",ms);     
+    } else {
+     outputMetaEvent("FLOW OUT OF RANGE LOW",ms); 
+    }
+    Serial.println();
+  }
   
   float flow = (SENSOR_INSTALLED_BACKWARD) ? -raw_flow : raw_flow;
 
   signed long flow_milliliters_per_minute = (signed long) (flow * 1000);
 
   
-  outputMeasurment('M', 'F', 'A', 0, ms, flow_milliliters_per_minute);
+  outputMeasurement('M', 'F', 'A', 0, ms, flow_milliliters_per_minute);
 
   Serial.println();
   Serial.flush();
