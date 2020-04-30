@@ -555,11 +555,13 @@ function plot(samples, trans, breaths) {
       var tzeroed = tmillis.map(m =>(m-min)/1000.0);
       var tstates = unpack(trans, 'state');
       var tstates_amped = tstates.map(m =>m*50);
-      var transPlot = {type: "scatter", mode: "lines",
+      var transPlot = {type: "scatter",
+                       mode: "lines+markers",
 		       name: "trans",
 		       x: tzeroed,
 		       y: tstates_amped,
-		       line: {color: 'dkGreen'}
+                       line: {shape: 'hv',
+                              color: 'dkGreen'},
 		      };
       // We add a hollow flow line to see in position..
       event_graph.push(new_data[2]);
@@ -576,7 +578,7 @@ function plot(samples, trans, breaths) {
 		        name: "Transitions",
 		        x: bzeroed,
 		        y: ys,
-		        marker: { size: 4, color: "red",symbol: "diamond" },
+		        marker: { size: 8, color: "red",symbol: "diamond" },
                         textposition: 'bottom center',
                         text: bzeroed
 		       };
@@ -738,32 +740,36 @@ function check_alarms(limits,key,limit,val,f,ms) {
 function compute_pressures(secs,samples) {
   var pressures = samples.filter(s => s.event == 'M' && s.type == 'D' && s.loc == 'A');
 
-  const recent_ms = pressures[pressures.length - 1].ms;
-  var cur_ms = recent_ms;
-  var cnt = 0.0;
-  var i = pressures.length - 1;
-  var cur_sample = pressures[i];
+  if (pressures.length == 0) {
+    return [0,0,0,[]];
+  } else {
+    const recent_ms = pressures[pressures.length - 1].ms;
+    var cur_ms = recent_ms;
+    var cnt = 0.0;
+    var i = pressures.length - 1;
+    var cur_sample = pressures[i];
 
-  var min = Number.MAX_VALUE;
-  var max = Number.MIN_VALUE;
-  var sum = 0;
-  var alarms = [];
-  while((i >=0) && (pressures[i].ms > (cur_ms - secs*1000))) {
-    var p = pressures[i].val / 10.0;  // this is now cm H2O
-    if (p < min ) {
-      min = p;
+    var min = Number.MAX_VALUE;
+    var max = Number.MIN_VALUE;
+    var sum = 0;
+    var alarms = [];
+    while((i >=0) && (pressures[i].ms > (cur_ms - secs*1000))) {
+      var p = pressures[i].val / 10.0;  // this is now cm H2O
+      if (p < min ) {
+        min = p;
+      }
+      if (p > max) {
+        max = p;
+      }
+      sum += p;
+      cnt++;
+      //    console.log(LIMITS["max"]["h"]);
+      alarms = alarms.concat(check_alarms(LIMITS,"max","h",p,(a,b) =>(a > b),pressures[i].ms));
+      alarms = alarms.concat(check_alarms(LIMITS,"max","l",p,(a,b) =>(a < b),pressures[i].ms));
+      i--;
     }
-    if (p > max) {
-      max = p;
-    }
-    sum += p;
-    cnt++;
-    //    console.log(LIMITS["max"]["h"]);
-    alarms = alarms.concat(check_alarms(LIMITS,"max","h",p,(a,b) =>(a > b),pressures[i].ms));
-    alarms = alarms.concat(check_alarms(LIMITS,"max","l",p,(a,b) =>(a < b),pressures[i].ms));
-    i--;
+    return [min,sum/cnt,max,alarms];
   }
-  return [min,sum/cnt,max,alarms];
 }
 
 function compute_respiration_rate(secs,samples,transitions,breaths) {
@@ -934,7 +940,41 @@ function retrieveAndPlot(){
 }
 
 
-
+function compute_transitions(vm,flows) {
+  var transitions = [];
+  var state = 0; // Let 1 mean inspiration, -1 mean expiration, 0 neither
+  for(var i = 0; i < flows.length; i++) {
+    var f = flows[i].val * CONVERT_PIRDS_TO_SLM;
+    //    var ms = flows[i].ms-first_time;
+    var ms = flows[i].ms;
+    if (state == 0) {
+      if (f > vm) {
+	state = 1;
+	transitions.push({ state: 1, sample: i, ms: ms})
+      } else if (f < -vm) {
+	state = -1;
+	transitions.push({ state: -1, sample: i, ms: ms})
+      }
+    } else if (state == 1) {
+      if (f < -vm) {
+	state = -1;
+	transitions.push({ state: -1, sample: i, ms: ms})
+      } else if (f < vm) {
+	state = 0;
+	transitions.push({ state: 0, sample: i, ms: ms})
+      }
+    } else if (state == -1) {
+      if (f > vm) {
+	state = 1;
+	transitions.push({ state: 1, sample: i, ms: ms})
+      } else if (f > 0) {
+	state = 0;
+	transitions.push({ state: 0, sample: i, ms: ms})
+      }
+    }
+  }
+  return transitions;
+}
 // A simple computation of a moving window trace
 // computing [A + -B], where A is volume to left
 // of sample int time window t, and B is volume to right
@@ -957,44 +997,15 @@ function computeMovingWindowTrace(samples,t,v) {
   // or zero, it causes a transition. If you are inspiring,
   // you have to cross zero to transition to neither,
   // and you start expiring when you cross the treshold.
-  const vm = 4;
+
+  // This is measured in standard liters per minute.
+  const vm = 10; // previously used 4
 
   // We will model this as a list of transitions.
   // A breath is any number of inspirations followed by
   // any number of expirations. (I+)(E+)
 
-  var transitions = [];
-  var state = 0; // Let 1 mean inspiration, -1 mean expiration, 0 neither
-  for(var i = 0; i < flows.length; i++) {
-    var f = flows[i].val * CONVERT_PIRDS_TO_SLM;
-    //    var ms = flows[i].ms-first_time;
-    var ms = flows[i].ms;
-    if (state == 0) {
-      if (f > vm) {
-	state = 1;
-	transitions.push({ state: 1, sample: i, ms: ms})
-      } else if (f < -vm) {
-	state = -1;
-	transitions.push({ state: -1, sample: i, ms: ms})
-      }
-    } else if (state == 1) {
-      if (f < -vm) {
-	state = -1;
-	transitions.push({ state: -1, sample: i, ms: ms})
-      } else if (f < 0) {
-	state = 0;
-	transitions.push({ state: 0, sample: i, ms: ms})
-      }
-    } else if (state == -1) {
-      if (f > vm) {
-	state = 1;
-	transitions.push({ state: 1, sample: i, ms: ms})
-      } else if (f > 0) {
-	state = 0;
-	transitions.push({ state: 0, sample: i, ms: ms})
-      }
-    }
-  }
+  var transitions = compute_transitions(vm,flows);
 
   // Now that we have transitions, we can apply a
   // diferrent algorithm to try to define "breaths".
@@ -1002,7 +1013,7 @@ function computeMovingWindowTrace(samples,t,v) {
   // and then an expiration, we will define a breath
   // as from the first inspiration, until there has
   // been one expiration, until the next inspiration.
-  var breaths = []
+  var breaths = [];
   var expiring = false;
   var last = 0;
   var voli = 0;
@@ -1026,36 +1037,86 @@ function computeMovingWindowTrace(samples,t,v) {
     }
     return vol/(60*1000);
   }
-  var beg = 0;
-  var zero = 0;
-  for(var i = 0; i < transitions.length; i++) {
-    // We're looking for the end of the inhalation here!!
-    if (((i -1) >= 0) && transitions[i-1].state == 1 && (transitions[i].state == 0 || transitions[i].state == -1 )) {
-      zero = i;
-    }
-    if (expiring && transitions[i].state == 1) {
-      breaths.push({ ms: transitions[i].ms,
-		     sample: transitions[i].sample,
-		     vol_e: vole,
-		     vol_i: voli,
-                     trans_begin_inhale: beg,
-                     trans_cross_zero: zero,
-                     trans_end_exhale: i,
-		   }
-		  );
-      beg = i;
-      expiring = false;
-      vole = integrateSamples(last,transitions[i].sample);
-      last = transitions[i].sample;
-    }
-    if (!expiring && transitions[i].state == -1) {
-      expiring = true;
-      voli = integrateSamples(last,transitions[i].sample);
-      last = transitions[i].sample;
-    }
-    // At this point we can in theory compute an inspiratory volume..
 
+  function compute_breaths_based_on_exhalations(transitions) {
+    var beg = 0;
+    var zero = 0;
+    for(var i = 0; i < transitions.length; i++) {
+      // We're looking for the end of the inhalation here!!
+      if (((i -1) >= 0) && transitions[i-1].state == 1 && (transitions[i].state == 0 || transitions[i].state == -1 )) {
+        zero = i;
+      }
+      if (expiring && transitions[i].state == 1) {
+        breaths.push({ ms: transitions[i].ms,
+		       sample: transitions[i].sample,
+		       vol_e: vole,
+		       vol_i: voli,
+                       trans_begin_inhale: beg,
+                       trans_cross_zero: zero,
+                       trans_end_exhale: i,
+		     }
+		    );
+        beg = i;
+        expiring = false;
+        vole = integrateSamples(last,transitions[i].sample);
+        last = transitions[i].sample;
+      }
+      if (!expiring && transitions[i].state == -1) {
+        expiring = true;
+        voli = integrateSamples(last,transitions[i].sample);
+        last = transitions[i].sample;
+      }
+    }
   }
+  // This is based only on inhalations, and
+  // is therefore functional when there is a check valve
+  // in place. Such a system will rarely
+  // have negative flows, and we must mark
+  // the beginning of a breath from a transition to a "1"
+  // state from any other state.
+  // This algorithm is simple: A breath begins on a trasition
+  // to 1 from a not 1 state. This algorithm is susceptible
+  // to "stutter" near the boundary point, but if necessary
+  // a digital filter would sove that; we have not yet found
+  // that level of sophistication needed.
+  // We still want to track zeros, but now must strack them
+  // as a falling signal.
+  function compute_breaths_based_without_negative_flow(transitions) {
+    var beg = 0;
+    var zero = 0;
+    var breaths = [];
+
+    for(var i = 0; i < transitions.length; i++) {
+      // We're looking for the end of the inhalation here!!
+      if (((i -1) >= 0) && transitions[i-1].state == 1 &&
+          (transitions[i].state == 0 || transitions[i].state == -1 )) {
+        zero = i;
+      }
+      if (expiring && transitions[i].state == 1) {
+        breaths.push({ ms: transitions[i].ms,
+		       sample: transitions[i].sample,
+		       vol_e: vole,
+		       vol_i: voli,
+                       trans_begin_inhale: beg,
+                       trans_cross_zero: zero,
+                       trans_end_exhale: i,
+		     }
+		    );
+        beg = i;
+        expiring = false;
+        vole = integrateSamples(last,transitions[i].sample);
+        last = transitions[i].sample;
+      }
+      if (!expiring && ((transitions[i].state == -1) || (transitions[i].state == 0)))  {
+        expiring = true;
+        voli = integrateSamples(last,transitions[i].sample);
+        last = transitions[i].sample;
+      }
+    }
+    return breaths;
+  }
+
+  breaths = compute_breaths_based_without_negative_flow(transitions);
 
   return [transitions,breaths];
 }
