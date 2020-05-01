@@ -905,6 +905,20 @@ function process(samples) {
   reflectAlarmsInGUI(alarms);
 }
 
+// WARNING: This is a hack...if the timestamp is negative,
+// we treat it as a limited (beyond range of sensor) measurement.
+// Our goal is to warn about this, but for now we will just
+// ignore and correct.
+function sanitize_samples(samples) {
+  samples.forEach(s =>
+                  {
+  if (s.ms < 0) {
+    s.ms = -s.ms
+  }
+                  });
+  return samples;
+}
+
 function retrieveAndPlot(){
   var trace_piece = (TRACE_ID) ? "/" + TRACE_ID : "";
   DSERVER_URL = $("#dserverurl").val();
@@ -913,6 +927,14 @@ function retrieveAndPlot(){
 
   $.ajax({url: url,
           success: function(cur_sam){
+
+              // WARNING: This is a hack...if the timestamp is negative,
+              // we treat it as a limited (beyond range of sensor) measurement.
+              // Our goal is to warn about this, but for now we will just
+              // ignore and correct.
+
+            cur_sam = sanitize_samples(cur_sam);
+
             if (cur_sam.length == 0) {
               console.log("no samples; potential misconfiguration!");
             } else {
@@ -924,6 +946,8 @@ function retrieveAndPlot(){
                                        samples.length + cur_sam.length - MAX_SAMPLES_TO_STORE_S);
 	        samples = samples.slice(discard);
 	      }
+
+
 	      samples = samples.concat(cur_sam);
 	      // We are not guaranteeed to get samples in order
 	      // we sort them....
