@@ -1039,9 +1039,6 @@ function computeMovingWindowTrace(samples,t,v) {
   // been one expiration, until the next inspiration.
   var breaths = [];
   var expiring = false;
-  var last = 0;
-  var voli = 0;
-  var vole = 0;
 
   // This should be in liters...
   function integrateSamples(a,z) {
@@ -1058,6 +1055,9 @@ function computeMovingWindowTrace(samples,t,v) {
       // We could do that here, but will move constants
       // to end...
       vol += ms * ht;
+      if (isNaN(vol)) {
+        debugger;
+      }
     }
     return vol/(60*1000);
   }
@@ -1065,6 +1065,10 @@ function computeMovingWindowTrace(samples,t,v) {
   function compute_breaths_based_on_exhalations(transitions) {
     var beg = 0;
     var zero = 0;
+    var last = 0;
+    var voli = 0;
+    var vole = 0;
+
     for(var i = 0; i < transitions.length; i++) {
       // We're looking for the end of the inhalation here!!
       if (((i -1) >= 0) && transitions[i-1].state == 1 && (transitions[i].state == 0 || transitions[i].state == -1 )) {
@@ -1108,7 +1112,12 @@ function computeMovingWindowTrace(samples,t,v) {
   function compute_breaths_based_without_negative_flow(transitions) {
     var beg = 0;
     var zero = 0;
+    var last = 0;
+    var voli = 0;
+    var vole = 0;
+
     var breaths = [];
+    var expiring = true;
 
     for(var i = 0; i < transitions.length; i++) {
       // We're looking for the end of the inhalation here!!
@@ -1129,6 +1138,7 @@ function computeMovingWindowTrace(samples,t,v) {
         beg = i;
         expiring = false;
         vole = integrateSamples(last,transitions[i].sample);
+
         last = transitions[i].sample;
       }
       if (!expiring && ((transitions[i].state == -1) || (transitions[i].state == 0)))  {
