@@ -912,9 +912,18 @@ function process(samples) {
 function sanitize_samples(samples) {
   samples.forEach(s =>
                   {
-  if (s.ms < 0) {
-    s.ms = -s.ms
-  }
+                    if (s.event == "M") {
+                      if ("string" == (typeof s.ms))
+                        s.ms = parseInt(s.ms);
+                      if ("string" == (typeof s.val))
+                        s.val = parseInt(s.val);
+                      if ("string" == (typeof s.num))
+                        s.num = parseInt(s.num);
+                      if (s.ms < 0) {
+                        s.ms = -s.ms;
+                      }
+                    }
+
                   });
   return samples;
 }
