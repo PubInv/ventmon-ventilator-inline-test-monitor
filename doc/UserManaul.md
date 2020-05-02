@@ -17,6 +17,8 @@ The VentMon plugs into an airway and measure flow and absolute and differential 
 airway approximately 25 times a second. It measures oxygen, humidity, and temperature within
 the airway and in the ambient air approximately once a minute.
 
+![Physical Configuration](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/VentMon%20Overall%20Architecture.png)
+
 The basic test function is to use the VentMon to log a data file over a period of time.
 This log file may be viewed live (with imperceptible delay) via our software tools, allowing
 an engineer to immediately observe pressures and flows. This same software computes the
