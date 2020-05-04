@@ -13,7 +13,7 @@ with in other designs, or as part of an emergent open design for ventilations sy
 
 # Basic Functionality
 
-The VentMon plugs into an airway and measure flow and absolute and differential pressure within the
+The VentMon plugs into an airway and measures flow and absolute and differential pressure within the
 airway approximately 25 times a second. It measures oxygen, humidity, and temperature within
 the airway and in the ambient air approximately once a minute.
 
@@ -25,7 +25,7 @@ clinically important parameters such as tidal volume, minute volume, and respira
 and I:E ratio. If produced over a long period of time, this would be evidence that the
 ventilator is performing as expected.
 
-# Physical Connection
+# Physical Connections
 
 
 ![Physical Configuration](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/VentMon%20Overall%20Architecture.png)
@@ -36,7 +36,7 @@ The VentMon has up to 4 physical connections:
 1. The air output, which is a standard male 22mm outer diameter port. This should be connected
 to the test lung/patient.
 1. A USB connection to provide 5V power to the VentMon. Additionally, the VentMon streams
-[PIRDS](https://github.com/PubInv/respiration-data-standard) data on the serial port, which is useful for testing and checks on verification.
+[PIRDS](https://github.com/PubInv/respiration-data-standard) JSON data on the serial port, which is useful for testing and checks on verification.
 It requires additional software, however, to produce an understandable picture of ventilator
 performance.
 1. An ethernet connection which is used by the VentMon to stream PIRDS data via UDP.
@@ -45,9 +45,9 @@ public data lake on port 6111 and vetmon.coslabs.com.
 
 # OLED Display
 
-Your VentMon comes with an OLED display for us to support with future firmware improvements.
+Your VentMon comes with a small OLED "badge" display for us to support with future firmware improvements.
 At present, it will display a changing (live) display of the differential pressure.
-This is useful main as an indication that the system is functioning properly.
+This is useful mainly as an indication that the system is functioning properly.
 In the future, we hope to evolve this display into a clinically useful display.
 
 # Recommended Unboxing Testing
@@ -56,8 +56,8 @@ To familiarize yourself with the VentMon and "smoke test" basic operation, we re
 the following steps:
 
 1. Before connecting to a ventilator or a test long, simply connect the VentMon to an
-Aduino IDE and start the Serial Monitor. Do not change the by uploading new code
-unless you intend to so ao. The current firmward outputs 115200 baud; set your Arduino
+Aduino IDE and start the Serial Monitor. Do not change the firmware by uploading new code
+unless you intend to so. The current firmward outputs 115200 baud; set your Arduino
 IDE to listen at that baud rate.
 1. Observe that the VentMon is streaming a series of JSON objects conformant to the
 [PIRDS](https://github.com/PubInv/respiration-data-standard) data standard.
@@ -84,14 +84,14 @@ The VentMon uses two independent BME680 sensors to compute the pressure differen
 The ambient pressure is kept as a running average over a period time. The instantaneous
 pressure in the airway is published as an event aobut 25 times a second, as is the
 difference withe ambient air.
-1. Observe that the pressure in the Aiway is of type "P" and nubmered "A" and "0".
+1. Observe that the pressure in the Aiway is of type "P" and numbered "A" and "0".
 The amBient pressure is "B" and "0". Following medical practice, these absolute
-pressures are measured in cm H2O. The VentMon PIRDS standard defines the units
-reported for pressure to be hundredths of cm of H2O.
+pressures are measured in cm H<sub>2</sub>O. The VentMon PIRDS standard defines the units
+reported for pressure to be hundredths of cm of H<sub>2</sub>O.
 1. Therefore, at close to sea level, the "val" field for these absolute pressures should be close
 to 10000. The amBient pressure is reported very rarely compared to the Airway pressure; it may
 be challenging to find the "B" field in the serial output.
-1. Differential pressure (when not in an active breathing circuit) should be at most tens (less than one cm H2O). This represents
+1. Differential pressure (when not in an active breathing circuit) should be at most tens (less than one cm H<sub>2</sub>O). This represents
 miscalibration in our two sensors; we do not believe this inaccuracy is clinically significant
 as long as it is small.
 
@@ -125,7 +125,7 @@ The BreathPlot web page can, however, can be used with any system that produces 
 [Public Invention Respiratory Data Standard](https://github.com/PubInv/respiration-data-standard/blob/master/PIRDS-v.0.1.md). You can create and import an array of JSON objects in the PIRDS standard and display it.
 
 
-## Basic Steps for Seeing a Live BreatPlot
+## Basic Steps for Seeing a Live Breath Plot
 
 1. Make sure the VentMon is powered up via USB.
 1. Connect a CAT-5 ethernet cable from the port to directly to your router (NOT your computer.)
@@ -133,7 +133,34 @@ The BreathPlot web page can, however, can be used with any system that produces 
 You may or may not have to manipulate your router firewall configuration.
 1. Determine your IP address as it appears to the outside world.
 1. Using any modern browser, browse to [http://ventmon.coslabs.com/](http://ventmon.coslabs.com/).
-1. Hopefully there you will see your IP address in a list that looks like this:
+1. Hopefully there you will see your IP address in a list that looks like this: ![DataLakeMainPageScreenshot](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/DataLakeMainPage.png)
+1. Identify your IP address in the list, and click on the Breath Plot link.
+1. Hopefully you will see a live breath plot, changing constantly based on the actual flow
+within the VentMon. If you ventilator is rhythmically forcing air through the VentMon, it
+should look something like this: ![SampleBreathPlot](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/SampleBreathPlot.png)
+1. Observe the features on the right may or may not be red if they are within default limits. These features change slowly as the samples change. You will see about 12 seconds of breath data by default.
+
+If you wish to see the software in use without having a live VentMon, you can paste a [sample PIRDS
+data file](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/breath_data/RobFM3200NoLung.pirds) into the text area and hit the "Import Trace" data file. These files were created by the "Export Trace" function.
+
+The Import and Export Trace capabilities use the JSON binding of the PIRDS data standard. Although
+offering little control at present, this provide a crude way to store, transmit, and communicate
+breath data.
+
+# Understanding Breath Plot Data
+
+The Breath Plot data page 4 areas:
+
+1. An upper most meta-control area. This allows you to use a different data server,
+if you wish, as longs as it serves PIRDS data in the JSON format. It also allows you
+to control a few other parameters
+1. The plotting area shows three plots aligned in the horizontal dimension of time. The first plot is differential pressure (in the airway against ambient pressure.) The second is flow (change in volume over time.) the final plot the "Event plot". The Event Plot uses an abstract scale. For convenience it draws ths flow plot. However, its main purpose is to show how the trace has been broken into breaths for the purpose of computing clinically significant measures.
+1. On the right are the clinical measures, such as PIP, PEEP, Tidal Volume, Minute Volume, and Respiration Rate. This are has default high and low values. When the calculated values are outside this range, they number is drawn in red to draw attention to the fact that one parameter is outside the specifications.
+1. Finally at the bottom is a simple user interface for importing and exporting traces.
+
+
+
+
 
 
 # Test Lungs
@@ -194,3 +221,11 @@ so that we may publish them to the whole community.
 # Using the Test Tools Without a VentMon
 
 # Cleaning and Physical Connections
+
+# Acknowledgements
+
+Thanks to the Public Invention volunteers Lauria Clarke and Geoff Mulligan.
+
+A special thanks to [Protocol Labs](https://protocol.ai/) and the Mozilla Open Source Support Foundation (MOSS)
+[COVID-19 Solutions Fund](https://blog.mozilla.org/blog/2020/03/31/moss-launches-covid-19-solutions-fund/)
+which made generous grants to support this project.
