@@ -43,6 +43,13 @@ performance.
 You are welcome to change the firmware, but our basic firmware streams data to our
 public data lake on port 6111 and vetmon.coslabs.com.
 
+# OLED Display
+
+Your VentMon comes with an OLED display for us to support with future firmware improvements.
+At present, it will display a changing (live) display of the differential pressure.
+This is useful main as an indication that the system is functioning properly.
+In the future, we hope to evolve this display into a clinically useful display.
+
 # Recommended Unboxing Testing
 
 To familiarize yourself with the VentMon and "smoke test" basic operation, we recommend
@@ -72,6 +79,7 @@ Finally, observe that the pressure differential is approximately correct.
 1. The VentMon pressents pressure in the airway in absoltue terms, but more useful
 is the differential pressure, which looks like this:
 >  { "event" : "M", "type" : "D", "ms" : 12037, "loc" : "A", "num" : 0, "val" : -11  }
+
 The VentMon uses two independent BME680 sensors to compute the pressure differential.
 The ambient pressure is kept as a running average over a period time. The instantaneous
 pressure in the airway is published as an event aobut 25 times a second, as is the
@@ -90,14 +98,54 @@ as long as it is small.
 If the pressure sensors do not seem to be working, contact us for support.
 
 
-
-
-
-
 # Software Usage
 
-Our software, however, can be used with any system that produces data in the
-[Public Invention Respiratory Data Standard](https://github.com/PubInv/respiration-data-standard/blob/master/PIRDS-v.0.1.md).
+Although you are free to make any changes you wish to the VentMon firmware and to process its
+output via any means you want, we have created what we hope is a convenient means of
+reviewing the live peformance of a ventilator and test lung combination.
+
+The simplest way to use the VentMon is to use our public data lake, which logs data for you on
+a server hosted by Public Invention and its volunteers (Geoff Mulligan.) This produces
+a live, real-time display modelled on what clinicians like to see.  This approach currently
+offers no privacy; anyone can look at any of the data in the data lake. If you don't want
+your data to be visible, don't attach an ethernet cable to the VentMon.
+
+The data lake records data indefinitely in a log file named after your IP address. This,
+and any other data logs, can be accessed by going to the [VentMon Data Lake](http://ventmon.coslabs.com/). From there, you can see your raw PIRDS data. By clicking on one of the links such as that of [Robert L. Read's Ventmon](http://ventmon.coslabs.com/breath_plot?i=136.49.35.13), you can
+see live plots of differential pressure, flow, volume, and other parameters that are clinically
+important. For each parameter, you can set high and low "alarm limits". These will turn
+red when you are outside of this sepcified range, and will be blue while you are inside it.
+(You will want to discover you own IP address, which may change occasionally depending on your
+internet service provider, to find the Breath Plot of your own device.)
+
+Breath Plot has a toggle switch that let's you switch live data on and off. When switched off,
+you will be examining whatever is on the screen until you turn the live data back on, at which point it will show you about the last 10 or 20 seconds of data live.
+
+The BreathPlot web page can, however, can be used with any system that produces data in the
+[Public Invention Respiratory Data Standard](https://github.com/PubInv/respiration-data-standard/blob/master/PIRDS-v.0.1.md). You can create and import an array of JSON objects in the PIRDS standard and display it.
+
+
+## Basic Steps for Seeing a Live BreatPlot
+
+1. Make sure the VentMon is powered up via USB.
+1. Connect a CAT-5 ethernet cable from the port to directly to your router (NOT your computer.)
+1. Attempt to make sure you router allows outgoing IP packets to ventmon.coslabs.com on port 6111.
+You may or may not have to manipulate your router firewall configuration.
+1. Determine your IP address as it appears to the outside world.
+1. Using any modern browser, browse to [http://ventmon.coslabs.com/](http://ventmon.coslabs.com/).
+1. Hopefully there you will see your IP address in a list that looks like this:
+
+
+# Test Lungs
+
+The VentMon is not a test lung. The purpose of a test lung is to provide realistic and compliance
+and resistance simulating a healthy or diseased human lung system.
+It is not possible to predict the clinical performance of a ventilator unless it
+has been extensively tested with a physical test lung. VentMon, can, however, measure
+some aspects of ventilator without a test lung attached as a preliminary test.
+Alex Izvorski of the [A.R.M.E.E.](https://armeevent.com/) and Robert L. Read of
+[Public Invention](https://www.pubinv.org) have discuessed this extensively in [How To Make Your Own Accurate Test Lungs for Testing Emergency Ventilators](https://medium.com/@RobertLeeRead/how-to-make-your-own-accurate-test-lungs-for-testing-emergency-ventilators-2d68fe5ac460).
+
 
 # License
 
