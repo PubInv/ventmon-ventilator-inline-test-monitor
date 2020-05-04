@@ -20,6 +20,10 @@ Free-libre Open Source ventilator design.
 For further explanation of design motivation and approach please refer to the following document - 
 [Motivation of Strategy](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/Motivation.md)
 
+# User Manual
+
+Although a work in progress, we have a [user manaul](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/UserManaul.md).
+
 
 
 
@@ -40,6 +44,15 @@ Initial BOM can be found here: [BOM](https://docs.google.com/document/d/1n-Ja3Ug
 
 
 ## Status
+
+**May 4th:**
+
+May the Fourth be with you. 
+
+We have shipped two VentMons free of charge to open source ventilators team that will use them for volume and flow measurements.
+
+A [user manaul](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/UserManaul.md) is progressing.
+
 
 **April 27th:**
 
