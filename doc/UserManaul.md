@@ -17,7 +17,6 @@ The VentMon plugs into an airway and measure flow and absolute and differential 
 airway approximately 25 times a second. It measures oxygen, humidity, and temperature within
 the airway and in the ambient air approximately once a minute.
 
-![Physical Configuration](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/VentMon%20Overall%20Architecture.png)
 
 The basic test function is to use the VentMon to log a data file over a period of time.
 This log file may be viewed live (with imperceptible delay) via our software tools, allowing
@@ -25,6 +24,75 @@ an engineer to immediately observe pressures and flows. This same software compu
 clinically important parameters such as tidal volume, minute volume, and respiration rate,
 and I:E ratio. If produced over a long period of time, this would be evidence that the
 ventilator is performing as expected.
+
+# Physical Connection
+
+
+![Physical Configuration](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/VentMon%20Overall%20Architecture.png)
+
+The VentMon has up to 4 physical connections:
+
+1. The air input, which is a female 22mm inner diameter airway tube. This is an international standard. The input to the VentMon comes from the ventilator or air-drive you are testing.
+1. The air output, which is a standard male 22mm outer diameter port. This should be connected
+to the test lung/patient.
+1. A USB connection to provide 5V power to the VentMon. Additionally, the VentMon streams
+[PIRDS](https://github.com/PubInv/respiration-data-standard) data on the serial port, which is useful for testing and checks on verification.
+It requires additional software, however, to produce an understandable picture of ventilator
+performance.
+1. An ethernet connection which is used by the VentMon to stream PIRDS data via UDP.
+You are welcome to change the firmware, but our basic firmware streams data to our
+public data lake on port 6111 and vetmon.coslabs.com.
+
+# Recommended Unboxing Testing
+
+To familiarize yourself with the VentMon and "smoke test" basic operation, we recommend
+the following steps:
+
+1. Before connecting to a ventilator or a test long, simply connect the VentMon to an
+Aduino IDE and start the Serial Monitor. Do not change the by uploading new code
+unless you intend to so ao. The current firmward outputs 115200 baud; set your Arduino
+IDE to listen at that baud rate.
+1. Observe that the VentMon is streaming a series of JSON objects conformant to the
+[PIRDS](https://github.com/PubInv/respiration-data-standard) data standard.
+
+If you cannot observe PIRDS data streaming, please contact us for support.
+
+1. Now check that flow is measured by simpling blowing into the ventmon airway tube
+or using a sanitary dry source of air such as a small fan.
+1. The PIRDS type code for flow is "F" and the flow sensor the sensor of type "F" named
+"A" and numbered "0". A PIRDS flow event looks like:
+> { "event" : "M", "type" : "F", "ms" : 12103, "loc" : "A", "num" : 0, "val" : 0  }.
+1. The units of flow according to the [PIRDS standard](https://github.com/PubInv/respiration-data-standard/blob/master/PIRDS-v.0.1.md) are standard liters per minute times 1000 (or milliliters pers minute.)  You should be able to create flow of a few milliliters per minute just by waving your hand quickly at the VentMon input; a fan will produce a much higher flow.
+1. Observe that you can create a measurable flow.
+
+If you cannot observer a measurable flow, please contact us for support.
+
+Finally, observe that the pressure differential is approximately correct.
+
+1. The VentMon pressents pressure in the airway in absoltue terms, but more useful
+is the differential pressure, which looks like this:
+>  { "event" : "M", "type" : "D", "ms" : 12037, "loc" : "A", "num" : 0, "val" : -11  }
+The VentMon uses two independent BME680 sensors to compute the pressure differential.
+The ambient pressure is kept as a running average over a period time. The instantaneous
+pressure in the airway is published as an event aobut 25 times a second, as is the
+difference withe ambient air.
+1. Observe that the pressure in the Aiway is of type "P" and nubmered "A" and "0".
+The amBient pressure is "B" and "0". Following medical practice, these absolute
+pressures are measured in cm H2O. The VentMon PIRDS standard defines the units
+reported for pressure to be hundredths of cm of H2O.
+1. Therefore, at close to sea level, the "val" field for these absolute pressures should be close
+to 10000. The amBient pressure is reported very rarely compared to the Airway pressure; it may
+be challenging to find the "B" field in the serial output.
+1. Differential pressure (when not in an active breathing circuit) should be at most tens (less than one cm H2O). This represents
+miscalibration in our two sensors; we do not believe this inaccuracy is clinically significant
+as long as it is small.
+
+If the pressure sensors do not seem to be working, contact us for support.
+
+
+
+
+
 
 # Software Usage
 
