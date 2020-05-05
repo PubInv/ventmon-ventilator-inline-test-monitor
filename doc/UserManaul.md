@@ -106,15 +106,15 @@ reviewing the live peformance of a ventilator and test lung combination.
 
 The simplest way to use the VentMon is to use our public data lake, which logs data for you on
 a server hosted by Public Invention and its volunteers (Geoff Mulligan.) This produces
-a live, real-time display modelled on what clinicians like to see.  This approach currently
+a live, real-time display modeled on what clinicians like to see.  This approach currently
 offers no privacy; anyone can look at any of the data in the data lake. If you don't want
 your data to be visible, don't attach an ethernet cable to the VentMon.
 
 The data lake records data indefinitely in a log file named after your IP address. This,
-and any other data logs, can be accessed by going to the [VentMon Data Lake](http://ventmon.coslabs.com/). From there, you can see your raw PIRDS data. By clicking on one of the links such as that of [Robert L. Read's Ventmon](http://ventmon.coslabs.com/breath_plot?i=136.49.35.13), you can
+and any other data logs, can be accessed by going to the [VentMon Data Lake](http://ventmon.coslabs.com/). From there, you can see your raw PIRDS data. By clicking on one of the links such as that of [Robert L. Read's personal Ventmon](http://ventmon.coslabs.com/breath_plot?i=136.49.35.13), you can
 see live plots of differential pressure, flow, volume, and other parameters that are clinically
 important. For each parameter, you can set high and low "alarm limits". These will turn
-red when you are outside of this sepcified range, and will be blue while you are inside it.
+red when ventilator behavior is outside of this sepcified range, and will be blue while you are inside it.
 (You will want to discover you own IP address, which may change occasionally depending on your
 internet service provider, to find the Breath Plot of your own device.)
 
@@ -144,17 +144,18 @@ If you wish to see the software in use without having a live VentMon, you can pa
 data file](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/breath_data/RobFM3200NoLung.pirds) into the text area and hit the "Import Trace" data file. These files were created by the "Export Trace" function.
 
 The Import and Export Trace capabilities use the JSON binding of the PIRDS data standard. Although
-offering little control at present, this provide a crude way to store, transmit, and communicate
+offering little control at present, this provides a crude way to store, transmit, and communicate
 breath data.
 
 # Understanding Breath Plot Data
 
-The Breath Plot data page 4 areas:
+The Breath Plot data page has four areas:
 
 1. An upper most meta-control area. This allows you to use a different data server,
 if you wish, as longs as it serves PIRDS data in the JSON format. It also allows you
-to control a few other parameters
-1. The plotting area shows three plots aligned in the horizontal dimension of time. The first plot is differential pressure (in the airway against ambient pressure.) The second is flow (change in volume over time.) the final plot the "Event plot". The Event Plot uses an abstract scale. For convenience it draws ths flow plot. However, its main purpose is to show how the trace has been broken into breaths for the purpose of computing clinically significant measures.
+to control a few other parameters.
+1. The plotting area shows three plots aligned in the horizontal dimension of time. The first plot is differential pressure (in the airway against ambient pressure.) The second is flow (change in volume over time.)
+The final plot the "Event plot". The Event Plot uses an abstract scale. For convenience it draws ths flow plot. However, its main purpose is to show how the trace has been broken into breaths for the purpose of computing clinically significant measures. Ocasionally measurments such as temperature and humidity are rendered as markers on this plot.
 1. On the right are the clinical measures, such as PIP, PEEP, Tidal Volume, Minute Volume, and Respiration Rate. This are has default high and low values. When the calculated values are outside this range, they number is drawn in red to draw attention to the fact that one parameter is outside the specifications.
 1. Finally at the bottom is a simple user interface for importing and exporting traces.
 
@@ -177,7 +178,7 @@ Alex Izvorski of the [A.R.M.E.E.](https://armeevent.com/) and Robert L. Read of
 # License
 
 The VentMon is both open hardware and open software. The firmware that runs on the board and
-makes sensor measurements is reduced under the [MIT License](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/LICENSE). Other libraries and files may be
+makes sensor measurements is released under the [MIT License](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/LICENSE). Other libraries and files may be
 released under different open source license if they are derived works of starting points
 released under other licenses.
 
