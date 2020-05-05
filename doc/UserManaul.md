@@ -8,8 +8,8 @@ engineering teams needing to test rapidly manufactured pandemic ventilators.
 The VentMon is a physical device designed to help the open-source community develop confidence in
 rapidly manufactured ventilators systems. At present it serves a tester to be used on
 the workbench of teams developing ventilators.  Eventually, we hope it will serve
-the important function of providing a monitoring/alarming system as a module reusable
-with in other designs, or as part of an emergent open design for ventilations systems.
+the important function of providing a monitoring/alarming system as a module
+within other designs, or as part of an emergent open design for ventilations systems.
 
 # Basic Functionality
 
@@ -20,7 +20,7 @@ the airway and in the ambient air approximately once a minute.
 
 The basic test function is to use the VentMon to log a data file over a period of time.
 This log file may be viewed live (with imperceptible delay) via our software tools, allowing
-an engineer to immediately observe pressures and flows. This same software computes the
+an engineer to immediately observe pressures and flows. This same software computes
 clinically important parameters such as tidal volume, minute volume, and respiration rate,
 and I:E ratio. If produced over a long period of time, this would be evidence that the
 ventilator is performing as expected.
@@ -65,9 +65,9 @@ In the future, we hope to evolve this display into a clinically useful display.
 To familiarize yourself with the VentMon and "smoke test" basic operation, we recommend
 the following steps:
 
-1. Before connecting to a ventilator or a test long, simply connect the VentMon to an
+1. Before connecting to a ventilator or a test lung, simply connect the VentMon to an
 Aduino IDE and start the Serial Monitor. Do not change the firmware by uploading new code
-unless you intend to so. The current firmward outputs 115200 baud; set your Arduino
+unless you intend to do so. The current firmward outputs 115200 baud; set your Arduino
 IDE to listen at that baud rate.
 1. Observe that the VentMon is streaming a series of JSON objects conformant to the
 [PIRDS](https://github.com/PubInv/respiration-data-standard) data standard.
@@ -86,14 +86,14 @@ If you cannot observer a measurable flow, please contact us for support.
 
 Finally, observe that the pressure differential is approximately correct.
 
-1. The VentMon pressents pressure in the airway in absoltue terms, but more useful
+1. The VentMon measures pressure in the airway in absoltue terms, but more useful
 is the differential pressure, which looks like this:
 >  { "event" : "M", "type" : "D", "ms" : 12037, "loc" : "A", "num" : 0, "val" : -11  }
 
 The VentMon uses two independent BME680 sensors to compute the pressure differential.
 The ambient pressure is kept as a running average over a period time. The instantaneous
 pressure in the airway is published as an event aobut 25 times a second, as is the
-difference withe ambient air.
+difference with the ambient air.
 1. Observe that the pressure in the Aiway is of type "P" and numbered "A" and "0".
 The amBient pressure is "B" and "0". Following medical practice, these absolute
 pressures are measured in cm H<sub>2</sub>O. The VentMon PIRDS standard defines the units
@@ -182,7 +182,7 @@ It is not possible to predict the clinical performance of a ventilator unless it
 has been extensively tested with a physical test lung. VentMon, can, however, measure
 some aspects of ventilator without a test lung attached as a preliminary test.
 Alex Izvorski of the [A.R.M.E.E.](https://armeevent.com/) and Robert L. Read of
-[Public Invention](https://www.pubinv.org) have discuessed this extensively in [How To Make Your Own Accurate Test Lungs for Testing Emergency Ventilators](https://medium.com/@RobertLeeRead/how-to-make-your-own-accurate-test-lungs-for-testing-emergency-ventilators-2d68fe5ac460).
+[Public Invention](https://www.pubinv.org) have discussed this extensively in [How To Make Your Own Accurate Test Lungs for Testing Emergency Ventilators](https://medium.com/@RobertLeeRead/how-to-make-your-own-accurate-test-lungs-for-testing-emergency-ventilators-2d68fe5ac460).
 
 
 # License
