@@ -25,6 +25,16 @@ clinically important parameters such as tidal volume, minute volume, and respira
 and I:E ratio. If produced over a long period of time, this would be evidence that the
 ventilator is performing as expected.
 
+# Measureable Flow is Currently Limitied
+
+Due to a world-wide supply-chain problem, we have had to use a neo-natal flow sensor instead of
+an adult flow sensor. This limits the instantaenouse measurement of flow to 33 standrad literes per minute.
+In many circumstances, this will not matter; but in some test scenarios with highly compliant lungs
+and low resistance, the flow sensor will "clip".
+
+In our software, this will be visually apparent as the flow curve simply looks like it has been clipped off. We also report this in the PIRDS standard that we publish. However, this error does not currently
+flow all the they way through our software.
+
 # Physical Connections
 
 
@@ -179,7 +189,7 @@ Alex Izvorski of the [A.R.M.E.E.](https://armeevent.com/) and Robert L. Read of
 
 The VentMon is both open hardware and open software. The firmware that runs on the board and
 makes sensor measurements is released under the [MIT License](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/LICENSE). Other libraries and files may be
-released under different open source license if they are derived works of starting points
+released under different open source licenses if they are derived works of starting points
 released under other licenses.
 
 Public Invention does not apply for patents. All of the hardware designs for the VentMon
@@ -195,7 +205,7 @@ the COVID-19 pandemic with the generous support of the [Mozilla Opens Source Sup
 
 However, the parts in the VentMon are expensive, and we may not be able to meet demand.
 To request a VentMon please contact us with a description of your need and a link to
-your project.
+your project. A small [donation](https://www.pubinv.org/donate/) helps make this work possible.
 
 # Technical Support
 
@@ -219,9 +229,21 @@ or make modifications and improvements to this design.
 If you make improvements, we hope you will submit them back to use under and open-source license
 so that we may publish them to the whole community.
 
-# Using the Test Tools Without a VentMon
-
 # Cleaning and Physical Connections
+
+Before the VentMon is used as a monitor with real patients, sanitization procedures
+will have to be provided. At present, the VentMon is intended as a tester only, and is not to be
+used with real patients.  However, it should still be sanitized periodically. We recommend a quick
+wipe with isopropyl alcohol. If you have breathed into the VentMon, do not allow another
+person to breath it into, or any other part of your breathing circuit, without a full sanitization.
+The VentMon is not autoclavable at present. We are not entirely sure how to fully sanitize it.
+
+# Calibration is Not Needed
+
+The Sensirion Flow Sensor that we use does not need further calibration. We have checked the
+neonatal flow sensor against an adult flow sensor with a  500ml syringe; they are both extraordinarily
+accurate. Additional double-checks are always valuable, but we do not believe a user of the
+VentMon will have to worry about calibrating the flow measurement.
 
 # Acknowledgements
 
