@@ -45,6 +45,12 @@ Initial BOM can be found here: [BOM](https://docs.google.com/document/d/1n-Ja3Ug
 
 ## Status
 
+** May 7th **
+
+We sent the first VentMon to Artemio Mendoza of the 1MillionVents team, and he made this great video:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/nViBK8d_pbM" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 **May 4th:**
 
 May the Fourth be with you. 
