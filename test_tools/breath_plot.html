@@ -156,12 +156,11 @@ an interactive or static analysis of a respiration. It&#39;s primary purpose is 
         <input type="text" class="form-control" id="traceid" aria-describedby="basic-addon3">
       </div>
 
-
       <div class="input-group mb-3">
         <div class="input-group-prepend">
-          <span class="input-group-text" id="num_to_read">Number of samples to Read and Plot:</span>
+          <span class="input-group-text" for="samples_to_plot">Number of Samples:</span>
         </div>
-        <input type="text" class="form-control" id="num_to_read" aria-describedby="basic-addon3">
+        <input type="text" class="form-control" id="samples_to_plot" aria-describedby="samples_to_plot">
       </div>
 
 
@@ -372,7 +371,7 @@ var intervalID = null;
 
 // This sould be better as time, but is easier
 // to do as number of samples.
-const MAX_SAMPLES_TO_STORE_S = 2000;
+var MAX_SAMPLES_TO_STORE_S = 2000;
 var samples = [];
 var INITS_ONLY = true;
 
@@ -777,6 +776,10 @@ function compute_respiration_rate(secs,samples,transitions,breaths) {
   // in the last s seconds, I compute those breaths
   // whose time stamp is s seconds from the most recent sample
 
+  // We will compute respiration rate by counting breaths
+  // and dividing (cnt - 1) by time the first and last inhalation
+  var first_inhale_ms = -1;
+  var last_inhale_ms = -1;
   if (breaths.length == 0) {
     return [0,0,0,"NA"];
   } else {
@@ -791,25 +794,32 @@ function compute_respiration_rate(secs,samples,transitions,breaths) {
     while((i >=0) && (breaths[i].ms > (cur_ms - secs*1000))) {
       cnt++;
       vol_i += breaths[i].vol_i;
-      time_inh +=
-        (transitions[breaths[i].trans_cross_zero].ms -
-        transitions[breaths[i].trans_begin_inhale].ms);
-
       vol_e += breaths[i].vol_e;
-      time_exh +=
-        (transitions[breaths[i].trans_end_exhale].ms -
-        transitions[breaths[i].trans_cross_zero].ms);
+
+      const inh_ms = transitions[breaths[i].trans_begin_inhale].ms;
+      // note i is counting down in this loop...
+      if (last_inhale_ms < 0) last_inhale_ms = inh_ms;
+      first_inhale_ms = inh_ms;
+      console.log(i,first_inhale_ms,last_inhale_ms);
+      const exh_ms = transitions[breaths[i].trans_end_exhale].ms;
+      const zero_ms = transitions[breaths[i].trans_cross_zero].ms;
+      time_inh += (zero_ms - inh_ms);
+      time_exh += (exh_ms -  zero_ms);
       i--;
     }
     if (cnt > 1) {
+      var inhalation_duration = last_inhale_ms - first_inhale_ms;
+      var rr = (cnt - 1) / (inhalation_duration / (60.0 * 1000.0));
       var duration_minutes = secs / 60.0;
       var minute_volume = (1000) * vol_i / duration_minutes;
       var tidal_volume = (1000) * vol_i / cnt;
 
       var EIratio = (time_inh == 0) ? null : time_exh / time_inh;
-      return  [(cnt * 60.0) / secs,
-               tidal_volume, minute_volume,
-               EIratio];
+      return  [
+        //        (cnt * 60.0) / secs,
+        rr,
+        tidal_volume, minute_volume,
+        EIratio];
     } else {
       return [0,0,0,"NA"];
     }
@@ -931,7 +941,7 @@ function sanitize_samples(samples) {
 function retrieveAndPlot(){
   var trace_piece = (TRACE_ID) ? "/" + TRACE_ID : "";
   DSERVER_URL = $("#dserverurl").val();
-  NUM_TO_READ = $("#num_to_read").val();
+//  NUM_TO_READ = $("#num_to_read").val();
   var url =  DSERVER_URL + trace_piece + "/json?n="+ NUM_TO_READ;
 
   $.ajax({url: url,
@@ -1235,14 +1245,20 @@ $( document ).ready(function() {
     DSERVER_URL = $("#dserverurl").val();
   });
 
-  $( "#num_to_read" ).val( NUM_TO_READ );
-  $('#num_to_read').change(function () {
-    NUM_TO_READ = $("#num_to_read").val();
-  });
+  // $( "#num_to_read" ).val( NUM_TO_READ );
+  // $('#num_to_read').change(function () {
+  //   NUM_TO_READ = $("#num_to_read").val();
+  // });
 
   $( "#traceid" ).val( TRACE_ID );
   $('#traceid').change(function () {
     TRACE_ID = $("#traceid").val();
+  });
+
+
+  $( "#samples_to_plot" ).val( MAX_SAMPLES_TO_STORE_S );
+  $('#samples_to_plot').change(function () {
+    MAX_SAMPLES_TO_STORE_S = $("#samples_to_plot").val();
   });
 
   samples = init_samples();
