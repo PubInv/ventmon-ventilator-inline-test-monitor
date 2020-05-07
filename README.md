@@ -49,7 +49,8 @@ Initial BOM can be found here: [BOM](https://docs.google.com/document/d/1n-Ja3Ug
 
 We sent the first VentMon to Artemio Mendoza of the 1MillionVents team, and he made this great video:
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/nViBK8d_pbM" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+![VentMon testing an A.R.M.E.E. Device](https://user-images.githubusercontent.com/5296671/81298650-b0fb8d00-903a-11ea-9d14-260d6de92e55.png))](https://youtu.be/nViBK8d_pbM)
+
 
 **May 4th:**
 
