@@ -158,7 +158,7 @@ an interactive or static analysis of a respiration. It&#39;s primary purpose is 
 
       <div class="input-group mb-3">
         <div class="input-group-prepend">
-          <span class="input-group-text" for="samples_to_plot">Number of Samples:</span>
+  <span class="input-group-text" for="samples_to_plot">Number of Samples (~10s per 3000 samples):</span>
         </div>
         <input type="text" class="form-control" id="samples_to_plot" aria-describedby="samples_to_plot">
       </div>
@@ -762,7 +762,6 @@ function compute_pressures(secs,samples) {
       }
       sum += p;
       cnt++;
-      //    console.log(LIMITS["max"]["h"]);
       alarms = alarms.concat(check_alarms(LIMITS,"max","h",p,(a,b) =>(a > b),pressures[i].ms));
       alarms = alarms.concat(check_alarms(LIMITS,"max","l",p,(a,b) =>(a < b),pressures[i].ms));
       i--;
@@ -791,34 +790,46 @@ function compute_respiration_rate(secs,samples,transitions,breaths) {
     var i = breaths.length - 1;
     var time_inh = 0;
     var time_exh = 0;
+    // fully completed inhalation volume does not include the
+    // most recent breath; we need it to be able to accurately
+    // divide by the inhlation_duration.
+    var vol_ci = 0.0;
+
     while((i >=0) && (breaths[i].ms > (cur_ms - secs*1000))) {
       cnt++;
       vol_i += breaths[i].vol_i;
+      if (i < (breaths.length -1)) {
+        vol_ci += breaths[i].vol_i;
+      }
       vol_e += breaths[i].vol_e;
 
       const inh_ms = transitions[breaths[i].trans_begin_inhale].ms;
       // note i is counting down in this loop...
       if (last_inhale_ms < 0) last_inhale_ms = inh_ms;
       first_inhale_ms = inh_ms;
-      console.log(i,first_inhale_ms,last_inhale_ms);
       const exh_ms = transitions[breaths[i].trans_end_exhale].ms;
       const zero_ms = transitions[breaths[i].trans_cross_zero].ms;
       time_inh += (zero_ms - inh_ms);
       time_exh += (exh_ms -  zero_ms);
       i--;
     }
-    if (cnt > 1) {
+    if ((cnt > 1) && (first_inhale_ms != last_inhale_ms)) {
       var inhalation_duration = last_inhale_ms - first_inhale_ms;
-      var rr = (cnt - 1) / (inhalation_duration / (60.0 * 1000.0));
+      var inhalation_duration_min = inhalation_duration / (60.0 * 1000.0);
+      var rr = (cnt - 1) / inhalation_duration_min;
       var duration_minutes = secs / 60.0;
-      var minute_volume = (1000) * vol_i / duration_minutes;
-      var tidal_volume = (1000) * vol_i / cnt;
+
+      // This is liters per minute. vol_ci is in liters.
+      // inhalation_duration is in ms.
+      var minute_volume =  vol_ci / inhalation_duration_min;
+
+      var tidal_volume = 1000.0 * vol_i / cnt;
 
       var EIratio = (time_inh == 0) ? null : time_exh / time_inh;
       return  [
-        //        (cnt * 60.0) / secs,
         rr,
-        tidal_volume, minute_volume,
+        tidal_volume,
+        minute_volume,
         EIratio];
     } else {
       return [0,0,0,"NA"];
@@ -881,7 +892,7 @@ function process(samples) {
 
   $("#bpm").text(bpm.toFixed(1));
   $("#tv").text(tv.toFixed(0));
-  $("#mv").text((mv/1000).toFixed(2));
+  $("#mv").text((mv).toFixed(2));
   if (EIratio == "NA") {
     $("#ier").text("NA");
   } else {
