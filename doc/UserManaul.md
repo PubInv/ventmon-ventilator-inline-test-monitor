@@ -25,7 +25,7 @@ clinically important parameters such as tidal volume, minute volume, and respira
 and I:E ratio. If produced over a long period of time, this would be evidence that the
 ventilator is performing as expected.
 
-# Measureable Flow is Currently Limitied
+# Measureable Flow is Currently Limitied and Restriction Added
 
 Due to a world-wide supply-chain problem, we have had to use a neo-natal flow sensor instead of
 an adult flow sensor. This limits the instantaenouse measurement of flow to 33 standrad literes per minute.
@@ -34,6 +34,9 @@ and low resistance, the flow sensor will "clip".
 
 In our software, this will be visually apparent as the flow curve simply looks like it has been clipped off. We also report this in the PIRDS standard that we publish. However, this error does not currently
 flow all the they way through our software.
+
+Additionally, the flow sensor in use adds restriction to the flow. All physical lung systems have both [resistance](https://en.wikipedia.org/wiki/Airway_resistance)
+and compliance. The fact that the VentMon T0.1 adds restriction due tp the use of the [SFM3400](https://www.mouser.com/datasheet/2/682/Sensirion_01212019_Mass_Flow_Meters_SFM3400_Datash-1524577.pdf) may have to be taken account of in your testing.
 
 # Physical Connections
 
