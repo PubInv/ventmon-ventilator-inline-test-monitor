@@ -15,137 +15,1030 @@ Breath Plot: COVID-19 VentMon analysis software
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-
+<!doctype html>
+<html lang="en">
   <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
 	<!-- Load plotly.js into the DOM -->
-	<script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+
+    <title>Public Invention VentMon</title>
+
 </head>
+  <style>
+#calcarea {
+  flex-direction:column;
+  background: AliceBlue;
+}
+.calcnum {
+    color: blue;
+    font-size: xx-large;
+}
+.fence {
+width: 3em;
+}
+.value_and_fences {
+  display: flex;
+flex-direction: row;
+justify-content: space-between;
+}
+.limit {
+  display: flex;
+  flex-direction: row;
+}
+.limit  label {
+   width: 1em;
+}
 
-<body>
-  <div id='myDiv'><!-- Plotly chart will be drawn inside this DIV --></div>
+  .alarmred {
+    background: red;
+  }
 
-  <button id="record">Record</button>
-  <button id="plot">Plot</button>
-    <button id="breath">Find breath points</button>
+</style>
+
+<!-- Style for toggle switch -->
+  <style>
+  .switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+</style>
+  <body>
+
+    <div class="container-fluid">
+
+      <div class="jumbotron">
+        <h1 class="display-4">VentMon Respiration Analysis</h1>
+        <p class="lead">This is a work in progress of <a href="https://www.pubinv.org">Public Invention</a>. It can be attached to a data server to produce
+an interactive or static analysis of a respiration. It&#39;s primary purpose is to test pandemic ventilators, but it is free software meant to be reused for other purposes.
+        </p>
+      </div>
+
+
+
+
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon3">PIRDS data server url:</span>
+        </div>
+        <input type="text" class="form-control" id="dserverurl" aria-describedby="basic-addon3">
+
+        <div class="input-group-append">
+          <a class="btn btn-outline-dark btn-sm" href="#" role="button" id="useofficial">Use Ventmon Data Lake: ventmon.coslabs.com</a>
+        </div>
+      </div>
+
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="basic-addon3">Trace ID:</span>
+        </div>
+        <input type="text" class="form-control" id="traceid" aria-describedby="basic-addon3">
+      </div>
+
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+  <span class="input-group-text" for="samples_to_plot">Number of Samples (~10s per 3000 samples):</span>
+        </div>
+        <input type="text" class="form-control" id="samples_to_plot" aria-describedby="samples_to_plot">
+      </div>
+
+
+  <label for="livetoggle">Plot Live:</label>
+<label class="switch">
+  <input type="checkbox" id="livetoggle" checked>
+  <span class="slider round"></span>
+</label>
+
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-9">
+            <div id='PFGraph'><!-- Pressure and Flow Graph --></div>
+            <div id='EventsGraph'><!-- Events --></div>
+          </div>
+          <div class="col-3">
+            <div class="container" id="calcarea">
+              <div>
+                <label for="max">PIP (max): </label>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="max"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="max_h">H:</label>
+                      <input class="fence" id="max_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="max_l">L:</label>
+                      <input class="fence" id="max_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
+             </div>
+             <div>
+                <label for="avg">P. Mean: </label>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="avg"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="avg_h">H:</label>
+                      <input class="fence" id="avg_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="avg_l">L:</label>
+                      <input class="fence" id="avg_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
+             </div>
+             <div>
+                <label for="min">PEEP (min): </label>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="min"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="min_h">H:</label>
+                      <input class="fence" id="min_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="min_l">L:</label>
+                      <input class="fence" id="min_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
+             </div>
+             <div>
+                <label for="mv">MVs (l/min): </label>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="mv"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="mv_h">H:</label>
+                      <input class="fence" id="mv_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="mv_l">L:</label>
+                      <input class="fence" id="mv_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+              <div>
+                <label for="bpm">RR: </label>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="bpm"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="bmp_h">H:</label>
+                      <input class="fence" id="bpm_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="bpm_l">L:</label>
+                      <input class="fence" id="bpm_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label for="ier">I:E ratio: </label>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="ier"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="ier_h">H:</label>
+                      <input class="fence" id="ier_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="ier_l">L:</label>
+                      <input class="fence" id="ier_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
+              </div>
+                <div>
+                <label for="tv">VTd (ml): </label>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="tv"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="tv_h">H:</label>
+                      <input class="fence" id="tv_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="tv_l">L:</label>
+                      <input class="fence" id="tv_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
+              </div>
+<!--              <div>
+                <label for="tv">VTd (ml): </label>
+                <div class="calcnum">
+                  <label id="tv"> </label>
+                </div>
+  </div>
+  -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- end main area -->
+</div>
+
+<div>
+  <button id="import">Import Trace</button>
+  <button id="export">Export Trace</button>
+</div>
+<div>
+  <textarea id="json_trace" rows="30" cols="80"></textarea>
+</div>
+
+<p>
+  This is a work in progress of <a href="https://www.pubinv.org">Public Invention</a>.
+
+<p>
+  This is a tester tool for open-source ventilators.
+  It uses the <a href="https://github.com/PubInv/respiration-data-standard">PIRDS data format</a>.
+
+<p>
+  The basic operation is receive data from web server specified in the URL above.
+  Probably for now that will be the VentMon Python web server that
+  listens on a serial port for the VentMon device or any other
+  device that streams PIRDS events.
+
+</div>
 </body>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
-<script>
-  const url = "http://localhost:80";
+  <script>
 
-var samples;
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+const VENTMON_DATA_LAKE = "http://ventmon.coslabs.com";
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+var TRACE_ID = urlParams.get('i')
+var DSERVER_URL = window.location.protocol + "//" + window.location.host;
+var NUM_TO_READ = 500;
+
+var DATA_RETRIEVAL_PERIOD = 50;
+
+var RESPIRATION_RATE_WINDOW_SECONDS = 20;
+
+var intervalID = null;
+
+
+// This sould be better as time, but is easier
+// to do as number of samples.
+var MAX_SAMPLES_TO_STORE_S = 2000;
+var samples = [];
+var INITS_ONLY = true;
+
+// This is just to get the party started!
+function init_samples() {
+    return [
+	{
+	    "event": "M",
+	    "type": "P",
+	    "ms": 19673310,
+	    "loc": "A",
+	    "num": "0",
+	    "val": 10111
+	},
+	{
+	    "event": "M",
+	    "type": "D",
+	    "ms": 19673310,
+	    "loc": "A",
+	    "num": "0",
+	    "val": 4
+	},
+	{
+	    "event": "M",
+	    "type": "F",
+	    "ms": 19673310,
+	    "loc": "A",
+	    "num": "0",
+	    "val": 0
+	},
+	{
+	    "event": "M",
+	    "type": "P",
+	    "ms": 19673376,
+	    "loc": "A",
+	    "num": "0",
+	    "val": 10111
+	},
+	{
+	    "event": "M",
+	    "type": "D",
+	    "ms": 19673376,
+	    "loc": "A",
+	    "num": "0",
+	    "val": 4
+	},
+	{
+	    "event": "M",
+	    "type": "F",
+	    "ms": 19673376,
+	    "loc": "A",
+	    "num": "0",
+	    "val": 0
+	},
+	{
+	    "event": "M",
+	    "type": "P",
+	    "ms": 19673442,
+	    "loc": "A",
+	    "num": "0",
+	    "val": 10110
+	},
+	{
+	    "event": "M",
+	    "type": "D",
+	    "ms": 19673442,
+	    "loc": "A",
+	    "num": "0",
+	    "val": 3
+	},
+    ];
+}
 
 
 
 function unpack(rows, key) {
-  return rows.map(function(row) { return row[key]; });
+    return rows.map(function(row) { return row[key]; });
 }
 
-var layout = {
-  title: 'Basic Time Series',
-};
+const CONVERT_PIRDS_TO_SLM = 1/1000;
 
+// we have now changed this, there will be flow and
+// pressure in the same samples, and we should filter.
+// TODO: I need to add maximal start and end
+// samples to equalize all the plots.
 function samplesToLine(samples) {
-  var millis = unpack(samples, 'millis');
-  var sums = unpack(samples, 'sum');
-  // Convert to seconds...
+    var flows = samples.filter(s => s.event == 'M' && s.type == 'F');
+
+    // These are slm/1000, or ml/minute...
+    // so we multiply by 1000 to get liters per minute
+    var flow_values = unpack(flows,"val").map(v => v * CONVERT_PIRDS_TO_SLM);
+    var fmillis = unpack(flows, 'ms');
+    // Convert to seconds...
+    var fmin = Math.min(...fmillis);
+    var fzeroed = fmillis.map(m =>(m-fmin)/1000.0);
+
+    var pressures = samples.filter(s => s.event == 'M' && s.type == 'D' && s.loc == 'A');
+
+    var pmillis = unpack(pressures, 'ms');
+    var pmin = Math.min(...pmillis);
+    var pzeroed = pmillis.map(m =>(m-pmin)/1000.0);
+    // the PIRDS standard is integral mm H2O, so we divide by 10
+    var delta_p = unpack(pressures, 'val').map(p => p / 10);
+    var diff_p = {type: "scatter", mode: "lines",
+		  name: "pressure",
+		  x: pzeroed,
+		  y: delta_p,
+		  line: {color: "#FF0000"}
+		 };
+
+  var flow = {type: "scatter", mode: "lines",
+		name: "flow",
+		x: fzeroed,
+	      y: flow_values,
+              xaxis: 'x2',
+              yaxis: 'y2',
+              fill: 'tozeroy',
+		line: {color: '#0000FF'}
+             };
+
+  var max_flow = flow_values.reduce(
+    function(a, b) {
+      return Math.max(Math.abs(a), Math.abs(b));
+    }
+    ,0);
+  var scaled_flow = flow_values.map(f => 100.0 * (f / max_flow));
+  var flow_hollow = {type: "scatter", mode: "lines",
+		name: "flow ghost",
+		     x: fzeroed,
+                     // Convert to a percentage
+	             y: scaled_flow,
+		line: {color: '#8888FF'}
+               };
+  return [diff_p,flow,flow_hollow];
+}
+function plot(samples, trans, breaths) {
+  var new_data = samplesToLine(samples);
+  var millis = unpack(samples, 'ms');
   var min = Math.min(...millis);
   var zeroed = millis.map(m =>(m-min)/1000.0);
-  var flow = {type: "scatter", mode: "lines",
-            name: "flow",
-            x: zeroed,
-            y: unpack(samples, 'Flow'),
-            line: {color: '#17BECF'}
-             };
-  var sum = {type: "scatter", mode: "lines",
-            name: "sum",
-            x: zeroed,
-            y: sums,
-            line: {color: '#FF00CF'}
-            };
-  //  return [flow,sum];
-  return [flow];
-}
-function plot(samples, trans) {
-  var new_data = samplesToLine(samples);
-  if (trans) {
-    var ttimes = unpack(trans, 'ms');
-    var zeroed = ttimes.map(m =>m/1000.0);
-    var tstates = unpack(trans, 'state');
-    var tstates_amped = tstates.map(m =>m*4);
-    var transPlot = {type: "scatter", mode: "lines",
-                     name: "trans",
-                     x: zeroed,
-            y: tstates_amped,
-            line: {color: '#0000FF'}
-            };
-    new_data.push(transPlot);
+
+  {
+    var layout = {
+      title: 'VentMon Breath Analysis',
+      showlegend: false,
+      xaxis: {domain: [0.0,1.0]},
+      yaxis: {
+        title: 'Airway P(cm H2O)',
+        titlefont: {color: 'red'},
+        tickfont: {color: 'red'},
+      },
+      xaxis2: {domain: [0.0,1.0]},
+      yaxis2: {
+        title: 'Flow l/minute',
+        titlefont: {color: 'blue'},
+        tickfont: {color: 'blue'}
+      },
+      grid: {
+        rows: 2,
+        columns: 1,
+        pattern: 'independent',
+        roworder: 'top to bottom'}
+    }
+
+    var double_plot = [new_data[0],new_data[1]];
+
+    Plotly.newPlot('PFGraph', double_plot, layout);
   }
-  Plotly.newPlot('myDiv', new_data, layout);
+
+  // The Y-axis for the events will be percentage.
+  // This is somewhat abstract; each trace has
+  // a different meaning. In general it will be
+  // % as a function of some known value, which
+  // will be either a limit or a min or max.
+  {
+    var event_graph = [];
+    if (trans) {
+      // Transitions are simply scaled to 50%.
+      var tmillis = unpack(trans, 'ms');
+      var tzeroed = tmillis.map(m =>(m-min)/1000.0);
+      var tstates = unpack(trans, 'state');
+      var tstates_amped = tstates.map(m =>m*50);
+      var transPlot = {type: "scatter",
+                       mode: "lines+markers",
+		       name: "trans",
+		       x: tzeroed,
+		       y: tstates_amped,
+                       line: {shape: 'hv',
+                              color: 'dkGreen'},
+		      };
+      // We add a hollow flow line to see in position..
+      event_graph.push(new_data[2]);
+      event_graph.push(transPlot);
+    }
+
+    if (breaths) {
+      var bmillis = unpack(breaths, 'ms');
+      var bzeroed = bmillis.map(m =>(m-min)/1000.0);
+      // I'm goint to a add start and end transition to make the plot
+      // come out right
+      var ys = breaths.map( b => 0);
+      var breathPlot = {type: "scatter", mode: "markers",
+		        name: "Transitions",
+		        x: bzeroed,
+		        y: ys,
+		        marker: { size: 8, color: "red",symbol: "diamond" },
+                        textposition: 'bottom center',
+                        text: bzeroed
+		       };
+      event_graph.push(breathPlot);
+      // Now I attempt to extract volumes...
+      // Our breaths mark the END of a breath..
+      // so we want to draw the volumes that way.
+      const volume_ht_factor = 20;
+      var max_exh = unpack(breaths,'vol_e').reduce(
+        function(a, b) {
+          return Math.max(Math.abs(a), Math.abs(b));
+        }
+        ,0);
+      var max_inh = unpack(breaths,'vol_i').reduce(
+        function(a, b) {
+          return Math.max(Math.abs(a), Math.abs(b));
+        }
+        ,0);
+      var max_v = Math.max(max_inh,max_exh);
+
+      var exh_v = unpack(breaths, 'vol_e').map(e => 100 * e / max_v);
+      var t_exh_v =  unpack(breaths, 'vol_e').map(e => Math.round(e*1000.0)+"ml exh");
+      var inh_v = unpack(breaths, 'vol_i').map(i => 100 * i / max_v);
+      var t_inh_v = unpack(breaths, 'vol_i').map(e => Math.round(e*1000.0)+"ml inh");
+      // now to graph properly, I must find the center of an inhalation.
+      // I have packed these into the breaths...
+      var inhale_centers = breaths.map(b => ((trans[b.trans_begin_inhale].ms + trans[b.trans_cross_zero].ms) - 2*min) / (2.0 * 1000.0));
+      var exhale_centers = breaths.map(b => ((trans[b.trans_cross_zero].ms + trans[b.trans_end_exhale].ms) - 2*min) / (2.0 * 1000.0));
+
+      var inhPlot = {type: "scatter", mode: "markers+text",
+                     name: "Inh. ml",
+                     textposition: 'bottom center',
+                     x: inhale_centers,
+                     y: inh_v,
+                     text: t_inh_v,
+                     marker: { size: 8,
+                               color: 'black',
+                               symbol: 'triangle-down'}
+                    };
+      var exhPlot = {type: "scatter", mode: "markers+text",
+                     name: "Exh. ml",
+                     textposition: 'top center',
+                     marker : {
+                       sizer: 12,
+                       color: 'green',
+                       symbol: 'triangle-up' },
+                     x: exhale_centers,
+                     y: exh_v,
+                     text: t_exh_v,
+
+                    };
+      event_graph.push(inhPlot);
+      event_graph.push(exhPlot);
+    }
+
+    // Now I will attempt to add other markers, such as Humidity, Altitude, and other events,
+    // including possible warning events.
+
+    function gen_graph(samples,name,color, textposition, tp,lc,vf,tf) {
+      var selected = samples.filter(s => s.event == 'M' && s.type == tp && s.loc == lc);
+      var millis = unpack(selected, 'ms');
+      var zeroed = millis.map(m =>(m-min)/1000.0);
+      var vs = selected.map(vf);
+      var vs_t = vs.map(tf);
+      var plot = {type: "scatter", mode: "markers+text",
+                     name: name,
+                     textposition: textposition,
+                     x: zeroed,
+                     y: vs,
+                     text: vs_t,
+                     marker: { size: 10, color: color }
+                    };
+      return plot;
+
+    }
+    {
+      var humAirwayPlot = gen_graph(samples,"Hum (%)","Aqua",'top center','H','A',
+                              (s => s.val/100.0),
+                              (v =>  "H2O (A): "+v.toFixed(0)+"%"));
+      event_graph.push(humAirwayPlot);
+    }
+
+    {
+      var humAmbientPlot = gen_graph(samples,"Hum (%)","CornflowerBlue",'bottom center','H','B',
+                              (s => -s.val/100.0),
+                                      (v =>  "H2O (B): "+(-v).toFixed(0)+"%"));
+      event_graph.push(humAmbientPlot);
+    }
+
+    {
+      var tempAirwayPlot = gen_graph(samples,"Temp A","red",'bottom center','T','A',
+                              (s => s.val/100.0),
+                              (v =>  "T (A): "+v.toFixed(1)+"C"));
+      event_graph.push(tempAirwayPlot);
+    }
+
+    {
+      var tempAmbientPlot = gen_graph(samples,"Temp B","orange",'top center','T','B',
+                              (s => -s.val/100.0),
+                                      (v =>  "T (B): "+(-v).toFixed(1)+"C"));
+      event_graph.push(tempAmbientPlot);
+    }
+
+    // Altitude is really just a check that the system is working
+     {
+      var altAmbientPlot = gen_graph(samples,"Altitude","purple",'right','A','B',
+                              (s => s.val/20.0),
+                                      (v =>  "Alt: "+(v*20.0).toFixed(0)+"m"));
+      event_graph.push(altAmbientPlot);
+    }
+
+
+    // The BME680 sensor detects VOC gases. I don't think has any clinical value
+    // compared
+
+    // {
+    //   var gasAirwayPlot = gen_graph(samples,"Gas A","yellow",'bottom center','G','A',
+    //                           (s => s.val/1000.0),
+    //                                 (v =>  "G (A): "+(v*100).toFixed(1)+"Ohms"));
+    //   event_graph.push(gasAirwayPlot);
+    // }
+
+    // {
+    //   var gasAmbientPlot = gen_graph(samples,"Gas B","gold",'top center','G','B',
+    //                           (s => -s.val/1000.0),
+    //                                   (v =>  "G (B): "+(-v*100).toFixed(1)+"Ohms"));
+    //   event_graph.push(gasAmbientPlot);
+    // }
+
+
+
+    // I'm going to try putting the pressure
+    // in faintly to make the graphs match
+
+    var event_layout = {
+      title: 'Events',
+      showlegend: false,
+      xaxis: {domain: [0.0,1.0]},
+      yaxis: {
+        range: [-100.0, 100.0]
+      },
+    };
+    Plotly.newPlot('EventsGraph', event_graph,event_layout);
+  }
+}
+
+function check_alarms(limits,key,limit,val,f,ms) {
+  var alarms = [];
+  if (limits[key][limit] && (f(val,limits[key][limit]))) {
+    alarms.push({param: key,
+                 limit: limit,
+                 val: val,
+                 ms: ms});
+  }
+  return alarms;
+}
+
+// Return, [min,avg,max] pressures (no smoothing)!
+function compute_pressures(secs,samples) {
+  var pressures = samples.filter(s => s.event == 'M' && s.type == 'D' && s.loc == 'A');
+
+  if (pressures.length == 0) {
+    return [0,0,0,[]];
+  } else {
+    const recent_ms = pressures[pressures.length - 1].ms;
+    var cur_ms = recent_ms;
+    var cnt = 0.0;
+    var i = pressures.length - 1;
+    var cur_sample = pressures[i];
+
+    var min = Number.MAX_VALUE;
+    var max = Number.MIN_VALUE;
+    var sum = 0;
+    var alarms = [];
+    while((i >=0) && (pressures[i].ms > (cur_ms - secs*1000))) {
+      var p = pressures[i].val / 10.0;  // this is now cm H2O
+      if (p < min ) {
+        min = p;
+      }
+      if (p > max) {
+        max = p;
+      }
+      sum += p;
+      cnt++;
+      alarms = alarms.concat(check_alarms(LIMITS,"max","h",p,(a,b) =>(a > b),pressures[i].ms));
+      alarms = alarms.concat(check_alarms(LIMITS,"max","l",p,(a,b) =>(a < b),pressures[i].ms));
+      i--;
+    }
+    return [min,sum/cnt,max,alarms];
+  }
+}
+
+function compute_respiration_rate(secs,samples,transitions,breaths) {
+  // In order to compute the number of breaths
+  // in the last s seconds, I compute those breaths
+  // whose time stamp is s seconds from the most recent sample
+
+  // We will compute respiration rate by counting breaths
+  // and dividing (cnt - 1) by time the first and last inhalation
+  var first_inhale_ms = -1;
+  var last_inhale_ms = -1;
+  if (breaths.length == 0) {
+    return [0,0,0,"NA"];
+  } else {
+    const recent_ms = samples[samples.length - 1].ms;
+    var cur_ms = recent_ms;
+    var cnt = 0.0;
+    var vol_i = 0.0;
+    var vol_e = 0.0;
+    var i = breaths.length - 1;
+    var time_inh = 0;
+    var time_exh = 0;
+    // fully completed inhalation volume does not include the
+    // most recent breath; we need it to be able to accurately
+    // divide by the inhlation_duration.
+    var vol_ci = 0.0;
+
+    while((i >=0) && (breaths[i].ms > (cur_ms - secs*1000))) {
+      cnt++;
+      vol_i += breaths[i].vol_i;
+      if (i < (breaths.length -1)) {
+        vol_ci += breaths[i].vol_i;
+      }
+      vol_e += breaths[i].vol_e;
+
+      const inh_ms = transitions[breaths[i].trans_begin_inhale].ms;
+      // note i is counting down in this loop...
+      if (last_inhale_ms < 0) last_inhale_ms = inh_ms;
+      first_inhale_ms = inh_ms;
+      const exh_ms = transitions[breaths[i].trans_end_exhale].ms;
+      const zero_ms = transitions[breaths[i].trans_cross_zero].ms;
+      time_inh += (zero_ms - inh_ms);
+      time_exh += (exh_ms -  zero_ms);
+      i--;
+    }
+    if ((cnt > 1) && (first_inhale_ms != last_inhale_ms)) {
+      var inhalation_duration = last_inhale_ms - first_inhale_ms;
+      var inhalation_duration_min = inhalation_duration / (60.0 * 1000.0);
+      var rr = (cnt - 1) / inhalation_duration_min;
+      var duration_minutes = secs / 60.0;
+
+      // This is liters per minute. vol_ci is in liters.
+      // inhalation_duration is in ms.
+      var minute_volume =  vol_ci / inhalation_duration_min;
+
+      var tidal_volume = 1000.0 * vol_i / cnt;
+
+      var EIratio = (time_inh == 0) ? null : time_exh / time_inh;
+      return  [
+        rr,
+        tidal_volume,
+        minute_volume,
+        EIratio];
+    } else {
+      return [0,0,0,"NA"];
+    }
+  }
+      }
+
+var LIMITS = {
+  max: { h: 40,
+         l: 0},
+  avg: { h: 30,
+         l: 0},
+  min: { h: 10,
+         l: -10},
+  mv: { h: 10,
+         l: 1},
+  bpm: { h: 40,
+         l: 5},
+  ier: { h: 4,
+         l: 0.25},
+  tv: { h: 1000,
+         l: 200},
+}
+
+function load_ui_with_defaults(limits) {
+  var Lkeys = Object.keys(limits);
+  Lkeys.forEach((key,index) => {
+    ["h","l"].forEach(limit => {
+      console.log(key,limit,limits[key][limit]);
+      $("#"+key+"_"+limit).val(limits[key][limit]);
+    })
+  });
+}
+
+function reflectAlarmsInGUI(alarms) {
+  var Lkeys = Object.keys(LIMITS);
+  Lkeys.forEach((key,index) => {
+    ["h","l"].forEach(limit => {
+      var alarms_for_key = alarms.filter(s => s.param == key && s.limit == limit);
+      if (alarms_for_key.length > 0) {
+        $("#"+key).addClass("alarmred");
+        $("#"+key+"_"+limit).addClass("alarmred");
+      } else {
+        $("#"+key).removeClass("alarmred");
+        $("#"+key+"_"+limit).removeClass("alarmred");
+      }
+    })
+  });
+}
+
+function process(samples) {
+  const t = 200; // size of the window is 200ms
+  const v = 50; // min volume in ml
+  var [transitions,breaths] = computeMovingWindowTrace(samples,t,v);
+  plot(samples,transitions,breaths);
+  // How many seconds backwards should we look? Perhaps 20?
+  var [bpm,tv,mv,EIratio] = compute_respiration_rate(RESPIRATION_RATE_WINDOW_SECONDS,samples,transitions,breaths);
+
+  var alarms = [];
+
+  $("#bpm").text(bpm.toFixed(1));
+  $("#tv").text(tv.toFixed(0));
+  $("#mv").text((mv).toFixed(2));
+  if (EIratio == "NA") {
+    $("#ier").text("NA");
+  } else {
+    $("#ier").text((1.0 / EIratio).toFixed(1));
+  }
+  var final_ms = samples[samples.length -1].ms;
+  var b_ms = 0;
+  if (breaths.length > 0) {
+    b_ms = breaths[breaths.length -1].ms;
+  } else {
+    b_ms = final_ms;
+  }
+  function check_high_and_low(limits,key,v,ms) {
+    var al1 = check_alarms(limits,key,"h",v,(a,b) =>(a > b),ms);
+    var al2 = check_alarms(limits,key,"l",v,(a,b) =>(a < b),ms);
+
+    return al1.concat(al2);
+  }
+  alarms = alarms.concat(check_high_and_low(LIMITS,"bpm",bpm.toFixed(1),b_ms));
+  alarms = alarms.concat(check_high_and_low(LIMITS,"tv",tv.toFixed(0),b_ms));
+  alarms = alarms.concat(check_high_and_low(LIMITS,"mv",(mv/1000).toFixed(2),b_ms));
+  alarms = alarms.concat(check_high_and_low(LIMITS,"ier",(1.0 / EIratio).toFixed(1),b_ms));
+
+  var [min,avg,max,palarms] = compute_pressures(RESPIRATION_RATE_WINDOW_SECONDS,samples);
+  alarms = alarms.concat(palarms);
+
+  $("#min").text(min.toFixed(1));
+  $("#avg").text(avg.toFixed(1));
+  $("#max").text(max.toFixed(1));
+
+  reflectAlarmsInGUI(alarms);
+}
+
+// WARNING: This is a hack...if the timestamp is negative,
+// we treat it as a limited (beyond range of sensor) measurement.
+// Our goal is to warn about this, but for now we will just
+// ignore and correct.
+function sanitize_samples(samples) {
+  samples.forEach(s =>
+                  {
+                    if (s.event == "M") {
+                      if ("string" == (typeof s.ms))
+                        s.ms = parseInt(s.ms);
+                      if ("string" == (typeof s.val))
+                        s.val = parseInt(s.val);
+                      if ("string" == (typeof s.num))
+                        s.num = parseInt(s.num);
+                      if (s.ms < 0) {
+                        s.ms = -s.ms;
+                      }
+                    }
+
+                  });
+  return samples;
+}
+
+function retrieveAndPlot(){
+  var trace_piece = (TRACE_ID) ? "/" + TRACE_ID : "";
+  DSERVER_URL = $("#dserverurl").val();
+//  NUM_TO_READ = $("#num_to_read").val();
+  var url =  DSERVER_URL + trace_piece + "/json?n="+ NUM_TO_READ;
+
+  $.ajax({url: url,
+          success: function(cur_sam){
+
+              // WARNING: This is a hack...if the timestamp is negative,
+              // we treat it as a limited (beyond range of sensor) measurement.
+              // Our goal is to warn about this, but for now we will just
+              // ignore and correct.
+
+            cur_sam = sanitize_samples(cur_sam);
+
+            if (cur_sam.length == 0) {
+              console.log("no samples; potential misconfiguration!");
+            } else {
+	      if (INITS_ONLY) {
+	        samples = cur_sam;
+	        INITS_ONLY = false;
+	      } else {
+                var discard = Math.max(0,
+                                       samples.length + cur_sam.length - MAX_SAMPLES_TO_STORE_S);
+	        samples = samples.slice(discard);
+	      }
+
+
+	      samples = samples.concat(cur_sam);
+	      // We are not guaranteeed to get samples in order
+	      // we sort them....
+	      samples = samples.sort((a,b) => a.ms - b.ms);
+              process(samples);
+            }
+          },
+          error: function(xhr, ajaxOptions, thrownError) {
+	    console.log("Error!" + xhr.status);
+	    console.log(thrownError);
+            clearInterval(intervalID);
+          }
+         });
 }
 
 
-$("#plot").click(function(){
-  $.ajax({url: url, success: function(result){
-    var lines = result.split("\n").filter( x => (x.length > 0) && (x[0] == '{') );
-
-    samples = lines.map(JSON.parse);
-    plot(samples);
-  }});
-});
-
-$("#record").click(function(){
-  $.ajax({url: url+"/rec?"+1000, success: function(result){
-  }});
-});
-
-
+function compute_transitions(vm,flows) {
+  var transitions = [];
+  var state = 0; // Let 1 mean inspiration, -1 mean expiration, 0 neither
+  for(var i = 0; i < flows.length; i++) {
+    var f = flows[i].val * CONVERT_PIRDS_TO_SLM;
+    //    var ms = flows[i].ms-first_time;
+    var ms = flows[i].ms;
+    if (state == 0) {
+      if (f > vm) {
+	state = 1;
+	transitions.push({ state: 1, sample: i, ms: ms})
+      } else if (f < -vm) {
+	state = -1;
+	transitions.push({ state: -1, sample: i, ms: ms})
+      }
+    } else if (state == 1) {
+      if (f < -vm) {
+	state = -1;
+	transitions.push({ state: -1, sample: i, ms: ms})
+      } else if (f < vm) {
+	state = 0;
+	transitions.push({ state: 0, sample: i, ms: ms})
+      }
+    } else if (state == -1) {
+      if (f > vm) {
+	state = 1;
+	transitions.push({ state: 1, sample: i, ms: ms})
+      } else if (f > 0) {
+	state = 0;
+	transitions.push({ state: 0, sample: i, ms: ms})
+      }
+    }
+  }
+  return transitions;
+}
 // A simple computation of a moving window trace
 // computing [A + -B], where A is volume to left
 // of sample int time window t, and B is volume to right
 // t is in milliseconds
 function computeMovingWindowTrace(samples,t,v) {
-  var A = 0; // running volume behind sample[i]
-  var B = 0; // running volume ahead of sample[i]
-  // first, compute the number of samples in a window...
-  // this is a kludge!
-  var first_time = samples[0].millis;
-  var last_time = samples[samples.length - 1].millis;
+
+  var flows = samples.filter(s => s.event == 'M' && s.type == 'F');
+  var first_time = flows[0].ms;
+  var last_time = flows[flows.length - 1].ms;
   var duration = last_time - first_time;
-  var n = Math.ceil(samples.length * t / duration);
-  // make it odd...
-  if ((n % 2) == 0) {
-    n = n+1;
-  }
-  // This way of doing it biases it because
-  // of the way we start, and we remained biased.
-  // By setting A = -B to begin with, we solve that problem.
-  var h = Math.floor(n/2); // h is now num of samples
-  // on either side of s
-  for(var i = 1; i < h+1; i++) {
-    B = B + samples[i].Flow;
-  }
-  var stack = [];
-
-  for(var i = 0; i < samples.length; i++) {
-    // first, create the sample
-    stack[i] = A + -B;
-    // now adust A and B!
-    A = A + samples[i].Flow;
-    if (i - h > 0) {
-      A = A - samples[i-h].Flow;
-    }
-
-    if (i + h < samples.length)
-      B = B + samples[i+h].Flow;
-    B = B - samples[i].Flow;
-  }
-
-  // Experimental area...
-  // Now we want to compute local extrema in the time window,
-  // and we will call those breath points...
-  var maxs = [];
-  var mins = [];
 
   // Here is an idea...
   // We define you to be in one of three states:
@@ -158,74 +1051,234 @@ function computeMovingWindowTrace(samples,t,v) {
   // or zero, it causes a transition. If you are inspiring,
   // you have to cross zero to transition to neither,
   // and you start expiring when you cross the treshold.
-  const vm = 4;
+
+  // This is measured in standard liters per minute.
+  const vm = 10; // previously used 4
 
   // We will model this as a list of transitions.
   // A breath is any number of inspirations followed by
   // any number of expirations. (I+)(E+)
 
-  var transitions = [];
-  var state = 0; // Let 1 mean inspiration, -1 mean expiration, 0 neither
-  for(var i = 0; i < samples.length; i++) {
-    var f = samples[i].Flow;
-    var ms = samples[i].millis-first_time;
-    if (state == 0) {
-      if (f > vm) {
-        state = 1;
-        transitions.push({ state: 1, sample: i, ms: ms})
-      } else if (f < -vm) {
-        state = -1;
-        transitions.push({ state: -1, sample: i, ms: ms})
+  var transitions = compute_transitions(vm,flows);
+
+  // Now that we have transitions, we can apply a
+  // diferrent algorithm to try to define "breaths".
+  // Because a breath is defined as an inspiration
+  // and then an expiration, we will define a breath
+  // as from the first inspiration, until there has
+  // been one expiration, until the next inspiration.
+  var breaths = [];
+  var expiring = false;
+
+  // This should be in liters...
+  function integrateSamples(a,z) {
+    // -1 for quadilateral approximation
+    var vol = 0;
+    for(var j = a; j < z-1; j++) {
+      // I'll use qadrilateral approximation.
+      // We'll form each quadrilateral between two samples.
+      var ms = flows[j+1].ms - flows[j].ms;
+      var ht = ((flows[j+1].val + flows[j].val )/2) * CONVERT_PIRDS_TO_SLM;
+      // Flow is actually in standard liters per minute,
+      // so to get liters we divide by 60 to it l/s,
+      // and and divde by 1000 to convert ms to seconds.
+      // We could do that here, but will move constants
+      // to end...
+      vol += ms * ht;
+      if (isNaN(vol)) {
+        debugger;
       }
-    } else if (state == 1) {
-      if (f < -vm) {
-        state = -1;
-        transitions.push({ state: -1, sample: i, ms: ms})
-      } else if (f < 0) {
-        state = 0;
-        transitions.push({ state: 0, sample: i, ms: ms})
+    }
+    return vol/(60*1000);
+  }
+
+  function compute_breaths_based_on_exhalations(transitions) {
+    var beg = 0;
+    var zero = 0;
+    var last = 0;
+    var voli = 0;
+    var vole = 0;
+
+    for(var i = 0; i < transitions.length; i++) {
+      // We're looking for the end of the inhalation here!!
+      if (((i -1) >= 0) && transitions[i-1].state == 1 && (transitions[i].state == 0 || transitions[i].state == -1 )) {
+        zero = i;
       }
-    } else if (state == -1) {
-      if (f > vm) {
-        state = 1;
-        transitions.push({ state: 1, sample: i, ms: ms})
-      } else if (f > 0) {
-        state = 0;
-        transitions.push({ state: 0, sample: i, ms: ms})
+      if (expiring && transitions[i].state == 1) {
+        breaths.push({ ms: transitions[i].ms,
+		       sample: transitions[i].sample,
+		       vol_e: vole,
+		       vol_i: voli,
+                       trans_begin_inhale: beg,
+                       trans_cross_zero: zero,
+                       trans_end_exhale: i,
+		     }
+		    );
+        beg = i;
+        expiring = false;
+        vole = integrateSamples(last,transitions[i].sample);
+        last = transitions[i].sample;
+      }
+      if (!expiring && transitions[i].state == -1) {
+        expiring = true;
+        voli = integrateSamples(last,transitions[i].sample);
+        last = transitions[i].sample;
       }
     }
   }
+  // This is based only on inhalations, and
+  // is therefore functional when there is a check valve
+  // in place. Such a system will rarely
+  // have negative flows, and we must mark
+  // the beginning of a breath from a transition to a "1"
+  // state from any other state.
+  // This algorithm is simple: A breath begins on a trasition
+  // to 1 from a not 1 state. This algorithm is susceptible
+  // to "stutter" near the boundary point, but if necessary
+  // a digital filter would sove that; we have not yet found
+  // that level of sophistication needed.
+  // We still want to track zeros, but now must strack them
+  // as a falling signal.
+  function compute_breaths_based_without_negative_flow(transitions) {
+    var beg = 0;
+    var zero = 0;
+    var last = 0;
+    var voli = 0;
+    var vole = 0;
 
-  console.log(transitions);
+    var breaths = [];
+    var expiring = true;
 
-  return [stack,transitions];
-}
+    for(var i = 0; i < transitions.length; i++) {
+      // We're looking for the end of the inhalation here!!
+      if (((i -1) >= 0) && transitions[i-1].state == 1 &&
+          (transitions[i].state == 0 || transitions[i].state == -1 )) {
+        zero = i;
+      }
+      if (expiring && transitions[i].state == 1) {
+        breaths.push({ ms: transitions[i].ms,
+		       sample: transitions[i].sample,
+		       vol_e: vole,
+		       vol_i: voli,
+                       trans_begin_inhale: beg,
+                       trans_cross_zero: zero,
+                       trans_end_exhale: i,
+		     }
+		    );
+        beg = i;
+        expiring = false;
+        vole = integrateSamples(last,transitions[i].sample);
 
-// Experimental math by Rob.
-// Take ALL of the samples (so that we have times)
-// A quick and dirty approximation is to sample equal
-// sample spacing, which is proably wrong.
-// The basic algorithm is take width of time t,
-// move a window of time t along the curve.
-// Any sample s which
-function findBreaths(samples,t,v) {
-  var summation = computeMovingWindowTrace(samples,t,v);
-  // Now the summation points are quite prominent...
-  // We seach for local maxima. Then when we have two
-  // maxima, we will look for minima between these
-  // peaks as a simple minima
-  //
-}
-
-$("#breath").click(function(){
-  const t = 200; // size of the window is 200ms
-  const v = 50; // min volume in ml
-  var [summation,transitions] = computeMovingWindowTrace(samples,t,v);
-  findBreaths(samples,t,v);
-  for(var i = 0; i < summation.length; i++) {
-    samples[i].sum = summation[i];
+        last = transitions[i].sample;
+      }
+      if (!expiring && ((transitions[i].state == -1) || (transitions[i].state == 0)))  {
+        expiring = true;
+        voli = integrateSamples(last,transitions[i].sample);
+        last = transitions[i].sample;
+      }
+    }
+    return breaths;
   }
-  plot(samples,transitions);
+
+  breaths = compute_breaths_based_without_negative_flow(transitions);
+
+  return [transitions,breaths];
+}
+
+
+$("#useofficial").click(function() {
+    DSERVER_URL = VENTMON_DATA_LAKE;
+    $("#dserverurl").val(DSERVER_URL);
 });
 
-  </script>
+$("#import").click(function() {
+    var input_trace = $("#json_trace").val();
+    samples = JSON.parse(input_trace);
+});
+
+$("#export").click(function() {
+    $("#json_trace").val(JSON.stringify(samples,null,2));
+});
+
+
+  // Experimental timing against the data server
+
+function stop_interval_timer() {
+  clearInterval(intervalID);
+  intervalID = null;
+}
+function start_interval_timer() {
+  if (intervalID) {
+    stop_interval_timer();
+  }
+  intervalID = setInterval(
+    function() {
+      retrieveAndPlot();
+    },
+    DATA_RETRIEVAL_PERIOD);
+}
+function toggle_interval_timer() {
+  if (intervalID) {
+    stop_interval_timer();
+  } else {
+    start_interval_timer();
+  }
+}
+
+function setLimit(ed) {
+  if(ed.which == 13) {
+    var id = ed.target.id;
+    var v = $("#"+id).val();
+    var vf = parseFloat(v);
+    var destruct = id.split("_");
+    LIMITS[destruct[0]][destruct[1]] = isNaN(vf) ? null : vf;
+  }
+}
+
+$(".fence").keypress(setLimit);
+
+$("#livetoggle").change(toggle_interval_timer);
+
+$("#startoperation").click(start_interval_timer);
+
+$("#stopoperation").click(stop_interval_timer);
+
+$( document ).ready(function() {
+
+  if (window.location.protocol == "http:")
+    DSERVER_URL = window.location.protocol + "//" + window.location.host;
+  else
+    DSERVER_URL = "http://localhost";
+
+
+  $( "#dserverurl" ).val( DSERVER_URL );
+  $('#dserverurl').change(function () {
+    DSERVER_URL = $("#dserverurl").val();
+  });
+
+  // $( "#num_to_read" ).val( NUM_TO_READ );
+  // $('#num_to_read').change(function () {
+  //   NUM_TO_READ = $("#num_to_read").val();
+  // });
+
+  $( "#traceid" ).val( TRACE_ID );
+  $('#traceid').change(function () {
+    TRACE_ID = $("#traceid").val();
+  });
+
+
+  $( "#samples_to_plot" ).val( MAX_SAMPLES_TO_STORE_S );
+  $('#samples_to_plot').change(function () {
+    MAX_SAMPLES_TO_STORE_S = $("#samples_to_plot").val();
+  });
+
+  samples = init_samples();
+  process(samples);
+  start_interval_timer();
+
+  load_ui_with_defaults(LIMITS);
+
+});
+
+
+</script>
