@@ -913,7 +913,7 @@ function process(samples) {
   }
   alarms = alarms.concat(check_high_and_low(LIMITS,"bpm",bpm.toFixed(1),b_ms));
   alarms = alarms.concat(check_high_and_low(LIMITS,"tv",tv.toFixed(0),b_ms));
-  alarms = alarms.concat(check_high_and_low(LIMITS,"mv",(mv/1000).toFixed(2),b_ms));
+  alarms = alarms.concat(check_high_and_low(LIMITS,"mv",(mv).toFixed(2),b_ms));
   alarms = alarms.concat(check_high_and_low(LIMITS,"ier",(1.0 / EIratio).toFixed(1),b_ms));
 
   var [min,avg,max,palarms] = compute_pressures(RESPIRATION_RATE_WINDOW_SECONDS,samples);
@@ -952,7 +952,6 @@ function sanitize_samples(samples) {
 function retrieveAndPlot(){
   var trace_piece = (TRACE_ID) ? "/" + TRACE_ID : "";
   DSERVER_URL = $("#dserverurl").val();
-//  NUM_TO_READ = $("#num_to_read").val();
   var url =  DSERVER_URL + trace_piece + "/json?n="+ NUM_TO_READ;
 
   $.ajax({url: url,
@@ -986,7 +985,9 @@ function retrieveAndPlot(){
           error: function(xhr, ajaxOptions, thrownError) {
 	    console.log("Error!" + xhr.status);
 	    console.log(thrownError);
-            clearInterval(intervalID);
+            //            clearInterval(intervalID);
+            stop_interval_timer();
+            $("#livetoggle").prop("checked",false);
           }
          });
 }
@@ -1204,6 +1205,7 @@ $("#export").click(function() {
 function stop_interval_timer() {
   clearInterval(intervalID);
   intervalID = null;
+  $("#livetoggle").prop("checked",false);
 }
 function start_interval_timer() {
   if (intervalID) {
@@ -1214,6 +1216,7 @@ function start_interval_timer() {
       retrieveAndPlot();
     },
     DATA_RETRIEVAL_PERIOD);
+  $("#livetoggle").prop("checked",true);
 }
 function toggle_interval_timer() {
   if (intervalID) {
@@ -1252,6 +1255,7 @@ $( document ).ready(function() {
   $( "#dserverurl" ).val( DSERVER_URL );
   $('#dserverurl').change(function () {
     DSERVER_URL = $("#dserverurl").val();
+    start_interval_timer();
   });
 
   // $( "#num_to_read" ).val( NUM_TO_READ );
@@ -1262,6 +1266,7 @@ $( document ).ready(function() {
   $( "#traceid" ).val( TRACE_ID );
   $('#traceid').change(function () {
     TRACE_ID = $("#traceid").val();
+    start_interval_timer();
   });
 
 
