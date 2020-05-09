@@ -1,6 +1,6 @@
   <!--
-Breath Plot: COVID-19 VentMon analysis software
-    Copyright (C) 2022  Robert L. Read
+Breath Plot: COVID-19 Respiration Analysis Software
+    Copyright (C) 2020  Robert L. Read
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,7 @@ Breath Plot: COVID-19 VentMon analysis software
 	<!-- Load plotly.js into the DOM -->
   <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
 
-    <title>Public Invention VentMon</title>
+    <title>Public Invention Respiration Analysis</title>
 
 </head>
   <style>
@@ -158,7 +158,7 @@ an interactive or static analysis of a respiration. It&#39;s primary purpose is 
 
       <div class="input-group mb-3">
         <div class="input-group-prepend">
-  <span class="input-group-text" for="samples_to_plot">Number of Samples (~10s per 3000 samples):</span>
+  <span class="input-group-text" for="samples_to_plot">Number of Samples (~10s per 15000 samples):</span>
         </div>
         <input type="text" class="form-control" id="samples_to_plot" aria-describedby="samples_to_plot">
       </div>
@@ -371,7 +371,7 @@ var intervalID = null;
 
 // This sould be better as time, but is easier
 // to do as number of samples.
-var MAX_SAMPLES_TO_STORE_S = 2000;
+var MAX_SAMPLES_TO_STORE_S = 8000;
 var samples = [];
 var INITS_ONLY = true;
 
@@ -962,12 +962,10 @@ function retrieveAndPlot(){
               // we treat it as a limited (beyond range of sensor) measurement.
               // Our goal is to warn about this, but for now we will just
               // ignore and correct.
-
-            cur_sam = sanitize_samples(cur_sam);
-
-            if (cur_sam.length == 0) {
+            if (cur_sam && cur_sam.length == 0) {
               console.log("no samples; potential misconfiguration!");
             } else {
+              cur_sam = sanitize_samples(cur_sam);
 	      if (INITS_ONLY) {
 	        samples = cur_sam;
 	        INITS_ONLY = false;
