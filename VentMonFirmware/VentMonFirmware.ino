@@ -86,15 +86,23 @@ SFM3X00 flowSensor(0x40);
 
 // It would be nice to support more than one,
 // but the BME680 only has two addresses (0x77, and 0x76 when SD0 tied to GND).
+
 Adafruit_BME680 bme[2]; // I2C
 
 bool found_bme[2] = { false, false}; // an abundance of caution to init
 
+// !!! Unless physical hardware changes the ambient sensor should have an address of 
+// 0x76 while the airway sensor should have an address of 0x77 on the I2C bus. 
+// Do not change this unless directed to do so. !!!
+// sensor addresses
+#define AMBIENT_SENSOR_ADDRESS  0x76
+#define AIRWAY_SENSOR_ADDRESS   0x77
+// these values should match the order the sensors occur in the array addr (below)
+#define AIRWAY_PRESSURE_SENSOR  0
+#define AMBIENT_PRESSURE_SENSOR 1
 
-uint8_t addr[2] = {0x76,0x77};
+uint8_t addr[2] = {AIRWAY_SENSOR_ADDRESS, AMBIENT_SENSOR_ADDRESS};
 
-//Adafruit_BME680 bme(BME_CS); // hardware SPI
-//Adafruit_BME680 bme(BME_CS, BME_MOSI, BME_MISO,  BME_SCK);
 
 bool found_display = false;
 
@@ -282,8 +290,8 @@ void setup() {
   init_ambient();
   while (!Serial);
   //Serial.println(F("BME680 test"));
-  seekBME(0);
-  seekBME(1);
+  seekBME(AIRWAY_PRESSURE_SENSOR);
+  seekBME(AMBIENT_PRESSURE_SENSOR);
 }
 
 bool send_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32_t value) {
@@ -323,17 +331,17 @@ bool send_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32
 }
 
 void seekUnfoundBME() {
-  if (!found_bme[0]) {
-    seekBME(0);
+  if (!found_bme[AIRWAY_PRESSURE_SENSOR]) {
+    seekBME(AIRWAY_PRESSURE_SENSOR);
   }
-  if (!found_bme[1]) {
-    seekBME(1);
+  if (!found_bme[AMBIENT_PRESSURE_SENSOR]) {
+    seekBME(AMBIENT_PRESSURE_SENSOR);
   }
 }
 
 void seekBME(int idx) {
-//  found_bme[idx] = bme[idx].begin(addr[idx], true);
-  found_bme[idx] = bme[idx].begin(addr[idx]);
+  found_bme[idx] = bme[idx].begin(addr[idx], true);
+//  found_bme[idx] = bme[idx].begin(addr[idx]);
   if (!found_bme[idx]) {
     Serial.println("Could not find a valid BME680 sensor, check wiring for:");
     Serial.println(addr[idx],HEX);
@@ -597,17 +605,21 @@ void loop() {
   signed long ambient_pressure = -999; 
   signed long internal_pressure = -999;  // Inspiratory Pathway pressure
   
-  if (found_bme[0]) {
-    internal_pressure = readPressureOnly(0);
+  if (found_bme[AIRWAY_PRESSURE_SENSOR]) {
+    internal_pressure = readPressureOnly(AIRWAY_PRESSURE_SENSOR);
   }
-  if (((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0) && found_bme[1]) {
-      ambient_pressure = readPressureOnly(1);
+  if (((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0) && found_bme[AMBIENT_PRESSURE_SENSOR]) {
+      ambient_pressure = readPressureOnly(AMBIENT_PRESSURE_SENSOR);
+      Serial.print("AMBIENT: ");
+      Serial.println(ambient_pressure);
+      Serial.print("AIRWAY: ");
+      Serial.println(internal_pressure);
       ambient_counter = 1;
 
       // experimentally we will report everything in the stream from 
       // both sensor; sadly the BM# 680 is to slow to do this every sample.
-      report_full(0);
-      report_full(1);
+      report_full(AIRWAY_PRESSURE_SENSOR);
+      report_full(AMBIENT_PRESSURE_SENSOR);
       
       if (ambient_pressure != -999) {    
         outputMeasurement('M', 'P', 'B', 1, ms, ambient_pressure);
