@@ -212,7 +212,16 @@ your project. A small [donation](https://www.pubinv.org/donate/) helps make this
 
 # Technical Support
 
-For technical support, please contact <read.robert@gmail.com> by email.
+For technical support, please contact <read.robert@gmail.com> by email. Some common problems and solutions are listed below. 
+
+### Common Debug: Pressure Readings do not Align With Respiration  
+
+If you have just unboxed the device you may find that the airway pressure does not change in relationship to the flow. If this is the case, it is possible that the I2C addresses of the two BME680 pressure sensors are reversed.  Please contact <read.robert@gmail.com> for support or change the addresses in FW yourself.   
+
+The two addresses should be set as follows:  
+AIRWAY pressure sensor address - 0x77  
+AMBIENT pressure sensor address - 0x76  
+
 
 # Firmware and Software Updates
 
