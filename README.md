@@ -15,9 +15,9 @@ sense, ventilators in the case of a shortfall of commercial and professional equ
 
 This includes rapidly doing high-quality tests, but also includes burn-in and multi-day tests, of
 ventilators. Perhaps we can produce a benchmark for the [multiple efforts](https://github.com/PubInv/covid19-vent-list) going on right now to try to develop a
-Free-libre Open Source ventilator design. 
+Free-libre Open Source ventilator design.
 
-For further explanation of design motivation and approach please refer to the following document - 
+For further explanation of design motivation and approach please refer to the following document -
 [Motivation of Strategy](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/Motivation.md)
 
 # User Manual
@@ -25,7 +25,14 @@ For further explanation of design motivation and approach please refer to the fo
 Although a work in progress, we have a [user manaul](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/UserManaul.md).
 
 
+# Hacking the Firmware
 
+If you have received a VentMon from us,
+it will have VentMonFirmware.ino installed.
+You are welcome to modify the VentMonFirmware.ino file as needed. To do so, you will
+have to install a library of our creation which encpasulates the PIRDS standard.
+Copy the libary [pirds_library](https://github.com/PubInv/PIRDS-respiration-data-standard/tree/master/pirds_library) into your Arudino library location. You may need to install the Adafruit BME680 library
+and other libaries as well.
 
 
 ## Design and Dependencies
@@ -36,14 +43,18 @@ Although a work in progress, we have a [user manaul](https://github.com/PubInv/v
 
 The idea is to make a standalone inline device plugged into the airway. It serves a dual purpose as a monitor/alarm when used on an actual patient, and a test devices for testing prototype ventilators. It also allows for burnin.
 
-VentMon depends on the following Arduino library for communication with Sensirion flow sensors: [SFM3X00](https://github.com/PubInv/SFM3x00) 
+VentMon depends on the following Arduino library for communication with Sensirion flow sensors: [SFM3X00](https://github.com/PubInv/SFM3x00)
 
-Assembly instructions can be found here: [Assembly Instructions](https://docs.google.com/document/d/1n-Ja3UgbrCLcY8kx9rmTZB7b3yNJ_DnjpA1hwfMbgXk/edit#) 
+Assembly instructions can be found here: [Assembly Instructions](https://docs.google.com/document/d/1n-Ja3UgbrCLcY8kx9rmTZB7b3yNJ_DnjpA1hwfMbgXk/edit#)
 
-Initial BOM can be found here: [BOM](https://docs.google.com/document/d/1n-Ja3UgbrCLcY8kx9rmTZB7b3yNJ_DnjpA1hwfMbgXk/edit#) 
+Initial BOM can be found here: [BOM](https://docs.google.com/document/d/1n-Ja3UgbrCLcY8kx9rmTZB7b3yNJ_DnjpA1hwfMbgXk/edit#)
 
 
 ## Status
+
+** May 25th **
+
+We have now shipped 4 VentMons. Most recent modifications involved using the "pirds_library" more universally.
 
 ** May 7th **
 
@@ -54,7 +65,7 @@ We sent the first VentMon to Artemio Mendoza of the 1MillionVents team, and he m
 
 **May 4th:**
 
-May the Fourth be with you. 
+May the Fourth be with you.
 
 We have shipped two VentMons free of charge to open source ventilators team that will use them for volume and flow measurements.
 
@@ -108,4 +119,3 @@ Righ now, we could use:
 # Licensing
 
 All code in this repo is licensed under the MIT License. All documents and diagrams and licensed under CC0.
-

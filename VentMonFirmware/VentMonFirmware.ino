@@ -1,3 +1,4 @@
+
 /***************************************************************************
   This is a library for the BME680 gas, humidity, temperature & pressure sensor
 
@@ -35,6 +36,8 @@
 #include <EthernetUdp.h>
 #include <Dns.h>
 
+
+#include <PIRDS.h>
 #include <SFM3X00.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
@@ -95,8 +98,12 @@ bool found_bme[2] = { false, false}; // an abundance of caution to init
 // 0x76 while the airway sensor should have an address of 0x77 on the I2C bus. 
 // Do not change this unless directed to do so. !!!
 // sensor addresses
-#define AMBIENT_SENSOR_ADDRESS  0x76
-#define AIRWAY_SENSOR_ADDRESS   0x77
+//#define AMBIENT_SENSOR_ADDRESS  0x76
+//#define AIRWAY_SENSOR_ADDRESS   0x77
+
+// This is for Rob's broken board!!!!
+#define AMBIENT_SENSOR_ADDRESS  0x77
+#define AIRWAY_SENSOR_ADDRESS   0x76
 // these values should match the order the sensors occur in the array addr (below)
 #define AIRWAY_PRESSURE_SENSOR  0
 #define AMBIENT_PRESSURE_SENSOR 1
@@ -118,6 +125,7 @@ bool SENSOR_INSTALLED_BACKWARD = true;
 signed long display_max_pressure = 0;
 signed long display_min_pressure = 0;
 
+
 #ifndef htonl
 #define htonl(x) ( ((x)<<24 & 0xFF000000UL) | \
                    ((x)<< 8 & 0x00FF0000UL) | \
@@ -129,6 +137,8 @@ byte mac[6];
 char macs[18];
 
 #define PARAMHOST "ventmon.coslabs.com"
+// #define PARAMHOST "192.168.1.210"
+
 // #define PARAMPORT 5858 // 6111
 // #define LOCALPORT 5858 // 6111
 #define PARAMPORT 6111
@@ -144,14 +154,8 @@ EthernetUDP udpclient;
 #ifdef CIRCBUFF
 #define CSIZE 500
 
-struct packet_t {
-  char event;
-  char mtype;
-  char loc;
-  uint8_t num;
-  uint32_t ms;
-  int32_t value;
-} packets[CSIZE];
+
+Measurment packets[CSIZE];
 
 uint8_t cbuf_head = 0;
 uint8_t cbuf_tail = 0;
@@ -294,28 +298,48 @@ void setup() {
   seekBME(AMBIENT_PRESSURE_SENSOR);
 }
 
-bool send_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32_t value) {
-  union {
-    struct {
-      char first;
-      char mtype;
-      char loc;
-      uint8_t num;
-      uint32_t ms;
-      int32_t value;
-      char nl;
-    } a;
-    byte m[13];
-  } message;
-  uint8_t *mm = message.m;
-  message.a.first = 'M';
-  message.a.mtype = mtype;
-  message.a.loc = loc;
-  message.a.num = 0 + num;
-  message.a.ms = htonl(ms);
-  message.a.value = htonl(value);
-  message.a.nl = '\n';
+void debugPrintBuffer(uint8_t* m,int n) {
+  for(int i = 0; i < n; i++) {
+    Serial.print(m[i],HEX);
+    Serial.print(' ');
+  }
+  Serial.println();
+}
 
+Measurement get_measurement(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32_t value) {
+  Measurement ma;
+  ma.event = event;
+  ma.type = mtype;
+  ma.loc = loc;
+  ma.num = 0 + num;
+  ma.ms = ms;
+  ma.val = value;
+  return ma;
+}
+Message get_message(uint32_t ms, char *msg) {
+  Message m;
+  m.event = 'E';
+  m.type = 'M';
+  m.ms = ms;
+  int n = strlen(msg);
+  if (n > 255) { 
+    m.b_size = 255;
+    memcpy(m.buff,msg,255);
+  } else {
+    m.b_size = n;
+    strcpy(m.buff,msg);
+  }
+  return m;
+}
+
+bool send_data_measurement(Measurement ma) {
+  
+  unsigned char m[14];
+
+  fill_byte_buffer_measurement(&ma,m,13);
+
+  m[13] = '\n';
+  
 //  Serial.print(F(" UDP send to "));
 //  Serial.print(LoghostAddr);
 //  Serial.print(F(" "));
@@ -323,7 +347,29 @@ bool send_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32
 
   if (udpclient.beginPacket(LoghostAddr, Logport) != 1)
     return false;
-  udpclient.write(message.m, 13);
+  udpclient.write(m, 14);
+  if (udpclient.endPacket() != 1)
+    return false;
+
+  return true;
+}
+
+bool send_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32_t value) {
+  Measurement ma = get_measurement(event,mtype,loc,num,ms,value);
+  return send_data_measurement(ma);
+}
+bool send_data_message(Message ma) {
+  
+  unsigned char m[264];
+
+  fill_byte_buffer_message(&ma,m,264);
+// I don't know how to compute this byte.
+  m[263] = '\n';
+ 
+
+  if (udpclient.beginPacket(LoghostAddr, Logport) != 1)
+    return false;
+  udpclient.write(m, 264);
   if (udpclient.endPacket() != 1)
     return false;
 
@@ -340,11 +386,13 @@ void seekUnfoundBME() {
 }
 
 void seekBME(int idx) {
-  found_bme[idx] = bme[idx].begin(addr[idx], true);
-//  found_bme[idx] = bme[idx].begin(addr[idx]);
+  uint8_t loc_addr = addr[idx];
+  // I don't understand why this API does not work, it seemed to work in the previous version....
+//  found_bme[idx] = bme[idx].begin(loc_addr, true);
+  found_bme[idx] = bme[idx].begin(addr[idx]);
   if (!found_bme[idx]) {
     Serial.println("Could not find a valid BME680 sensor, check wiring for:");
-    Serial.println(addr[idx],HEX);
+    Serial.println(loc_addr,HEX);
   } else {
     // Set up oversampling and filter initialization
     if (idx == 0) {
@@ -374,72 +422,28 @@ int ambient_counter = 0;
 
 unsigned long sample_millis = 0;
 
-void outputChrField(char *name,char v) {
-  Serial.print("\"");
-  Serial.print(name);
-  Serial.print("\" : \"");
-  Serial.print(v);
-  Serial.print("\", ");
-}
-void outputNumField(char *name,signed long v) {
-  Serial.print("\"");
-  Serial.print(name);
-  Serial.print("\" : ");
-  Serial.print(v);
-  Serial.print(", ");
-}
-void outputNumFieldNoSep(char *name,signed long v) {
-  Serial.print("\"");
-  Serial.print(name);
-  Serial.print("\" : ");
-  Serial.print(v);
-  Serial.print(" ");
-}
-
-void outputByteField(char *name,unsigned short v) {
-  Serial.print("\"");
-  Serial.print(name);
-  Serial.print("\" : ");
-  Serial.print((unsigned short int) v);
-  Serial.print(", ");
-}
-
-void outputStringFieldNoComma(char *name, char *str) {
-  Serial.print("\"");
-  Serial.print(name);
-  Serial.print("\" : \"");
-  Serial.print(str);
-  Serial.print("\""); 
+void output_on_serial_print_PIRDS(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
+  Measurement ma = get_measurement(e,t,loc,n,ms,val);
+  // I need a proof that this buffer is larger enough, but I think it is...
+  char buff[256];
+  int rv = fill_JSON_buffer_measurement(&ma,buff,256);
+  Serial.print(buff);
 }
 
 void outputMeasurement(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
-  Serial.print("{ ");
-  outputChrField("event",e);
-  outputChrField("type",t);
-  outputNumField("ms",ms);
-  outputChrField("loc",loc);
-  outputByteField("num",n);
-  outputNumFieldNoSep("val",val);
-  Serial.print(" }");
+
+  output_on_serial_print_PIRDS(e, t, loc, n, ms, val);
 
   send_data(e, t, loc, n, ms, val);
 }
 
-// This needs to have a version of send_data which we have not yet 
-// written and which the server code is not yet prepared to read!
 void outputMetaEvent(char *msg, unsigned long ms) {
-  Serial.print("{ ");
-  outputChrField("event", 'E');
-  int n = strlen(msg);
-  if (n > 255) {
-    Serial.println("INTERNAL ERROR, STRING TOO LONG!");
-    return;
-  }
-  outputByteField("len",n);
-  outputNumField("ms",ms);
-  outputStringFieldNoComma("msg",msg);
-  Serial.print(" }");
-
+  Message m = get_message(ms, msg);
+  char buff[264];
+  int rv = fill_JSON_buffer_message(&m,buff,264);
+  Serial.print(buff);
+  
+  send_data_message(m);
 }
 
 // We could send out only raw data, and let more powerful computers process thing.
@@ -469,41 +473,16 @@ void report_full(int idx)
     return;
   }
 
-
   char loc = (idx == 0) ? 'A' : 'B';
-
   outputMeasurement('M', 'T', loc, 0, ms, (signed long) (0.5 + (bme[idx].temperature * 100)));
   Serial.println();
-
-// This code is useful for debugging 
-//  Serial.print("Data For:");
-//  Serial.println(addr[idx],HEX);
-//  Serial.print("Temperature = ");
-// Serial.print(bme[idx].temperature);
-// Serial.println(" *C");
-//
-//  Serial.print("Pressure = ");
-//  Serial.print(bme[idx].pressure / 1000.0);
-//  Serial.println(" kPa");
-
   outputMeasurement('M', 'P', loc, 0, ms, (signed long) (0.5 + (bme[idx].pressure / (98.0665 / 10))));
   Serial.println(); 
-// Serial.print("Humidity = ");
-// Serial.print(bme[idx].humidity);
-// Serial.println(" %");
-
- outputMeasurement('M', 'H', loc, 0, ms, (signed long) (0.5 + (bme[idx].humidity * 100)));
+  outputMeasurement('M', 'H', loc, 0, ms, (signed long) (0.5 + (bme[idx].humidity * 100)));
   Serial.println();
-//  Serial.print("Gas = ");
-//  Serial.print(bme[idx].gas_resistance / 1000.0);
-//  Serial.println(" KOhms");
   outputMeasurement('M', 'G', loc, 0, ms, (signed long) (0.5 + bme[idx].gas_resistance));
   Serial.println();
-//  Serial.print("Approx. Altitude = ");
-//  Serial.print(bme[idx].readAltitude(SEALEVELPRESSURE_HPA));
-//  Serial.println(" m");
   outputMeasurement('M', 'A', loc, 0, ms, (signed long) (0.5 + bme[idx].readAltitude(SEALEVELPRESSURE_HPA)));
-
   Serial.println();
 }
 
@@ -610,10 +589,6 @@ void loop() {
   }
   if (((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0) && found_bme[AMBIENT_PRESSURE_SENSOR]) {
       ambient_pressure = readPressureOnly(AMBIENT_PRESSURE_SENSOR);
-      Serial.print("AMBIENT: ");
-      Serial.println(ambient_pressure);
-      Serial.print("AIRWAY: ");
-      Serial.println(internal_pressure);
       ambient_counter = 1;
 
       // experimentally we will report everything in the stream from 
@@ -644,7 +619,8 @@ void loop() {
     Serial.println();
      // really this should be a running max, for now it is instantaneous
     display_max_pressure = internal_pressure - smooth_ambient;
-    outputMeasurement('M', 'D', 'A', 0, ms, internal_pressure - smooth_ambient);  
+    outputMeasurement('M', 'D', 'A', 0, ms, internal_pressure - smooth_ambient);
+ //   outputMeasurement('M', 'D', 'A', 0, ms, (signed long) 555);    
     Serial.println();
   } else {
     // This is not actually part of the format!!!
@@ -666,10 +642,7 @@ void loop() {
   }
   
   float flow = (SENSOR_INSTALLED_BACKWARD) ? -raw_flow : raw_flow;
-
   signed long flow_milliliters_per_minute = (signed long) (flow * 1000);
-
-  
   outputMeasurement('M', 'F', 'A', 0, ms, flow_milliliters_per_minute);
 
   Serial.println();
