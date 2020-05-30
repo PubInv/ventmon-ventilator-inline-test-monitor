@@ -170,13 +170,16 @@ an interactive or static analysis of a respiration. It&#39;s primary purpose is 
   <span class="slider round"></span>
 </label>
 
-      <div class="container-fluid">
-        <div class="row">
+  <div class="container-fluid">
+    <div class="row">
           <div class="col-9">
             <div id='PFGraph'><!-- Pressure and Flow Graph --></div>
             <div id='EventsGraph'><!-- Events --></div>
           </div>
           <div class="col-3">
+            <div class="alert alert-danger" role="alert" id="main_alert">
+  Danger! Flow limits exceeded; volumes will be incorrect.
+            </div>
             <div class="container" id="calcarea">
               <div>
                 <label for="max">PIP (max): </label>
@@ -354,6 +357,11 @@ function getParameterByName(name, url) {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
 }
+
+// These are defined in PIRDS.h as "constant" key words of special meaning...
+var FLOW_LIMITS_EXCEEDED = false;
+const FLOW_TOO_HIGH = "FLOW OUT OF RANGE HIGH";
+const FLOW_TOO_LOW = "FLOW OUT OF RANGE LOW";
 
 const VENTMON_DATA_LAKE = "http://ventmon.coslabs.com";
 const queryString = window.location.search;
@@ -636,8 +644,11 @@ function plot(samples, trans, breaths) {
     // Now I will attempt to add other markers, such as Humidity, Altitude, and other events,
     // including possible warning events.
 
-    function gen_graph(samples,name,color, textposition, tp,lc,vf,tf) {
+    function gen_graph_measurement(samples, name, color, textposition, tp, lc, vf, tf) {
       var selected = samples.filter(s => s.event == 'M' && s.type == tp && s.loc == lc);
+      return gen_graph(selected, name, color, textposition, vf, tf);
+    }
+    function gen_graph(selected,name,color, textposition, vf, tf) {
       var millis = unpack(selected, 'ms');
       var zeroed = millis.map(m =>(m-min)/1000.0);
       var vs = selected.map(vf);
@@ -653,29 +664,71 @@ function plot(samples, trans, breaths) {
       return plot;
 
     }
+    function gen_message_events(samples,name,color, textposition) {
+      var messages = samples.filter(s => s.event == 'E' && s.type == 'M');
+      // Now I want to filter our all flow error messages...
+      // There are two special ones, "FLOW OUT OF RANGE LOW" and
+      // "FLOW OUT OF RANGE HIGH"
+      // Basically, we will show only the first of these in a "run"
+      // This is rather difficult; we will instead just use 200 ms
+      // as a window.
+      const time_windwow_ms = 200;
+
+      var lows = [];
+      var highs = [];
+      var others = [];
+      for(var i = 0; i < messages.length; i++) {
+        var m = messages[i];
+        if (m.buff == FLOW_TOO_LOW) {
+          if ((lows.length == 0) || ((lows.length > 0) && (lows[lows.length-1].ms < (m.ms - 200))))
+            lows.push(m);
+        } else if (m.buff == FLOW_TOO_HIGH) {
+          if ((highs.length == 0) || ((highs.length > 0) && (highs[highs.length-1].ms < (m.ms - 200))))
+            highs.push(m);
+        } else {
+          others.push(m);
+        }
+      }
+      if (lows.length > 0 || highs.length > 0) {
+        set_flow_alert();
+      } else {
+        unset_flow_alert();
+      }
+
+      var lowsPlot = gen_graph(lows,"Low Range","blue",'top center',
+                                    (s => -90.0),
+                                    (v =>  "LOW"));
+      var highsPlot = gen_graph(highs,"High Range","red",'bottom center',
+                                    (s => 90.0),
+                                    (v =>  "HIGH"));
+      var othersPlot = gen_graph(others,"messages","Aqua",'top center',
+                                    (s => -75.0),
+                                 (v =>  v.buff));
+      return [lowsPlot,highsPlot,othersPlot];
+    }
     {
-      var humAirwayPlot = gen_graph(samples,"Hum (%)","Aqua",'top center','H','A',
+      var humAirwayPlot = gen_graph_measurement(samples,"Hum (%)","Aqua",'top center','H','A',
                               (s => s.val/100.0),
                               (v =>  "H2O (A): "+v.toFixed(0)+"%"));
       event_graph.push(humAirwayPlot);
     }
 
     {
-      var humAmbientPlot = gen_graph(samples,"Hum (%)","CornflowerBlue",'bottom center','H','B',
+      var humAmbientPlot = gen_graph_measurement(samples,"Hum (%)","CornflowerBlue",'bottom center','H','B',
                               (s => -s.val/100.0),
                                       (v =>  "H2O (B): "+(-v).toFixed(0)+"%"));
       event_graph.push(humAmbientPlot);
     }
 
     {
-      var tempAirwayPlot = gen_graph(samples,"Temp A","red",'bottom center','T','A',
+      var tempAirwayPlot = gen_graph_measurement(samples,"Temp A","red",'bottom center','T','A',
                               (s => s.val/100.0),
                               (v =>  "T (A): "+v.toFixed(1)+"C"));
       event_graph.push(tempAirwayPlot);
     }
 
     {
-      var tempAmbientPlot = gen_graph(samples,"Temp B","orange",'top center','T','B',
+      var tempAmbientPlot = gen_graph_measurement(samples,"Temp B","orange",'top center','T','B',
                               (s => -s.val/100.0),
                                       (v =>  "T (B): "+(-v).toFixed(1)+"C"));
       event_graph.push(tempAmbientPlot);
@@ -683,25 +736,33 @@ function plot(samples, trans, breaths) {
 
     // Altitude is really just a check that the system is working
      {
-      var altAmbientPlot = gen_graph(samples,"Altitude","purple",'right','A','B',
+      var altAmbientPlot = gen_graph_measurement(samples,"Altitude","purple",'right','A','B',
                               (s => s.val/20.0),
                                       (v =>  "Alt: "+(v*20.0).toFixed(0)+"m"));
       event_graph.push(altAmbientPlot);
-    }
+     }
+
+     {
+       var [l,h,o] = gen_message_events(samples,"Message","red",'right');
+       event_graph.push(l);
+       event_graph.push(h);
+       event_graph.push(o);
+     }
+
 
 
     // The BME680 sensor detects VOC gases. I don't think has any clinical value
     // compared
 
     // {
-    //   var gasAirwayPlot = gen_graph(samples,"Gas A","yellow",'bottom center','G','A',
+    //   var gasAirwayPlot = gen_graph_measurement(samples,"Gas A","yellow",'bottom center','G','A',
     //                           (s => s.val/1000.0),
     //                                 (v =>  "G (A): "+(v*100).toFixed(1)+"Ohms"));
     //   event_graph.push(gasAirwayPlot);
     // }
 
     // {
-    //   var gasAmbientPlot = gen_graph(samples,"Gas B","gold",'top center','G','B',
+    //   var gasAmbientPlot = gen_graph_measurement(samples,"Gas B","gold",'top center','G','B',
     //                           (s => -s.val/1000.0),
     //                                   (v =>  "G (B): "+(-v*100).toFixed(1)+"Ohms"));
     //   event_graph.push(gasAmbientPlot);
@@ -722,6 +783,13 @@ function plot(samples, trans, breaths) {
     };
     Plotly.newPlot('EventsGraph', event_graph,event_layout);
   }
+}
+
+function set_flow_alert() {
+  $("#main_alert").show();
+}
+function unset_flow_alert() {
+  $("#main_alert").hide();
 }
 
 function check_alarms(limits,key,limit,val,f,ms) {
@@ -858,7 +926,7 @@ function load_ui_with_defaults(limits) {
   var Lkeys = Object.keys(limits);
   Lkeys.forEach((key,index) => {
     ["h","l"].forEach(limit => {
-      console.log(key,limit,limits[key][limit]);
+//      console.log(key,limit,limits[key][limit]);
       $("#"+key+"_"+limit).val(limits[key][limit]);
     })
   });
@@ -942,6 +1010,7 @@ function sanitize_samples(samples) {
                         s.num = parseInt(s.num);
                       if (s.ms < 0) {
                         s.ms = -s.ms;
+                      } else if (s.event == "E") {
                       }
                     }
 
