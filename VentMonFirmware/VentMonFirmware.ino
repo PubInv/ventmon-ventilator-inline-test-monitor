@@ -47,6 +47,8 @@
 
 #include <SFM3X00.h>
 
+char* flow_too_high = FLOW_TOO_HIGH;
+char* flow_too_low = FLOW_TOO_LOW;
 
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
  
@@ -98,8 +100,8 @@ bool found_bme[2] = { false, false}; // an abundance of caution to init
 // 0x76 while the airway sensor should have an address of 0x77 on the I2C bus. 
 // Do not change this unless directed to do so. !!!
 // sensor addresses
-//#define AMBIENT_SENSOR_ADDRESS  0x76
-//#define AIRWAY_SENSOR_ADDRESS   0x77
+#define AMBIENT_SENSOR_ADDRESS  0x76
+#define AIRWAY_SENSOR_ADDRESS   0x77
 
 // This is for Rob's broken board!!!!
 #define AMBIENT_SENSOR_ADDRESS  0x77
@@ -619,8 +621,7 @@ void loop() {
     Serial.println();
      // really this should be a running max, for now it is instantaneous
     display_max_pressure = internal_pressure - smooth_ambient;
-    outputMeasurement('M', 'D', 'A', 0, ms, internal_pressure - smooth_ambient);
- //   outputMeasurement('M', 'D', 'A', 0, ms, (signed long) 555);    
+    outputMeasurement('M', 'D', 'A', 0, ms, internal_pressure - smooth_ambient);   
     Serial.println();
   } else {
     // This is not actually part of the format!!!
@@ -634,9 +635,9 @@ void loop() {
   raw_flow = flowSensor.readFlow();
   if (flowSensor.checkRange(raw_flow)) {
     if (raw_flow > 0) {
-     outputMetaEvent("FLOW OUT OF RANGE HIGH",ms);     
+     outputMetaEvent( (char *) ((SENSOR_INSTALLED_BACKWARD) ? flow_too_low : flow_too_high),ms);     
     } else {
-     outputMetaEvent("FLOW OUT OF RANGE LOW",ms); 
+     outputMetaEvent( (char *) ((SENSOR_INSTALLED_BACKWARD) ? flow_too_high : flow_too_low),ms); 
     }
     Serial.println();
   }
