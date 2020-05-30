@@ -104,8 +104,8 @@ bool found_bme[2] = { false, false}; // an abundance of caution to init
 #define AIRWAY_SENSOR_ADDRESS   0x77
 
 // This is for Rob's broken board!!!!
-#define AMBIENT_SENSOR_ADDRESS  0x77
-#define AIRWAY_SENSOR_ADDRESS   0x76
+// #define AMBIENT_SENSOR_ADDRESS  0x77
+// #define AIRWAY_SENSOR_ADDRESS   0x76
 // these values should match the order the sensors occur in the array addr (below)
 #define AIRWAY_PRESSURE_SENSOR  0
 #define AMBIENT_PRESSURE_SENSOR 1
