@@ -103,7 +103,7 @@ bool found_bme[2] = { false, false}; // an abundance of caution to init
 #define AMBIENT_SENSOR_ADDRESS  0x76
 #define AIRWAY_SENSOR_ADDRESS   0x77
 
-// This is for Rob's broken board!!!!
+// This is for Rob Read's broken board!!!!
 // #define AMBIENT_SENSOR_ADDRESS  0x77
 // #define AIRWAY_SENSOR_ADDRESS   0x76
 // these values should match the order the sensors occur in the array addr (below)
@@ -293,11 +293,13 @@ void setup() {
  
   delay(1000);
 
-  init_ambient();
+
   while (!Serial);
   //Serial.println(F("BME680 test"));
   seekBME(AIRWAY_PRESSURE_SENSOR);
   seekBME(AMBIENT_PRESSURE_SENSOR);
+  signed long v = readPressureOnly(AMBIENT_PRESSURE_SENSOR);
+  init_ambient(v);
 }
 
 void debugPrintBuffer(uint8_t* m,int n) {
@@ -460,8 +462,8 @@ int amb_wc = 0;
 // sea level starting pressure.
 signed long ambient_window[AMB_WINDOW_SIZE];
 
-void init_ambient() {
-  for(int i = 0; i < 4; i++) ambient_window[i] = 10340;
+void init_ambient(signed long v) {
+  for(int i = 0; i < AMB_WINDOW_SIZE; i++) ambient_window[i] = v;
 }
 
 void report_full(int idx) 
