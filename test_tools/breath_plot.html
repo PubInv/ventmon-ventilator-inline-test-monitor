@@ -307,6 +307,27 @@ an interactive or static analysis of a respiration. It&#39;s primary purpose is 
                     </div>
                   </div>
               </div>
+                <div>
+                <label for="fio2">FiO2 Mean (%): </label>
+                  <div class="value_and_fences">
+                    <div class="calcnum">
+                      <label id="fio2"> </label>
+                    </div>
+                    <div class="vertical_alarms">
+                    <div class="limit max">
+                      <label for="fio2_h">H:</label>
+                      <input class="fence" id="fio2_h" type='text'> </input>
+                    </div>
+                    <div class="limit min">
+                      <label for="fio2_l">L:</label>
+                      <input class="fence" id="fio2_l" type='text'> </input>
+                    </div>
+                    </div>
+                  </div>
+              </div>
+
+
+
 <!--              <div>
                 <label for="tv">VTd (ml): </label>
                 <div class="calcnum">
@@ -707,6 +728,14 @@ function plot(samples, trans, breaths) {
       return [lowsPlot,highsPlot,othersPlot];
     }
     {
+      var fio2AirwayPlot = gen_graph_measurement(samples,"FiO2 (%)","Black",'top center','O','A',
+                              (s => s.val),
+                              (v =>  "FiO2 (A): "+v.toFixed(1)+"%"));
+      console.log(fio2AirwayPlot);
+      event_graph.push(fio2AirwayPlot);
+    }
+
+    {
       var humAirwayPlot = gen_graph_measurement(samples,"Hum (%)","Aqua",'top center','H','A',
                               (s => s.val/100.0),
                               (v =>  "H2O (A): "+v.toFixed(0)+"%"));
@@ -838,6 +867,33 @@ function compute_pressures(secs,samples) {
   }
 }
 
+function compute_fio2_mean(secs,samples) { 
+  var oxygens = samples.filter(s => s.event == 'M' && s.type == 'O' && s.loc == 'A');
+
+  if (oxygens.length == 0) {
+    return null;
+  } else {
+    const recent_ms = oxygens[oxygens.length - 1].ms;
+    var cur_ms = recent_ms;
+    var cnt = 0.0;
+    var i = oxygens.length - 1;
+
+    var sum = 0;
+    var alarms = [];
+    while((i >=0) && (oxygens[i].ms > (cur_ms - secs*1000))) {
+      var oxy = oxygens[i].val; // oxygen concentration as a percentage
+      sum += oxy;
+      cnt++;
+      i--;
+    }
+
+    var fio2_avg = sum / cnt;
+
+    return fio2_avg;
+  }
+}
+
+
 function compute_respiration_rate(secs,samples,transitions,breaths) {
   // In order to compute the number of breaths
   // in the last s seconds, I compute those breaths
@@ -920,6 +976,8 @@ var LIMITS = {
          l: 0.25},
   tv: { h: 1000,
          l: 200},
+  fio2: { h: 100,
+         l: 20},
 }
 
 function load_ui_with_defaults(limits) {
@@ -954,7 +1012,7 @@ function process(samples) {
   var [transitions,breaths] = computeMovingWindowTrace(samples,t,v);
   plot(samples,transitions,breaths);
   // How many seconds backwards should we look? Perhaps 20?
-  var [bpm,tv,mv,EIratio] = compute_respiration_rate(RESPIRATION_RATE_WINDOW_SECONDS,samples,transitions,breaths);
+  var [bpm,tv,mv,EIratio,fio2] = compute_respiration_rate(RESPIRATION_RATE_WINDOW_SECONDS,samples,transitions,breaths);
 
   var alarms = [];
 
@@ -966,6 +1024,7 @@ function process(samples) {
   } else {
     $("#ier").text((1.0 / EIratio).toFixed(1));
   }
+
   var final_ms = samples[samples.length -1].ms;
   var b_ms = 0;
   if (breaths.length > 0) {
@@ -979,6 +1038,7 @@ function process(samples) {
 
     return al1.concat(al2);
   }
+
   alarms = alarms.concat(check_high_and_low(LIMITS,"bpm",bpm.toFixed(1),b_ms));
   alarms = alarms.concat(check_high_and_low(LIMITS,"tv",tv.toFixed(0),b_ms));
   alarms = alarms.concat(check_high_and_low(LIMITS,"mv",(mv).toFixed(2),b_ms));
@@ -990,6 +1050,15 @@ function process(samples) {
   $("#min").text(min.toFixed(1));
   $("#avg").text(avg.toFixed(1));
   $("#max").text(max.toFixed(1));
+
+  var fio2 = compute_fio2_mean(RESPIRATION_RATE_WINDOW_SECONDS,samples);
+
+   if(fio2 == null){
+    $("#fio2").text("NA");
+   } else {
+    alarms = alarms.concat(check_high_and_low(LIMITS,"fio2",fio2.toFixed(1),b_ms));
+    $("#fio2").text(fio2.toFixed(1));
+   }
 
   reflectAlarmsInGUI(alarms);
 }
@@ -1354,3 +1423,4 @@ $( document ).ready(function() {
 
 
 </script>
+
