@@ -1166,6 +1166,102 @@ function compute_transitions(vm,flows) {
   }
   return transitions;
 }
+
+// produces a set of rising signals, time in ms of the leading edge of the rise and the trailing edge of the rise
+// an array of 2-tuple
+
+function compute_TAIP(min,max,pressures) {
+  var pressures = pressures.filter(s => s.event == 'M' && s.type == 'D' && s.loc == 'A');
+  const responseBegin = 0.1;
+  const responseEnd = 0.9;
+
+  var rising_signals = [];
+  var foundMinSignal = false;
+  const lowFence = min * responseBegin;
+  const highFence = max * responseEnd;
+  var cur_riseStart;
+  var state = -1; // Let 1 mean rising, -1 mean fallen, 0 risen, but not fallen
+  for(var i = 0; i < pressures.length; i++) {
+    var p = pressures[i].val / 10; // getting cm H2o
+    var ms = pressures[i].ms;     
+    if (state == -1) {
+      if (p > lowFence) {
+	      state = 1;
+        cur_riseStart = pressures[i];
+      } 
+      if (p>highFence){
+        rising_signals.push([ms,ms]);
+      }
+    } else if (state == 1) {
+      if (p > highFence) {
+        rising_signals.push([cur_riseStart.ms,ms])
+        state = 0;
+      } else if (p < lowFence) {
+        state = -1;
+        cur_riseStart = null;
+      }
+    } else if (state == 0) {
+      if (p < lowFence) {
+	      state = -1;
+      } 
+    }
+  }
+  return rising_signals;
+}
+
+function compute_meanTAIP(min,max,pressures){
+  var sigs = compute_TAIP(min,max,pressures);
+  var sum = 0;
+  for(var i = 0; i < sigs.length; i++) {
+    sum += sigs[i][1] - sigs[i][0];  // time in ms 
+  }
+  return sum/sigs.length;
+}
+
+function testdata(){
+  //0 (not good enough), 10 (rising), 20 (above threshold) all 10 ms apart
+  //saw tooth function
+  var data = []; // pushing 50 things into it
+  for(var i = 0; i < 10; i++) {
+    var ms = i*5*10;
+    data[i*5+0] = {event:'M',loc:'A',ms:ms + 0,type:'D',val: 0};
+    data[i*5+1] = {event:'M',loc:'A',ms:ms + 10,type:'D',val: 1000};
+    data[i*5+2] = {event:'M',loc:'A',ms:ms + 20,type:'D',val: 2000};
+    data[i*5+3] = {event:'M',loc:'A',ms:ms + 30,type:'D',val: 1000};
+    data[i*5+4] = {event:'M',loc:'A',ms:ms + 40,type:'D',val: 0};
+  }
+  return data;
+}
+
+function testdataSine(period_sm){
+  //0 (not good enough), 10 (rising), 20 (above threshold) all 10 ms apart
+  //sine tooth function
+  var data = []; // pushing 50 things into it
+  for(var i = 0; i < 1000; i++) {
+    var ms = i*10;
+    data[i] = {event:'M',loc:'A',ms:ms + 20,type:'D',val: 2000*Math.sin(2*Math.PI*i/period_sm)};
+  }
+  return data;
+}
+
+function test_compute_TAIP() {  
+  var samples = testdata();
+  const min = 0;
+  const max = 20;
+  var m = compute_meanTAIP(min,max,samples);
+  console.assert(m == 10); 
+for (i = 50; i<150; i+=10) {
+  var sinewave = testdataSine(i);
+  var m = compute_meanTAIP(min,max,sinewave);
+  console.log(m); 
+}
+}
+
+function compute_current_TAIP(min,max){ //uses samples from a global var
+  var m = compute_meanTAIP(min,max,samples);
+  return m;
+}
+
 // A simple computation of a moving window trace
 // computing [A + -B], where A is volume to left
 // of sample int time window t, and B is volume to right
