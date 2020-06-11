@@ -152,39 +152,6 @@ IPAddress LoghostAddr;
 
 EthernetUDP udpclient;
 
-//#define CIRCBUFF
-#ifdef CIRCBUFF
-#define CSIZE 500
-
-
-Measurment packets[CSIZE];
-
-uint8_t cbuf_head = 0;
-uint8_t cbuf_tail = 0;
-
-void push_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32_t value) {
-  packets[cbuf_head].event = event;
-  packets[cbuf_head].mtype = mtype;
-  packets[cbuf_head].log = loc;
-  packets[cbuf_head].num = num;
-  packets[cbuf_head].ms = ms;
-  packets[cbuf_head].value = value;
-  cbuf_head++;
-  if (cbuf_head > CSIZE) cbuf_head = 0;
-}
-
-uint8_t pop_data() {
-  while (cbuf_head != cbuf_tail) {
-    send_data('M', packets[cbuf_tail].event, packets[cbuf_tail].mtype, packets[cbuf_tail].loc, packets[cbuf_tail].num,
-	      packets[cbuf_tail].ms, packets[cbuf_tail].value);
-    cbuf_tail++;
-    if (cbuf_tail > CSIZE)
-      cbuf_tail = 0;
-  }
-  return 1;
-}
-#endif
-
 void setupOLED() {
  // Here we initialize the OLED...
   Serial.println("OLED FeatherWing test");
@@ -349,11 +316,15 @@ bool send_data_measurement(Measurement ma) {
 //  Serial.print(F(" "));
 //  Serial.println(Logport);
 
-  if (udpclient.beginPacket(LoghostAddr, Logport) != 1)
+  if (udpclient.beginPacket(LoghostAddr, Logport) != 1) {
+    Serial.println("send_data_measurement begin failed!");
     return false;
+  }
   udpclient.write(m, 14);
-  if (udpclient.endPacket() != 1)
+  if (udpclient.endPacket() != 1) {
+    Serial.println("send_data_measurement end failed!");
     return false;
+  }
 
   return true;
 }
@@ -371,11 +342,15 @@ bool send_data_message(Message ma) {
   m[263] = '\n';
  
 
-  if (udpclient.beginPacket(LoghostAddr, Logport) != 1)
+  if (udpclient.beginPacket(LoghostAddr, Logport) != 1) {
+    Serial.println("send_data_message begin failed!");
     return false;
+  }
   udpclient.write(m, 264);
-  if (udpclient.endPacket() != 1)
+  if (udpclient.endPacket() != 1) {
+    Serial.println("send_data_message end failed!");
     return false;
+  }
 
   return true;
 }
@@ -513,19 +488,34 @@ signed long readPressureOnly(int idx)
 }
 
 void buttonA() {
+    Serial.println("A BUTTON");
     display.clearDisplay();
     display.setCursor(0, 0);
     display.print("A");
 }
+// This is basically a "debounce" of this B Button
+unsigned long buttonCpress_ms = 0;
 void buttonB() {
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.print("B");
+      Serial.println("B BUTTON");
+      display.clearDisplay();
+      display.setCursor(0, 0);
+      display.print("B");
 }
+
+
+// This is an experimental used of this event!!!
 void buttonC() {
     display.clearDisplay();
     display.setCursor(0, 10);
     display.print("C");
+    
+    unsigned long ms = millis();
+    int n = strlen(SAVE_LOG_TO_FILE);
+    char buffer[255];
+    strcpy(buffer,SAVE_LOG_TO_FILE);
+    strcpy(buffer+n,"test_file_name");
+    outputMetaEvent(buffer,ms); 
+    Serial.println();    
 }
 
 // Trying to make simple, I will define 3 lines..
@@ -552,10 +542,20 @@ void loop() {
 // experimental OLED test code
     if(!digitalRead(BUTTON_A)) {
       buttonA();
-    } else if(!digitalRead(BUTTON_B)) {
-      buttonB();
-    } else if(!digitalRead(BUTTON_C)) { 
-      buttonC();
+    } 
+// ButtonB is causing my machine to hang with no explanation
+    else if(!digitalRead(BUTTON_B)) {
+        Serial.println("B BUTTON");
+        buttonB();
+        Serial.println("B BUTTON PROCESS DONE");
+    } 
+    else if(!digitalRead(BUTTON_C)) { 
+      unsigned long m = millis();
+      if (m > (buttonCpress_ms + 1000)) { 
+        buttonCpress_ms = m;
+        Serial.println("B BUTTON");
+        buttonC();
+      }
     } else {
       display.clearDisplay();
 
@@ -567,10 +567,9 @@ void loop() {
     }
   //  delay(10);
   //  yield();
-    display.display();
-  
+    display.display(); 
   }
-  
+
   unsigned long m = millis();
   if (m > sample_millis) {
     sample_millis = m;

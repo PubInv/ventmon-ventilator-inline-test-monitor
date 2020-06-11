@@ -685,6 +685,22 @@ function plot(samples, trans, breaths) {
       return plot;
 
     }
+    function gen_clock_graph(selected,name,color, textposition) {
+      var millis = unpack(selected, 'ms');
+      var zeroed = millis.map(m =>(m-min)/1000.0);
+      var vs = selected.map( s => -30)
+      var vs_t = selected.map(v => v.buff);
+      var plot = {type: "scatter", mode: "markers+text",
+                     name: name,
+                     textposition: textposition,
+                     x: zeroed,
+                     y: vs,
+                     text: vs_t,
+                     marker: { size: 10, color: color }
+                    };
+      return plot;
+
+    }
     function gen_message_events(samples,name,color, textposition) {
       var messages = samples.filter(s => s.event == 'E' && s.type == 'M');
       // Now I want to filter our all flow error messages...
@@ -693,7 +709,7 @@ function plot(samples, trans, breaths) {
       // Basically, we will show only the first of these in a "run"
       // This is rather difficult; we will instead just use 200 ms
       // as a window.
-      const time_windwow_ms = 200;
+      const time_window_ms = 200;
 
       var lows = [];
       var highs = [];
@@ -701,10 +717,10 @@ function plot(samples, trans, breaths) {
       for(var i = 0; i < messages.length; i++) {
         var m = messages[i];
         if (m.buff == FLOW_TOO_LOW) {
-          if ((lows.length == 0) || ((lows.length > 0) && (lows[lows.length-1].ms < (m.ms - 200))))
+          if ((lows.length == 0) || ((lows.length > 0) && (lows[lows.length-1].ms < (m.ms - time_window_ms))))
             lows.push(m);
         } else if (m.buff == FLOW_TOO_HIGH) {
-          if ((highs.length == 0) || ((highs.length > 0) && (highs[highs.length-1].ms < (m.ms - 200))))
+          if ((highs.length == 0) || ((highs.length > 0) && (highs[highs.length-1].ms < (m.ms - time_window_ms))))
             highs.push(m);
         } else {
           others.push(m);
@@ -727,11 +743,24 @@ function plot(samples, trans, breaths) {
                                  (v =>  v.buff));
       return [lowsPlot,highsPlot,othersPlot];
     }
+    function gen_clock_events(samples,name,color, textposition) {
+      var messages = samples.filter(s => s.event == 'E' && s.type == 'C');
+      const time_window_ms = 200;
+
+      var clocks = [];
+      for(var i = 0; i < messages.length; i++) {
+        var m = messages[i];
+         if ((clocks.length == 0) || ((clocks.length > 0) && (clocks[clocks.length-1].ms < (m.ms - time_window_ms))))
+            clocks.push(m);
+      }
+
+      var clocksPlot = gen_clock_graph(clocks,name,color,textposition);
+      return clocksPlot;
+    }
     {
       var fio2AirwayPlot = gen_graph_measurement(samples,"FiO2 (%)","Black",'top center','O','A',
                               (s => s.val),
                               (v =>  "FiO2 (A): "+v.toFixed(1)+"%"));
-      console.log(fio2AirwayPlot);
       event_graph.push(fio2AirwayPlot);
     }
 
@@ -776,6 +805,12 @@ function plot(samples, trans, breaths) {
        event_graph.push(l);
        event_graph.push(h);
        event_graph.push(o);
+     }
+
+     {
+       var cs = gen_clock_events(samples,"Wall Clock","black",'top center');
+
+       event_graph.push(cs);
      }
 
 
@@ -867,7 +902,7 @@ function compute_pressures(secs,samples) {
   }
 }
 
-function compute_fio2_mean(secs,samples) { 
+function compute_fio2_mean(secs,samples) {
   var oxygens = samples.filter(s => s.event == 'M' && s.type == 'O' && s.loc == 'A');
 
   if (oxygens.length == 0) {
@@ -1423,4 +1458,3 @@ $( document ).ready(function() {
 
 
 </script>
-
