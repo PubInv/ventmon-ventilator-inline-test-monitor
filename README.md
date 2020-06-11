@@ -118,4 +118,4 @@ Righ now, we could use:
 
 # Licensing
 
-All code in this repo is licensed under the MIT License. All documents and diagrams and licensed under CC0.
+All code in this repo is licensed under the MIT License. All documents and diagrams and licensed under CC0. All hardware is licensed under the [CERN Open Hardware Licences Version 2 - Strongly Reciprocal](https://ohwr.org/cern_ohl_s_v2.pdf).
