@@ -1171,51 +1171,100 @@ function compute_transitions(vm,flows) {
 // an array of 2-tuple
 
 function compute_TAIP(min,max,pressures) {
-  var pressures = pressures.filter(s => s.event == 'M' && s.type == 'D' && s.loc == 'A');
-  const responseBegin = 0.1;
-  const responseEnd = 0.9;
+  var TAIP_pressures = pressures.filter(s => s.event == 'M' && s.type == 'D' && s.loc == 'A');
+  const TAIP_responseBegin = 0.1;
+  const TAIP_responseEnd = 0.9;
 
-  var rising_signals = [];
-  var foundMinSignal = false;
-  const lowFence = min * responseBegin;
-  const highFence = max * responseEnd;
+  var TAIP_rising_signals = [];
+  var TAIP_foundMinSignal = false;
+  const TAIP_lowFence = TAIP_min * TAIP_responseBegin;
+  const TAIP_highFence = TAIP_max * TAIP_responseEnd;
   var cur_riseStart;
-  var state = -1; // Let 1 mean rising, -1 mean fallen, 0 risen, but not fallen
-  for(var i = 0; i < pressures.length; i++) {
-    var p = pressures[i].val / 10; // getting cm H2o
-    var ms = pressures[i].ms;     
-    if (state == -1) {
-      if (p > lowFence) {
-	      state = 1;
-        cur_riseStart = pressures[i];
+  var TAIP_state = -1; // Let 1 mean rising, -1 mean fallen, 0 risen, but not fallen
+  for(var i = 0; i < TAIP_pressures.length; i++) {
+    var TAIP_p = TAIP_pressures[i].val / 10; // getting cm H2o
+    var TAIP_ms = TAIP_pressures[i].ms;     
+    if (TAIP_state == -1) {
+      if (TAIP_p > TAIP_lowFence) {
+	      TAIP_state = 1;
+        cur_riseStart = TAIP_pressures[i];
       } 
-      if (p>highFence){
-        rising_signals.push([ms,ms]);
+      if (TAIP_p>TAIP_highFence){
+        TAIP_rising_signals.push([TAIP_ms,TAIP_ms]);
       }
-    } else if (state == 1) {
-      if (p > highFence) {
-        rising_signals.push([cur_riseStart.ms,ms])
-        state = 0;
-      } else if (p < lowFence) {
-        state = -1;
+    } else if (TAIP_state == 1) {
+      if (TAIP_p > TAIP_highFence) {
+        TAIP_rising_signals.push([TAIP_cur_riseStart.ms,ms])
+        TAIP_state = 0;
+      } else if (TAIP_p < TAIP_lowFence) {
+        TAIP_state = -1;
         cur_riseStart = null;
       }
-    } else if (state == 0) {
-      if (p < lowFence) {
-	      state = -1;
+    } else if (TAIP_state == 0) {
+      if (TAIP_p < TAIP_lowFence) {
+	      TAIP_state = -1;
       } 
     }
   }
-  return rising_signals;
+  return TAIP_rising_signals;
 }
 
-function compute_meanTAIP(min,max,pressures){
-  var sigs = compute_TAIP(min,max,pressures);
-  var sum = 0;
-  for(var i = 0; i < sigs.length; i++) {
-    sum += sigs[i][1] - sigs[i][0];  // time in ms 
+function compute_meanTAIP(TAIP_min,TAIP_max,TAIP_pressures){
+  var TAIP_sigs = compute_TAIP(TAIP_min,TAIP_max,TAIP_pressures);
+  var TAIP_sum = 0;
+  for(var i = 0; i < TAIP_sigs.length; i++) {
+    TAIP_sum += TAIP_sigs[i][1] - TAIP_sigs[i][0];  // time in ms 
   }
-  return sum/sigs.length;
+  return TAIP_sum/TAIP_sigs.length;
+}
+
+
+function compute_TRIP(TRIP_min,TRIP_max,pressures) {
+  var TRIP_pressures = pressures.filter(s => s.event == 'M' && s.type == 'D' && s.loc == 'A');
+  const TRIP_responseBegin = 0.9;
+  const TRIP_responseEnd = 0.1;
+
+  var TRIP_falling_signals = [];
+  var TRIP_foundMaxSignal = false;
+  const TRIP_lowFence = TRIP_min * TRIP_responseBegin;
+  const TRIP_highFence = TRIP_max * TRIP_responseEnd;
+  var cur_fallStart;
+  var TRIP_state = 1; // Let -1 mean falling, 1 mean risen, 0 fallen, but not risen
+  for(var i = 0; i < TRIP_pressures.length; i++) {
+    var TRIP_p = TRIP_pressures[i].val / 10; // getting cm H2o
+    var TRIP_ms = TRIP_pressures[i].ms;     
+    if (TRIP_state == 1) {
+      if (TRIP_p < TRIP_highFence) {
+	      TRIP_state = -1;
+        cur_fallStart = TRIP_pressures[i];
+      } 
+      if (TRIP_p<TRIP_lowFence){
+        falling_signals.push([ms,ms]);
+      }
+    } else if (TRIP_state == -1) {
+      if (TRIP_p < TRIP_lowFence) {
+        falling_signals.push([cur_fallStart.ms,ms])
+        TRIP_state = 0;
+      } else if (TRIP_p > TRIP_highFence) {
+        TRIP_state = 1;
+        cur_fallStart = null;
+      }
+    } else if (TRIP_state == 0) {
+      if (TRIP_p > TRIP_highFence) {
+	      TRIP_state = 1;
+      } 
+    }
+  }
+  return falling_signals;
+}
+
+function compute_meanTRIP(TRIP_min,TRIP_max,TRIP_pressures){
+  var TRIP_sigs = compute_TRIP(TRIP_min,TRIP_max,TRIP_pressures);
+  var TRIP_sum = 0;
+  for(var i = 0; i < TRIP_sigs.length; i++) {
+    TRIP_sum += TRIP_sigs[i][1] - TRIP_sigs[i][0];  // time in ms 
+  }
+  return TRIP_sum/TRIP_sigs.length;
 }
 
 function testdata(){
@@ -1246,22 +1295,40 @@ function testdataSine(period_sm){
 
 function test_compute_TAIP() {  
   var samples = testdata();
-  const min = 0;
-  const max = 20;
-  var m = compute_meanTAIP(min,max,samples);
-  console.assert(m == 10); 
+  const TAIP_min = 0;
+  const TAIP_max = 20;
+  var TAIP_m = compute_meanTAIP(TAIP_min,TAIP_max,samples);
+  console.assert(TAIP_m == 10); 
 for (i = 50; i<150; i+=10) {
   var sinewave = testdataSine(i);
-  var m = compute_meanTAIP(min,max,sinewave);
-  console.log(m); 
+  var TAIP_m = compute_meanTAIP(TAIP_min,TAIP_max,sinewave);
+  console.log(TAIP_m); 
 }
 }
 
-function compute_current_TAIP(min,max){ //uses samples from a global var
-  var m = compute_meanTAIP(min,max,samples);
-  return m;
+function compute_current_TAIP(TAIP_min,TAIP_max){ //uses samples from a global var
+  var TAIP_m = compute_meanTAIP(TAIP_min,TAIP_max,samples);
+  return TAIP_m;
 }
 
+
+function test_compute_TRIP() {  
+  var samples = testdata();
+  const TRIP_min = 0;
+  const TRIP_max = 20;
+  var TRIP_m = compute_meanTRIP(TRIP_min,TRIP_max,samples);
+  console.assert(TRIP_m == 10); 
+for (i = 50; i<150; i+=10) {
+  var TRIP_sinewave = testdataSine(i);
+  var TRIP_m = compute_meanTRIP(TRIP_min,TRIP_max,sinewave);
+  console.log(TRIP_m); 
+}
+}
+
+function compute_current_TRIP(TRIP_min,TRIP_max, samples){ //uses samples from a global var
+  var TRIP_m = compute_meanTRIP(TRIP_min,TRIP_max,samples);
+  return TRIP_m;
+}
 // A simple computation of a moving window trace
 // computing [A + -B], where A is volume to left
 // of sample int time window t, and B is volume to right
