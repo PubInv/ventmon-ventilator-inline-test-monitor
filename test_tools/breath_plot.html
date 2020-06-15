@@ -731,7 +731,6 @@ function plot(samples, trans, breaths) {
       var fio2AirwayPlot = gen_graph_measurement(samples,"FiO2 (%)","Black",'top center','O','A',
                               (s => s.val),
                               (v =>  "FiO2 (A): "+v.toFixed(1)+"%"));
-      console.log(fio2AirwayPlot);
       event_graph.push(fio2AirwayPlot);
     }
 
@@ -1170,7 +1169,7 @@ function compute_transitions(vm,flows) {
 // produces a set of rising signals, time in ms of the leading edge of the rise and the trailing edge of the rise
 // an array of 2-tuple
 
-function compute_TAIP(min,max,pressures) {
+function compute_TAIP(TAIP_min,TAIP_max,pressures) {
   var TAIP_pressures = pressures.filter(s => s.event == 'M' && s.type == 'D' && s.loc == 'A');
   const TAIP_responseBegin = 0.1;
   const TAIP_responseEnd = 0.9;
@@ -1179,26 +1178,28 @@ function compute_TAIP(min,max,pressures) {
   var TAIP_foundMinSignal = false;
   const TAIP_lowFence = TAIP_min * TAIP_responseBegin;
   const TAIP_highFence = TAIP_max * TAIP_responseEnd;
-  var cur_riseStart;
+  var TAIP_cur_riseStart;
   var TAIP_state = -1; // Let 1 mean rising, -1 mean fallen, 0 risen, but not fallen
   for(var i = 0; i < TAIP_pressures.length; i++) {
-    var TAIP_p = TAIP_pressures[i].val / 10; // getting cm H2o
-    var TAIP_ms = TAIP_pressures[i].ms;     
+    var TAIP_p = TAIP_pressures[i].val / 100; // getting cm H2o
+    var ms = TAIP_pressures[i].ms;     
     if (TAIP_state == -1) {
       if (TAIP_p > TAIP_lowFence) {
 	      TAIP_state = 1;
-        cur_riseStart = TAIP_pressures[i];
+        TAIP_cur_riseStart = TAIP_pressures[i];
+        
       } 
       if (TAIP_p>TAIP_highFence){
-        TAIP_rising_signals.push([TAIP_ms,TAIP_ms]);
+        TAIP_rising_signals.push([ms,ms]);
       }
     } else if (TAIP_state == 1) {
+      //console.log("TAIP_state = 1",TAIP_cur_riseStart); for debugging
       if (TAIP_p > TAIP_highFence) {
         TAIP_rising_signals.push([TAIP_cur_riseStart.ms,ms])
         TAIP_state = 0;
       } else if (TAIP_p < TAIP_lowFence) {
         TAIP_state = -1;
-        cur_riseStart = null;
+        TAIP_cur_riseStart = null;
       }
     } else if (TAIP_state == 0) {
       if (TAIP_p < TAIP_lowFence) {
@@ -1211,11 +1212,15 @@ function compute_TAIP(min,max,pressures) {
 
 function compute_meanTAIP(TAIP_min,TAIP_max,TAIP_pressures){
   var TAIP_sigs = compute_TAIP(TAIP_min,TAIP_max,TAIP_pressures);
-  var TAIP_sum = 0;
-  for(var i = 0; i < TAIP_sigs.length; i++) {
-    TAIP_sum += TAIP_sigs[i][1] - TAIP_sigs[i][0];  // time in ms 
+  if (TAIP_sigs.length == 0){
+    return "NA";
+  }  else {
+    var TAIP_sum = 0;
+    for(var i = 0; i < TAIP_sigs.length; i++) {
+      TAIP_sum += TAIP_sigs[i][1] - TAIP_sigs[i][0];  // time in ms 
+    }
+    return TAIP_sum/TAIP_sigs.length;
   }
-  return TAIP_sum/TAIP_sigs.length;
 }
 
 
@@ -1226,28 +1231,31 @@ function compute_TRIP(TRIP_min,TRIP_max,pressures) {
 
   var TRIP_falling_signals = [];
   var TRIP_foundMaxSignal = false;
-  const TRIP_lowFence = TRIP_min * TRIP_responseBegin;
-  const TRIP_highFence = TRIP_max * TRIP_responseEnd;
-  var cur_fallStart;
-  var TRIP_state = 1; // Let -1 mean falling, 1 mean risen, 0 fallen, but not risen
+  const TRIP_lowFence = TRIP_min +(TRIP_responseEnd * (TRIP_max - TRIP_min)); // Replace TAIP in the same way !!!!!
+  const TRIP_highFence = TRIP_min+(TRIP_responseBegin * (TRIP_max - TRIP_min));
+  var TRIP_cur_fallStart;
+  var TRIP_state = 0; // Let 1 mean risen, 0, not yet risen, -1, falling (lowfence<x<highfence)
   for(var i = 0; i < TRIP_pressures.length; i++) {
-    var TRIP_p = TRIP_pressures[i].val / 10; // getting cm H2o
-    var TRIP_ms = TRIP_pressures[i].ms;     
+    var TRIP_p = TRIP_pressures[i].val / 100; // getting cm H2o
+    var ms = TRIP_pressures[i].ms;     
     if (TRIP_state == 1) {
       if (TRIP_p < TRIP_highFence) {
 	      TRIP_state = -1;
-        cur_fallStart = TRIP_pressures[i];
+        TRIP_cur_fallStart = TRIP_pressures[i];
       } 
       if (TRIP_p<TRIP_lowFence){
-        falling_signals.push([ms,ms]);
+        TRIP_falling_signals.push([ms,ms]);
+        TRIP_state = 0;
       }
     } else if (TRIP_state == -1) {
-      if (TRIP_p < TRIP_lowFence) {
-        falling_signals.push([cur_fallStart.ms,ms])
-        TRIP_state = 0;
-      } else if (TRIP_p > TRIP_highFence) {
+        if (TRIP_p > TRIP_highFence) {
         TRIP_state = 1;
-        cur_fallStart = null;
+        TRIP_cur_fallStart = null;
+      }
+      if (TRIP_p<TRIP_lowFence){
+        TRIP_state = 0;
+        TRIP_falling_signals.push([TRIP_cur_fallStart.ms,ms]);
+        TRIP_cur_fallStart = null;
       }
     } else if (TRIP_state == 0) {
       if (TRIP_p > TRIP_highFence) {
@@ -1255,16 +1263,21 @@ function compute_TRIP(TRIP_min,TRIP_max,pressures) {
       } 
     }
   }
-  return falling_signals;
+  return TRIP_falling_signals;
 }
 
 function compute_meanTRIP(TRIP_min,TRIP_max,TRIP_pressures){
+
   var TRIP_sigs = compute_TRIP(TRIP_min,TRIP_max,TRIP_pressures);
-  var TRIP_sum = 0;
-  for(var i = 0; i < TRIP_sigs.length; i++) {
-    TRIP_sum += TRIP_sigs[i][1] - TRIP_sigs[i][0];  // time in ms 
+  if (TRIP_sigs.length == 0){
+    return "NA";
+  } else {
+    var TRIP_sum = 0;
+    for(var i = 0; i < TRIP_sigs.length; i++) {
+      TRIP_sum += TRIP_sigs[i][1] - TRIP_sigs[i][0];  // time in ms 
+    } 
+    return TRIP_sum/TRIP_sigs.length;  
   }
-  return TRIP_sum/TRIP_sigs.length;
 }
 
 function testdata(){
@@ -1282,7 +1295,7 @@ function testdata(){
   return data;
 }
 
-function testdataSine(period_sm){
+function testdataSine(period_sm){ // period expressed in # of samples, each sample 10 ms 
   //0 (not good enough), 10 (rising), 20 (above threshold) all 10 ms apart
   //sine tooth function
   var data = []; // pushing 50 things into it
@@ -1295,8 +1308,8 @@ function testdataSine(period_sm){
 
 function test_compute_TAIP() {  
   var samples = testdata();
-  const TAIP_min = 0;
-  const TAIP_max = 20;
+  const TAIP_min = 0; // cm of H2O
+  const TAIP_max = 20; // cm of H2O
   var TAIP_m = compute_meanTAIP(TAIP_min,TAIP_max,samples);
   console.assert(TAIP_m == 10); 
 for (i = 50; i<150; i+=10) {
@@ -1319,15 +1332,20 @@ function test_compute_TRIP() {
   var TRIP_m = compute_meanTRIP(TRIP_min,TRIP_max,samples);
   console.assert(TRIP_m == 10); 
 for (i = 50; i<150; i+=10) {
-  var TRIP_sinewave = testdataSine(i);
+  var sinewave = testdataSine(i);
   var TRIP_m = compute_meanTRIP(TRIP_min,TRIP_max,sinewave);
   console.log(TRIP_m); 
 }
 }
 
 function compute_current_TRIP(TRIP_min,TRIP_max, samples){ //uses samples from a global var
+  if (samples.length == 0){
+    return "NA";
+  }
+  else {
   var TRIP_m = compute_meanTRIP(TRIP_min,TRIP_max,samples);
   return TRIP_m;
+}
 }
 // A simple computation of a moving window trace
 // computing [A + -B], where A is volume to left
