@@ -1,5 +1,8 @@
 # VentMon 0.1 - Inline Ventilator Test Fixture and Monitor
 
+Note: The important file "breath_plot.html" which reneders respiration traces and calculated values from PIRDS 
+data was moved to its own [repo](https://github.com/PubInv/vent-diplay) on Thursday, June 18, 2020.
+
 Since March 16th, I've been working full time on this. Along with volunteers at [EndCornaVirus.org](https://www.endcoronavirus.org/) and [Public Invention](https:\\www.pubinv.org), we have been
 [tracking and analyzing](https://github.com/PubInv/covid19-vent-list)
 all [open-source ventilator projects]((https://medium.com/@RobertLeeRead/analysis-of-open-source-covid-19-pandemic-ventilator-projects-27acf9075f7e)) we can find. It has become apparent that the biggest piece
@@ -52,6 +55,10 @@ Initial BOM can be found here: [BOM](https://docs.google.com/document/d/1n-Ja3Ug
 
 ## Status
 
+** June 18th ***
+
+Lauria plans to ship 5 more VentMons on the 23rd. She has added FiO2 sensing, and important feature. Rob Giseburt has create an VentMon-like device using a Raspberry PI; we may switch to that display. The VentMon has been used internationally by several teams to gain important insights into their prototype pandemic ventilators. One team may be constructiong their own VentMon from our Open Source designs.
+
 ** May 25th **
 
 We have now shipped 4 VentMons. Most recent modifications involved using the "pirds_library" more universally.
@@ -103,10 +110,7 @@ solution is not required.
 
 Righ now, we could use:
 1. An experienced Arduino engineer to build and improve the design below
-1. Someone who knows how to reliably process a time series to tell when a breath begins and respiration rate
-1. A website build who can make nice graphs of pressure/volume curves show up
-1. Someone to build a software test-bench to analyze 48 hours worth of data and mark anomalies.
-1. Someone to compare our Javascript analys algorithms to [BreathMetrics](https://github.com/zelanolab/breathmetrics) in MatLab.
+1. A JavaScript programmer to add the ability to scroll-through all time to [https://github.com/PubInv/vent-diplay](vent-display) code.
 1. Someone to design the User Interface of the "monitor and alarm" feature. Would have to be or become familiar with existing ventilators to make a similar interface. This is likely to be a small LCD or OLED text screen, 4 physical buttons, and a small speaker or buzzer.
 
 
