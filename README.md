@@ -1,7 +1,7 @@
 # VentMon 0.1 - Inline Ventilator Test Fixture and Monitor
 
 Note: The important file "breath_plot.html" which reneders respiration traces and calculated values from PIRDS 
-data was moved to its own [repo](https://github.com/PubInv/vent-diplay) on Thursday, June 18, 2020.
+data was moved to its own [repo](https://github.com/PubInv/vent-display) on Thursday, June 18, 2020.
 
 Since March 16th, I've been working full time on this. Along with volunteers at [EndCornaVirus.org](https://www.endcoronavirus.org/) and [Public Invention](https:\\www.pubinv.org), we have been
 [tracking and analyzing](https://github.com/PubInv/covid19-vent-list)
