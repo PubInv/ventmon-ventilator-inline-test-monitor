@@ -1,6 +1,6 @@
 # VentMon 0.1 - Inline Ventilator Test Fixture and Monitor
 
-Note: The important file "breath_plot.html" which reneders respiration traces and calculated values from PIRDS 
+Note: The important file "breath_plot.html" which renders respiration traces and calculated values from PIRDS 
 data was moved to its own [repo](https://github.com/PubInv/vent-display) on Thursday, June 18, 2020.
 
 Since March 16th, I've been working full time on this. Along with volunteers at [EndCornaVirus.org](https://www.endcoronavirus.org/) and [Public Invention](https:\\www.pubinv.org), we have been
@@ -25,7 +25,7 @@ For further explanation of design motivation and approach please refer to the fo
 
 # User Manual
 
-Although a work in progress, we have a [user manaul](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/UserManaul.md).
+Although a work in progress, we have a [user manual](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/UserManaul.md).
 
 
 # Hacking the Firmware
@@ -33,9 +33,9 @@ Although a work in progress, we have a [user manaul](https://github.com/PubInv/v
 If you have received a VentMon from us,
 it will have VentMonFirmware.ino installed.
 You are welcome to modify the VentMonFirmware.ino file as needed. To do so, you will
-have to install a library of our creation which encpasulates the PIRDS standard.
-Copy the libary [pirds_library](https://github.com/PubInv/PIRDS-respiration-data-standard/tree/master/pirds_library) into your Arudino library location. You may need to install the Adafruit BME680 library
-and other libaries as well.
+have to install a library of our creation which encapsulates the PIRDS standard.
+Copy the library [pirds_library](https://github.com/PubInv/PIRDS-respiration-data-standard/tree/master/pirds_library) into your Arduino library location. You may need to install the Adafruit BME680 library
+and other libraries as well.
 
 
 ## Design and Dependencies
@@ -76,7 +76,7 @@ May the Fourth be with you.
 
 We have shipped two VentMons free of charge to open source ventilators team that will use them for volume and flow measurements.
 
-A [user manaul](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/UserManaul.md) is progressing.
+A [user manual](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/UserManaul.md) is progressing.
 
 
 **April 27th:**
@@ -94,7 +94,7 @@ Initial prototype is fully assembled!
 
 1) Have a working ESP32 board with pressure sensors and Sensirion flow sensors.
 1) This code outputs a stream of PIRDS respiratory standard events on the serial port.
-1) These are read by data_server.py which presents a web server for retrieving this data.
+1) These are read by `data_server.py` which presents a web server for retrieving this data.
 1) test_tools/breath_plot.html makes AJAX calls to this server and renders the results dynamically.
 
 
