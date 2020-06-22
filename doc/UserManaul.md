@@ -1,4 +1,4 @@
-# VentMon T0.1 User Manaul
+# VentMon T0.1 User Manual
 
 This is the rapidly-evolving VentMon by Public Invention. This is for version T0.1 -- "Tester v. 0.1", which is aimed at
 engineering teams needing to test rapidly manufactured pandemic ventilators.
@@ -25,10 +25,10 @@ clinically important parameters such as tidal volume, minute volume, and respira
 and I:E ratio. If produced over a long period of time, this would be evidence that the
 ventilator is performing as expected.
 
-# Measureable Flow is Currently Limitied and Restriction Added
+# Measureable Flow is Currently Limited and Restriction Added
 
 Due to a world-wide supply-chain problem, we have had to use a neo-natal flow sensor instead of
-an adult flow sensor. This limits the instantaenouse measurement of flow to 33 standrad literes per minute.
+an adult flow sensor. This limits the instantaneous measurement of flow to 33 standard literes per minute.
 In many circumstances, this will not matter; but in some test scenarios with highly compliant lungs
 and low resistance, the flow sensor will "clip".
 
@@ -36,7 +36,7 @@ In our software, this will be visually apparent as the flow curve simply looks l
 flow all the they way through our software.
 
 Additionally, the flow sensor in use adds restriction to the flow. All physical lung systems have both [resistance](https://en.wikipedia.org/wiki/Airway_resistance)
-and compliance. The fact that the VentMon T0.1 adds restriction due tp the use of the [SFM3400](https://www.mouser.com/datasheet/2/682/Sensirion_01212019_Mass_Flow_Meters_SFM3400_Datash-1524577.pdf) may have to be taken account of in your testing.
+and compliance. The fact that the VentMon T0.1 adds restriction due to the use of the [SFM3400](https://www.mouser.com/datasheet/2/682/Sensirion_01212019_Mass_Flow_Meters_SFM3400_Datash-1524577.pdf) may have to be taken account of in your testing.
 
 # Physical Connections
 
@@ -54,7 +54,7 @@ It requires additional software, however, to produce an understandable picture o
 performance.
 1. An ethernet connection which is used by the VentMon to stream PIRDS data via UDP.
 You are welcome to change the firmware, but our basic firmware streams data to our
-public data lake on port 6111 and vetmon.coslabs.com.
+public data lake on port `6111` and ventmon.coslabs.com.
 
 # OLED Display
 
@@ -69,7 +69,7 @@ To familiarize yourself with the VentMon and "smoke test" basic operation, we re
 the following steps:
 
 1. Before connecting to a ventilator or a test lung, simply connect the VentMon to an
-Aduino IDE and start the Serial Monitor. Do not change the firmware by uploading new code
+Arduino IDE and start the Serial Monitor. Do not change the firmware by uploading new code
 unless you intend to do so. The current firmward outputs 115200 baud; set your Arduino
 IDE to listen at that baud rate.
 1. Observe that the VentMon is streaming a series of JSON objects conformant to the
@@ -89,15 +89,15 @@ If you cannot observer a measurable flow, please contact us for support.
 
 Finally, observe that the pressure differential is approximately correct.
 
-1. The VentMon measures pressure in the airway in absoltue terms, but more useful
+1. The VentMon measures pressure in the airway in absolute terms, but more useful
 is the differential pressure, which looks like this:
 >  { "event" : "M", "type" : "D", "ms" : 12037, "loc" : "A", "num" : 0, "val" : -11  }
 
 The VentMon uses two independent BME680 sensors to compute the pressure differential.
 The ambient pressure is kept as a running average over a period time. The instantaneous
-pressure in the airway is published as an event aobut 25 times a second, as is the
+pressure in the airway is published as an event about 25 times a second, as is the
 difference with the ambient air.
-1. Observe that the pressure in the Aiway is of type "P" and numbered "A" and "0".
+1. Observe that the pressure in the Airway is of type "P" and numbered "A" and "0".
 The amBient pressure is "B" and "0". Following medical practice, these absolute
 pressures are measured in cm H<sub>2</sub>O. The VentMon PIRDS standard defines the units
 reported for pressure to be hundredths of cm of H<sub>2</sub>O.
@@ -127,7 +127,7 @@ The data lake records data indefinitely in a log file named after your IP addres
 and any other data logs, can be accessed by going to the [VentMon Data Lake](http://ventmon.coslabs.com/). From there, you can see your raw PIRDS data. By clicking on one of the links such as that of [Robert L. Read's personal Ventmon](http://ventmon.coslabs.com/breath_plot?i=136.49.35.13), you can
 see live plots of differential pressure, flow, volume, and other parameters that are clinically
 important. For each parameter, you can set high and low "alarm limits". These will turn
-red when ventilator behavior is outside of this sepcified range, and will be blue while you are inside it.
+red when ventilator behavior is outside of this specified range, and will be blue while you are inside it.
 (You will want to discover you own IP address, which may change occasionally depending on your
 internet service provider, to find the Breath Plot of your own device.)
 
@@ -142,7 +142,7 @@ The BreathPlot web page can, however, can be used with any system that produces 
 
 1. Make sure the VentMon is powered up via USB.
 1. Connect a CAT-5 ethernet cable from the port to directly to your router (NOT your computer.)
-1. Attempt to make sure you router allows outgoing IP packets to ventmon.coslabs.com on port 6111.
+1. Attempt to make sure you router allows outgoing IP packets to ventmon.coslabs.com on port `6111`.
 You may or may not have to manipulate your router firewall configuration.
 1. Determine your IP address as it appears to the outside world.
 1. Using any modern browser, browse to [http://ventmon.coslabs.com/](http://ventmon.coslabs.com/).
@@ -168,7 +168,7 @@ The Breath Plot data page has four areas:
 if you wish, as longs as it serves PIRDS data in the JSON format. It also allows you
 to control a few other parameters.
 1. The plotting area shows three plots aligned in the horizontal dimension of time. The first plot is differential pressure (in the airway against ambient pressure.) The second is flow (change in volume over time.)
-The final plot the "Event plot". The Event Plot uses an abstract scale. For convenience it draws ths flow plot. However, its main purpose is to show how the trace has been broken into breaths for the purpose of computing clinically significant measures. Ocasionally measurments such as temperature and humidity are rendered as markers on this plot.
+The final plot the "Event plot". The Event Plot uses an abstract scale. For convenience it draws ths flow plot. However, its main purpose is to show how the trace has been broken into breaths for the purpose of computing clinically significant measures. Ocasionally measurements such as temperature and humidity are rendered as markers on this plot.
 1. On the right are the clinical measures, such as PIP, PEEP, Tidal Volume, Minute Volume, and Respiration Rate. This are has default high and low values. When the calculated values are outside this range, they number is drawn in red to draw attention to the fact that one parameter is outside the specifications.
 1. Finally at the bottom is a simple user interface for importing and exporting traces.
 
@@ -253,7 +253,7 @@ The VentMon is not autoclavable at present. We are not entirely sure how to full
 # Calibration is Not Needed
 
 The Sensirion Flow Sensor that we use does not need further calibration. We have checked the
-neonatal flow sensor against an adult flow sensor with a  500ml syringe; they are both extraordinarily
+neonatal flow sensor against an adult flow sensor with a 500ml syringe; they are both extraordinarily
 accurate. Additional double-checks are always valuable, but we do not believe a user of the
 VentMon will have to worry about calibrating the flow measurement.
 
