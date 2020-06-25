@@ -117,13 +117,15 @@ bool SENSOR_INSTALLED_BACKWARD = true;
 /* FiO2 ***********************************************/
 
 // oxygen sensor is connecte to channel 3 of ADS115
-#define O2CHANNEL 3
-#define UNPLUGGED_MAX 400
+#define O2CHANNEL        3
+#define UNPLUGGED_MAX    400
+#define FIO2_SAMPLE_RATE 4000
 
 Adafruit_ADS1115 ads;
 
 int initialO2 = 0;
 bool oxygenSensing = true;
+unsigned long lastFiO2Sample = 0;
 
 /******************************************************/
 
@@ -248,13 +250,16 @@ void loop() {
   }
 
 
-
   // FiO2
-  if (oxygenSensing)
+  unsigned long fiO2Timer = millis(); 
+    
+  if (oxygenSensing && ((fiO2Timer -  lastFiO2Sample) >= FIO2_SAMPLE_RATE))
   {
     float fiO2 = (avgADC(O2CHANNEL) / initialO2) * 20.9;
     outputMeasurement('M', 'O', 'A', 0, ms, fiO2);
+    lastFiO2Sample = millis();
   }
+  
 
   // FLOW
   // our units are slm * 1000, or milliliters per minute.
