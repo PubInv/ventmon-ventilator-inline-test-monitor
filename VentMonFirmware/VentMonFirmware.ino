@@ -5,7 +5,7 @@
   designed to support ethernet using esp wifi chip
 
   All Adafruit libraries written by Limor Fried for Adafruit Industries.
-  
+
   Modififications released under BSD to avoid complication (I prefer GPL).
  ***************************************************************************/
 
@@ -60,8 +60,8 @@ Adafruit_BME680 bme[2]; // I2C
 
 bool found_bme[2] = { false, false}; // an abundance of caution to init
 
-// !!! Unless physical hardware changes the ambient sensor should have an address of 
-// 0x76 while the airway sensor should have an address of 0x77 on the I2C bus. 
+// !!! Unless physical hardware changes the ambient sensor should have an address of
+// 0x76 while the airway sensor should have an address of 0x77 on the I2C bus.
 // Do not change this unless directed to do so. !!!
 // sensor addresses
 #define AMBIENT_SENSOR_ADDRESS  0x76
@@ -90,12 +90,12 @@ unsigned long sample_millis = 0;
 // We could send out only raw data, and let more powerful computers process thing.
 // But we have a powerful micro controller here, so we will try to be useful!
 // Instead of outputting only the absolute pressure, we will output the differential
-// pressure in the Airway. We will compute a differential pressure against the 
+// pressure in the Airway. We will compute a differential pressure against the
 // ambient air. We will name this D0. We need a moving window to make sure there
 // is not jitter.
 int amb_wc = 0;
 #define AMB_WINDOW_SIZE 4
-#define AMB_SAMPLES_PER_WINDOW_ELEMENT 200 
+#define AMB_SAMPLES_PER_WINDOW_ELEMENT 200
 // sea level starting pressure.
 signed long ambient_window[AMB_WINDOW_SIZE];
 
@@ -118,6 +118,7 @@ bool SENSOR_INSTALLED_BACKWARD = true;
 
 // oxygen sensor is connecte to channel 3 of ADS115
 #define O2CHANNEL 3
+#define UNPLUGGED_MAX 400
 
 Adafruit_ADS1115 ads;
 
@@ -139,8 +140,8 @@ void setup() {
 
   int a = 0;
   int b = 0;
-  int c = 0; 
- 
+  int c = 0;
+
   delay(1000);
 
 
@@ -158,19 +159,19 @@ void setup() {
 void loop() {
 
   if (found_display) {
-// experimental OLED test code
-    if(!digitalRead(BUTTON_A)) {
+    // experimental OLED test code
+    if (!digitalRead(BUTTON_A)) {
       buttonA();
-    } 
-// ButtonB is causing my machine to hang with no explanation
-    else if(!digitalRead(BUTTON_B)) {
-        Serial.println("B BUTTON");
-        buttonB();
-        Serial.println("B BUTTON PROCESS DONE");
-    } 
-    else if(!digitalRead(BUTTON_C)) { 
+    }
+    // ButtonB is causing my machine to hang with no explanation
+    else if (!digitalRead(BUTTON_B)) {
+      Serial.println("B BUTTON");
+      buttonB();
+      Serial.println("B BUTTON PROCESS DONE");
+    }
+    else if (!digitalRead(BUTTON_C)) {
       unsigned long m = millis();
-      if (m > (buttonCpress_ms + 1000)) { 
+      if (m > (buttonCpress_ms + 1000)) {
         buttonCpress_ms = m;
         Serial.println("B BUTTON");
         buttonC();
@@ -180,11 +181,11 @@ void loop() {
 
       display.setCursor(0, 0);
       displayPressure(true);
-      display.setCursor(0,10);
-      displayPressure(false);  
+      display.setCursor(0, 10);
+      displayPressure(false);
     }
 
-    display.display(); 
+    display.display();
   }
 
   unsigned long m = millis();
@@ -201,56 +202,59 @@ void loop() {
 
   // We need to use a better sentinel...this is a legal value!
   // units for pressure are cm H2O * 100 (integer 10ths of mm)
-  signed long ambient_pressure = -999; 
+  signed long ambient_pressure = -999;
   signed long internal_pressure = -999;  // Inspiratory Pathway pressure
-  
+
   if (found_bme[AIRWAY_PRESSURE_SENSOR]) {
     internal_pressure = readPressureOnly(AIRWAY_PRESSURE_SENSOR);
   }
   if (((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0) && found_bme[AMBIENT_PRESSURE_SENSOR]) {
-      ambient_pressure = readPressureOnly(AMBIENT_PRESSURE_SENSOR);
-      ambient_counter = 1;
+    ambient_pressure = readPressureOnly(AMBIENT_PRESSURE_SENSOR);
+    ambient_counter = 1;
 
-      // experimentally we will report everything in the stream from 
-      // both sensor; sadly the BM# 680 is to slow to do this every sample.
-      report_full(AIRWAY_PRESSURE_SENSOR);
-      report_full(AMBIENT_PRESSURE_SENSOR);
-      
-      if (ambient_pressure != -999) {    
-        outputMeasurement('M', 'P', 'B', 1, ms, ambient_pressure);
-        ambient_window[amb_wc] = ambient_pressure;
-        amb_wc = (amb_wc +1) % AMB_WINDOW_SIZE;
-        Serial.println();
-      } else {
-        Serial.print("\"NA\"");  
-      }
+    // experimentally we will report everything in the stream from
+    // both sensor; sadly the BM# 680 is to slow to do this every sample.
+    report_full(AIRWAY_PRESSURE_SENSOR);
+    report_full(AMBIENT_PRESSURE_SENSOR);
+
+    if (ambient_pressure != -999) {
+      outputMeasurement('M', 'P', 'B', 1, ms, ambient_pressure);
+      ambient_window[amb_wc] = ambient_pressure;
+      amb_wc = (amb_wc + 1) % AMB_WINDOW_SIZE;
+      Serial.println();
+    } else {
+      Serial.print("\"NA\"");
+    }
   } else {
-   ambient_counter++;
+    ambient_counter++;
   }
   signed long smooth_ambient = 0;
-  for(int i = 0; i < AMB_WINDOW_SIZE; i++) {
+  for (int i = 0; i < AMB_WINDOW_SIZE; i++) {
     smooth_ambient += ambient_window[i];
   }
   smooth_ambient = (signed long) (smooth_ambient / AMB_WINDOW_SIZE);
 
 
-  if (internal_pressure != -999) {    
+  if (internal_pressure != -999) {
     outputMeasurement('M', 'P', 'A', 0, ms, internal_pressure);
     Serial.println();
-     // really this should be a running max, for now it is instantaneous
+    // really this should be a running max, for now it is instantaneous
     display_max_pressure = internal_pressure - smooth_ambient;
-    outputMeasurement('M', 'D', 'A', 0, ms, internal_pressure - smooth_ambient);   
+    outputMeasurement('M', 'D', 'A', 0, ms, internal_pressure - smooth_ambient);
     Serial.println();
   } else {
     // This is not actually part of the format!!!
-    Serial.print("\"NA\"");  
+    Serial.print("\"NA\"");
   }
 
 
 
   // FiO2
-  float fiO2 = (avgADC(O2CHANNEL) / initialO2) * 20.9;
-  outputMeasurement('M', 'O', 'A', 0, ms, fiO2);
+  if (oxygenSensing)
+  {
+    float fiO2 = (avgADC(O2CHANNEL) / initialO2) * 20.9;
+    outputMeasurement('M', 'O', 'A', 0, ms, fiO2);
+  }
 
   // FLOW
   // our units are slm * 1000, or milliliters per minute.
@@ -258,13 +262,13 @@ void loop() {
   raw_flow = flowSensor.readFlow();
   if (flowSensor.checkRange(raw_flow)) {
     if (raw_flow > 0) {
-     outputMetaEvent( (char *) ((SENSOR_INSTALLED_BACKWARD) ? flow_too_low : flow_too_high),ms);     
+      outputMetaEvent( (char *) ((SENSOR_INSTALLED_BACKWARD) ? flow_too_low : flow_too_high), ms);
     } else {
-     outputMetaEvent( (char *) ((SENSOR_INSTALLED_BACKWARD) ? flow_too_high : flow_too_low),ms); 
+      outputMetaEvent( (char *) ((SENSOR_INSTALLED_BACKWARD) ? flow_too_high : flow_too_low), ms);
     }
     Serial.println();
   }
-  
+
   float flow = (SENSOR_INSTALLED_BACKWARD) ? -raw_flow : raw_flow;
   signed long flow_milliliters_per_minute = (signed long) (flow * 1000);
   outputMeasurement('M', 'F', 'A', 0, ms, flow_milliliters_per_minute);
@@ -278,10 +282,10 @@ void loop() {
 /* DATA TRANSFER ***************************************/
 
 void output_on_serial_print_PIRDS(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
-  Measurement ma = get_measurement(e,t,loc,n,ms,val);
+  Measurement ma = get_measurement(e, t, loc, n, ms, val);
   // I need a proof that this buffer is larger enough, but I think it is...
   char buff[256];
-  int rv = fill_JSON_buffer_measurement(&ma,buff,256);
+  int rv = fill_JSON_buffer_measurement(&ma, buff, 256);
   Serial.print(buff);
 }
 
@@ -295,19 +299,19 @@ void outputMeasurement(char e, char t, char loc, unsigned short int n, unsigned 
 void outputMetaEvent(char *msg, unsigned long ms) {
   Message m = get_message(ms, msg);
   char buff[264];
-  int rv = fill_JSON_buffer_message(&m,buff,264);
+  int rv = fill_JSON_buffer_message(&m, buff, 264);
   Serial.print(buff);
-  
+
   send_data_message(m);
 }
 
-void report_full(int idx) 
+void report_full(int idx)
 {
-  unsigned long ms = millis(); 
-   
+  unsigned long ms = millis();
+
   if (! bme[idx].performReading()) {
     Serial.println("Failed to perform reading :( for:");
-    Serial.println(addr[idx],HEX);
+    Serial.println(addr[idx], HEX);
     found_bme[idx] = false;
     return;
   }
@@ -316,7 +320,7 @@ void report_full(int idx)
   outputMeasurement('M', 'T', loc, 0, ms, (signed long) (0.5 + (bme[idx].temperature * 100)));
   Serial.println();
   outputMeasurement('M', 'P', loc, 0, ms, (signed long) (0.5 + (bme[idx].pressure / (98.0665 / 10))));
-  Serial.println(); 
+  Serial.println();
   outputMeasurement('M', 'H', loc, 0, ms, (signed long) (0.5 + (bme[idx].humidity * 100)));
   Serial.println();
   outputMeasurement('M', 'G', loc, 0, ms, (signed long) (0.5 + bme[idx].gas_resistance));
@@ -325,9 +329,9 @@ void report_full(int idx)
   Serial.println();
 }
 
-void debugPrintBuffer(uint8_t* m,int n) {
-  for(int i = 0; i < n; i++) {
-    Serial.print(m[i],HEX);
+void debugPrintBuffer(uint8_t* m, int n) {
+  for (int i = 0; i < n; i++) {
+    Serial.print(m[i], HEX);
     Serial.print(' ');
   }
   Serial.println();
@@ -350,28 +354,28 @@ Message get_message(uint32_t ms, char *msg) {
   m.type = 'M';
   m.ms = ms;
   int n = strlen(msg);
-  if (n > 255) { 
+  if (n > 255) {
     m.b_size = 255;
-    memcpy(m.buff,msg,255);
+    memcpy(m.buff, msg, 255);
   } else {
     m.b_size = n;
-    strcpy(m.buff,msg);
+    strcpy(m.buff, msg);
   }
   return m;
 }
 
 bool send_data_measurement(Measurement ma) {
-  
+
   unsigned char m[14];
 
-  fill_byte_buffer_measurement(&ma,m,13);
+  fill_byte_buffer_measurement(&ma, m, 13);
 
   m[13] = '\n';
-  
-//  Serial.print(F(" UDP send to "));
-//  Serial.print(LoghostAddr);
-//  Serial.print(F(" "));
-//  Serial.println(Logport);
+
+  //  Serial.print(F(" UDP send to "));
+  //  Serial.print(LoghostAddr);
+  //  Serial.print(F(" "));
+  //  Serial.println(Logport);
 
   if (udpclient.beginPacket(LoghostAddr, Logport) != 1) {
     Serial.println("send_data_measurement begin failed!");
@@ -387,18 +391,18 @@ bool send_data_measurement(Measurement ma) {
 }
 
 bool send_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32_t value) {
-  Measurement ma = get_measurement(event,mtype,loc,num,ms,value);
+  Measurement ma = get_measurement(event, mtype, loc, num, ms, value);
   return send_data_measurement(ma);
 }
 
 bool send_data_message(Message ma) {
-  
+
   unsigned char m[264];
 
-  fill_byte_buffer_message(&ma,m,264);
-// I don't know how to compute this byte.
+  fill_byte_buffer_message(&ma, m, 264);
+  // I don't know how to compute this byte.
   m[263] = '\n';
- 
+
 
   if (udpclient.beginPacket(LoghostAddr, Logport) != 1) {
     Serial.println("send_data_message begin failed!");
@@ -417,21 +421,23 @@ bool send_data_message(Message ma) {
 
 /* FiO2 ***********************************************/
 
-void initializeOxygenSensor() 
-{ 
+void initializeOxygenSensor()
+{
   // setup ADC for oxygen sensing
   ads.setGain(GAIN_SIXTEEN);
   ads.begin();
   initialO2 = avgADC(O2CHANNEL);
-  
-  if (initialO2 <= 100 && initialO2 >= -100)
+
+  Serial.println(-(UNPLUGGED_MAX));
+
+  if (initialO2 <= UNPLUGGED_MAX && initialO2 >= -(UNPLUGGED_MAX))
   {
     Serial.println("WARNING: No oxygen sensor detected.");
     oxygenSensing = false;
   }
 }
 
-double avgADC(int adcNumber) 
+double avgADC(int adcNumber)
 {
   double adc = 0;
   double average;
@@ -470,53 +476,53 @@ void seekBME(int idx) {
   uint8_t loc_addr = addr[idx];
   // I don't understand why this API does not work, it seemed to work in the previous version....
   found_bme[idx] = bme[idx].begin(loc_addr, true);
-//  found_bme[idx] = bme[idx].begin(addr[idx]);
+  //  found_bme[idx] = bme[idx].begin(addr[idx]);
   if (!found_bme[idx]) {
     Serial.println("Could not find a valid BME680 sensor, check wiring for:");
-    Serial.println(loc_addr,HEX);
+    Serial.println(loc_addr, HEX);
   } else {
     // Set up oversampling and filter initialization
     if (idx == 0) {
-//    bme[idx].setTemperatureOversampling(BME680_OS_8X);
+      //    bme[idx].setTemperatureOversampling(BME680_OS_8X);
       bme[idx].setTemperatureOversampling(BME680_OS_1X);
       bme[idx].setHumidityOversampling(BME680_OS_1X);
       bme[idx].setPressureOversampling(BME680_OS_1X);
- //   bme[idx].setIIRFilterSize(BME680_FILTER_SIZE_3);
-  //  bme[idx].setGasHeater(320, 150); // 320*C for 150 ms
-    bme[idx].setGasHeater(0, 0); // 320*C for 150 ms 
+      //   bme[idx].setIIRFilterSize(BME680_FILTER_SIZE_3);
+      //  bme[idx].setGasHeater(320, 150); // 320*C for 150 ms
+      bme[idx].setGasHeater(0, 0); // 320*C for 150 ms
     } else if (idx == 1) {
-     // bme[idx].setTemperatureOversampling(BME680_OS_8X);
+      // bme[idx].setTemperatureOversampling(BME680_OS_8X);
       bme[idx].setTemperatureOversampling(BME680_OS_1X);
       bme[idx].setHumidityOversampling(BME680_OS_1X);
       bme[idx].setPressureOversampling(BME680_OS_1X);
-//    bme[idx].setIIRFilterSize(BME680_FILTER_SIZE_3);
-//     bme[idx].setGasHeater(320, 150); // 320*C for 150 ms
-    // I believe this feature is not needed or useful for this application
-    bme[idx].setGasHeater(0, 0); // 320*C for 150 ms  
+      //    bme[idx].setIIRFilterSize(BME680_FILTER_SIZE_3);
+      //     bme[idx].setGasHeater(320, 150); // 320*C for 150 ms
+      // I believe this feature is not needed or useful for this application
+      bme[idx].setGasHeater(0, 0); // 320*C for 150 ms
     }
   }
 }
 
 void init_ambient(signed long v) {
-  for(int i = 0; i < AMB_WINDOW_SIZE; i++) ambient_window[i] = v;
+  for (int i = 0; i < AMB_WINDOW_SIZE; i++) ambient_window[i] = v;
 }
 
 
 // the parameter idx here numbers our pressure sensors.
 // The sensors may be better, for as per the PIRDS we are returning integer 10ths of a mm of H2O
-signed long readPressureOnly(int idx) 
+signed long readPressureOnly(int idx)
 {
   if (idx < 2) {
     if (! bme[idx].performReading()) {
       Serial.println("Failed to perform reading :( for:");
-      Serial.println(addr[idx],HEX);
+      Serial.println(addr[idx], HEX);
       found_bme[idx] = false;
       return -999.0;
-    } else {     
+    } else {
       // returning resorts in kPa
       // the sensor apparently gives us Pascals...
-      
-    return (signed long) (0.5 + (bme[idx].pressure / (98.0665 / 10)));
+
+      return (signed long) (0.5 + (bme[idx].pressure / (98.0665 / 10)));
     }
   } else {
     // internal error! Ideally would publish and internal error event
@@ -529,7 +535,7 @@ signed long readPressureOnly(int idx)
 /* DISPLAY ********************************************/
 
 void setupOLED() {
- // Here we initialize the OLED...
+  // Here we initialize the OLED...
   Serial.println("OLED FeatherWing test");
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
   int ret_oled = display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
@@ -542,80 +548,80 @@ void setupOLED() {
   }
   found_display = true;
   Serial.println("OLED begun");
- 
+
   // Show image buffer on the display hardware.
   // Since the buffer is intialized with an Adafruit splashscreen
   // internally, this will display the splashscreen.
   display.display();
 
   delay(1000);
- 
+
   // Clear the buffer.
   display.clearDisplay();
   display.display();
- 
+
   Serial.println("IO test");
- 
+
   pinMode(BUTTON_A, INPUT_PULLUP);
   pinMode(BUTTON_B, INPUT_PULLUP);
   pinMode(BUTTON_C, INPUT_PULLUP);
- 
+
   // text display tests
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0,0);
+  display.setCursor(0, 0);
   display.print("Connecting to SSID\n'adafruit':");
   display.print("connected!");
   display.println("IP: 10.0.1.23");
   display.println("Sending val #0");
-  display.setCursor(0,0);
-  display.display(); // actually display all of the above 
+  display.setCursor(0, 0);
+  display.display(); // actually display all of the above
 }
 
 void buttonA() {
-    Serial.println("A BUTTON");
-    display.clearDisplay();
-    display.setCursor(0, 0);
-    display.print("A");
+  Serial.println("A BUTTON");
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print("A");
 }
 
 void buttonB() {
-      Serial.println("B BUTTON");
-      display.clearDisplay();
-      display.setCursor(0, 0);
-      display.print("B");
+  Serial.println("B BUTTON");
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print("B");
 }
 
 // This is an experimental used of this event!!!
 void buttonC() {
-    display.clearDisplay();
-    display.setCursor(0, 10);
-    display.print("C");
-    
-    unsigned long ms = millis();
-    int n = strlen(SAVE_LOG_TO_FILE);
-    char buffer[255];
-    strcpy(buffer,SAVE_LOG_TO_FILE);
-    strcpy(buffer+n,"test_file_name");
-    outputMetaEvent(buffer,ms); 
-    Serial.println();    
+  display.clearDisplay();
+  display.setCursor(0, 10);
+  display.print("C");
+
+  unsigned long ms = millis();
+  int n = strlen(SAVE_LOG_TO_FILE);
+  char buffer[255];
+  strcpy(buffer, SAVE_LOG_TO_FILE);
+  strcpy(buffer + n, "test_file_name");
+  outputMetaEvent(buffer, ms);
+  Serial.println();
 }
 
 // Trying to make simple, I will define 3 lines..
-void displayLine(int n,char* s) {
-    display.setCursor(0, 10);
-    display.print(s);
+void displayLine(int n, char* s) {
+  display.setCursor(0, 10);
+  display.print(s);
 }
 
-void displayPressure(bool max_not_min) {     
-      display.print(max_not_min ? "Max" : "Min" );   
-      display.print(" cm H2O: ");
-      char buffer[32];
-      long display_pressure = max_not_min ? display_max_pressure : display_min_pressure;
-      int pressure_sign = ( display_pressure < 0) ? -1 : 1;
-      int abs_pressure = (pressure_sign == -1) ? - display_pressure : display_pressure;
-      sprintf(buffer, "%d.1", display_pressure/10);  
-      display.println(buffer);
+void displayPressure(bool max_not_min) {
+  display.print(max_not_min ? "Max" : "Min" );
+  display.print(" cm H2O: ");
+  char buffer[32];
+  long display_pressure = max_not_min ? display_max_pressure : display_min_pressure;
+  int pressure_sign = ( display_pressure < 0) ? -1 : 1;
+  int abs_pressure = (pressure_sign == -1) ? - display_pressure : display_pressure;
+  sprintf(buffer, "%d.1", display_pressure / 10);
+  display.println(buffer);
 }
 
 /******************************************************/
@@ -624,14 +630,14 @@ void displayPressure(bool max_not_min) {
 
 void ethernet_setup() {
   Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
-  
+
   WiFi.macAddress(mac); // Get MAC address of wifi chip for ethernet address
   snprintf(macs, sizeof macs, "%02X:%02X:%02X:%02X:%02X:%02X",
-    mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
   Serial.print(F("Mac: "));
   Serial.print(macs);
   Serial.println();
-  
+
   while (1) {
     // start the Ethernet connection:
     Serial.println(F("Initialize Ethernet with DHCP:"));
@@ -639,14 +645,14 @@ void ethernet_setup() {
       Serial.println(F("Failed to configure Ethernet using DHCP"));
       // Check for Ethernet hardware present
       if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-	Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
-	while (1) {
-	  delay(1); // do nothing, no point running without Ethernet hardware
-	}
+        Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
+        while (1) {
+          delay(1); // do nothing, no point running without Ethernet hardware
+        }
       }
       if (Ethernet.linkStatus() == LinkOFF) {
-	Serial.println(F("Ethernet cable is not connected."));
-	delay(5000);
+        Serial.println(F("Ethernet cable is not connected."));
+        delay(5000);
       }
       delay(5000);
     } else {
@@ -660,7 +666,7 @@ void ethernet_setup() {
   delay(1000);
 
   udpclient.begin(LOCALPORT);
-  
+
   DNSClient dns;
   dns.begin(Ethernet.dnsServerIP());
   if (dns.getHostByName(Loghost, LoghostAddr) == 1) {
