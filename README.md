@@ -23,6 +23,9 @@ Free-libre Open Source ventilator design.
 For further explanation of design motivation and approach please refer to the following document -
 [Motivation of Strategy](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/Motivation.md)
 
+For a hands on demonstration and in-depth explanation of VentMon watch our screen cast!  
+[VentMon ScreenCast](https://www.youtube.com/watch?v=OV9MrMjVOCI)
+
 # User Manual
 
 Although a work in progress, we have a [user manaul](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/UserManaul.md).
