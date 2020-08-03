@@ -846,29 +846,29 @@ void loop() {
   unsigned long ms = millis();
 
 
-  if (found_bme[AMBIENT_PRESSURE_SENSOR] && ((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0)) {
-    signed long ambient_pressure = readPressureOnly(AMBIENT_PRESSURE_SENSOR);
-    ambient_counter = 1;
-
-    // experimentally we will report everything in the stream from
-    // both sensor; sadly the BM# 680 is to slow to do this every sample.
-    report_full(INSPIRATORY_PRESSURE_SENSOR);
-    report_full(AMBIENT_PRESSURE_SENSOR);
-
-    if (ambient_pressure != LONG_MIN) {
-      outputMeasurement('M', 'P', 'B', 1, ms, ambient_pressure);
-      ambient_window[amb_wc] = ambient_pressure;
-      amb_wc = (amb_wc + 1) % AMB_WINDOW_SIZE;
-      Serial.println();
-    } else {
-      // This should be handled as an error message!!
-      Serial.print(AMBIENT_PRESSURE_SENSOR_ERROR);
-      unsigned long ms = millis();  
-      outputMetaEvent(AMBIENT_PRESSURE_SENSOR_ERROR, ms);
-    }
-  } else {
-    ambient_counter++;
-  }
+//  if (found_bme[AMBIENT_PRESSURE_SENSOR] && ((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0)) {
+//    signed long ambient_pressure = readPressureOnly(AMBIENT_PRESSURE_SENSOR);
+//    ambient_counter = 1;
+//
+//    // experimentally we will report everything in the stream from
+//    // both sensor; sadly the BM# 680 is to slow to do this every sample.
+//    report_full(INSPIRATORY_PRESSURE_SENSOR);
+//    report_full(AMBIENT_PRESSURE_SENSOR);
+//
+//    if (ambient_pressure != LONG_MIN) {
+//      outputMeasurement('M', 'P', 'B', 1, ms, ambient_pressure);
+//      ambient_window[amb_wc] = ambient_pressure;
+//      amb_wc = (amb_wc + 1) % AMB_WINDOW_SIZE;
+//      Serial.println();
+//    } else {
+//      // This should be handled as an error message!!
+//      Serial.print(AMBIENT_PRESSURE_SENSOR_ERROR);
+//      unsigned long ms = millis();  
+//      outputMetaEvent(AMBIENT_PRESSURE_SENSOR_ERROR, ms);
+//    }
+//  } else {
+//    ambient_counter++;
+//  }
 
   for (int i = 0; i < AMB_WINDOW_SIZE; i++) {
     smooth_ambient += ambient_window[i];
