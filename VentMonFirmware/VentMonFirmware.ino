@@ -162,14 +162,15 @@ signed long smooth_ambient = 0;
 
 SFM3X00 flowSensor(0x40);
 
-#define PIRDS_SENSIRION_SFM3200 0
-#define PIRDS_SENSIRION_SFM3400 1
+// Note: The SFM3300-D is compatible with the SFM3200- you should use that for it!
+#define PIRDS_SENSIRION_SFM3200 1
+#define PIRDS_SENSIRION_SFM3400 0
 
 // int sensirion_sensor_type = PIRDS_SENSIRION_SFM3200;
 int sensirion_sensor_type = PIRDS_SENSIRION_SFM3400;
 // At present we have to install the SENSIRION_SFM3400 backwards
 // because of the physical mounting!!!
-bool SENSOR_INSTALLED_BACKWARD = true;
+bool SENSOR_INSTALLED_BACKWARD = false;
 
 /* FiO2 ***********************************************/
 
@@ -312,16 +313,6 @@ void outputMetaEvent(char *msg, unsigned long ms) {
 
 }
 
-void report_full(int idx) {
-  if (found_bme680[idx]) {
-    return report_full680(idx);
-  } else if (found_bme280[idx]) {
-    return report_full280(idx);
-  } else {
-    Serial.println("INTERNAL ERROR! (report full)");
-  }
-}
-
 void perform_read(int idx) {
    if (found_bme680[idx]) {
       if (! bme680[idx].performReading()) {
@@ -335,36 +326,6 @@ void perform_read(int idx) {
   } else {
     Serial.println("INTERNAL ERROR! (report full)");
   }
-}
-
-void report_full680(int idx)
-{
-  unsigned long ms = millis();
-
-  if (! bme680[idx].performReading()) {
-    Serial.println("Failed to perform reading :( for:");
-    Serial.println(addr[idx], HEX);
-    found_bme680[idx] = false;
-    return;
-  }
-
-  char loc = (idx == 0) ? 'I' : 'B';
-  outputMeasurement('M', 'T', loc, 0, ms, (signed long) (0.5 + (bme680[idx].readTemperature() * 100)));
-  outputMeasurement('M', 'P', loc, 0, ms, (signed long) (0.5 + (bme680[idx].readPressure() / (98.0665 / 10))));
-  outputMeasurement('M', 'H', loc, 0, ms, (signed long) (0.5 + (bme680[idx].readHumidity() * 100)));
-  outputMeasurement('M', 'G', loc, 0, ms, (signed long) (0.5 + bme680[idx].gas_resistance));
-  outputMeasurement('M', 'A', loc, 0, ms, (signed long) (0.5 + bme680[idx].readAltitude(SEALEVELPRESSURE_HPA)));
-}
-
-void report_full280(int idx)
-{
-  unsigned long ms = millis();
-
-  char loc = (idx == 0) ? 'I' : 'B';
-  outputMeasurement('M', 'T', loc, 0, ms, (signed long) (0.5 + (bme280[idx].readTemperature() * 100)));
-  outputMeasurement('M', 'P', loc, 0, ms, (signed long) (0.5 + (bme280[idx].readPressure() / (98.0665 / 10))));
-  outputMeasurement('M', 'H', loc, 0, ms, (signed long) (0.5 + (bme280[idx].readHumidity() * 100)));
-  outputMeasurement('M', 'A', loc, 0, ms, (signed long) (0.5 + bme280[idx].readAltitude(SEALEVELPRESSURE_HPA)));
 }
 
 void debugPrintBuffer(uint8_t* m, int n) {
@@ -695,7 +656,9 @@ void ethernet_setup() {
   Serial.print(macs);
   Serial.println();
 
-  while (1) {
+  int n = 0;
+  const int ETHERNET_TRIES = 5;
+  while (n < ETHERNET_TRIES) {
     // start the Ethernet connection:
     Serial.println(F("Initialize Ethernet with DHCP:"));
     if (Ethernet.begin(mac) == 0) {
@@ -706,13 +669,20 @@ void ethernet_setup() {
       }
       if (Ethernet.linkStatus() == LinkOFF) {
         Serial.println(F("Ethernet cable is not connected."));
-        return;
+        delay(3000);
       }
     } else {
       Serial.print(F("  DHCP assigned IP "));
       Serial.println(Ethernet.localIP());
-      return;
+      delay(5000);
+      break;
     }
+    Serial.print("FAILED TO FIND, TRY #"); 
+    Serial.println(n);
+    n++;
+  }
+  if (n==ETHERNET_TRIES) {
+    Serial.println("FAILED TO FIND ETHERNET, GIVING UP!");
   }
 
   // give the Ethernet shield a second to initialize:
@@ -770,40 +740,50 @@ void output_I_ADPRES() {
     }
 }
 void output_I_PRES() {
-    unsigned long ms = millis();
-    signed long internal_pressure = readPressureOnly(INSPIRATORY_PRESSURE_SENSOR);
-    if (internal_pressure != LONG_MIN) {
-      outputMeasurement('M', 'P', 'I', 0, ms, internal_pressure);
-    } else {
-     Serial.print(INSPIRATORY_PRESSURE_SENSOR_ERROR);
-     outputMetaEvent(INSPIRATORY_PRESSURE_SENSOR_ERROR, ms);
-    }
+    output_PRES(0);
 }
 void output_B_PRES() {
-      unsigned long ms = millis();
-    signed long internal_pressure = readPressureOnly(AMBIENT_PRESSURE_SENSOR);
-    if (internal_pressure != LONG_MIN) {
-      outputMeasurement('M', 'P', 'B', 0, ms, internal_pressure);
+  output_PRES(1);
+}
+void output_PRES(int idx) {
+    char loc = (idx == 0) ? 'I' : 'B';
+    int sensor = (idx == 0) ? INSPIRATORY_PRESSURE_SENSOR : AMBIENT_PRESSURE_SENSOR;
+    unsigned long ms = millis();
+    signed long pressure = readPressureOnly(sensor);
+    if (pressure != LONG_MIN) {
+      outputMeasurement('M', 'P', loc, 0, ms, pressure);
     } else {
-     Serial.print(AMBIENT_PRESSURE_SENSOR_ERROR);
-     outputMetaEvent(AMBIENT_PRESSURE_SENSOR_ERROR, ms);
+      if (idx == 0) {
+        Serial.print(INSPIRATORY_PRESSURE_SENSOR_ERROR);
+        outputMetaEvent(INSPIRATORY_PRESSURE_SENSOR_ERROR, ms);        
+      } else {
+        Serial.print(AMBIENT_PRESSURE_SENSOR_ERROR);
+        outputMetaEvent(AMBIENT_PRESSURE_SENSOR_ERROR, ms);
+      }
     }
 }
-// TODO: MIGHT have to use bme680 below, have to check which is found.
+
 void output_temp(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
     unsigned long ms = millis();
-    outputMeasurement('M', 'T', loc, 0, ms, (signed long) (0.5 + (bme280[idx].readTemperature() * 100)));
+    found_bme280[idx] || found_bme680[idx];
+    outputMeasurement('M', 'T', loc, 0, ms, (signed long) (0.5 + 
+      (found_bme280[idx] ? bme280[idx].readTemperature() : bme680[idx].readTemperature()) * 100));
 }
 void output_h2o(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
     unsigned long ms = millis();
-    outputMeasurement('M', 'H', loc, 0, ms, (signed long) (0.5 + (bme280[idx].readHumidity() * 100)));
+    outputMeasurement('M', 'H', loc, 0, ms, (signed long) (0.5 + 
+      (found_bme280[idx] ? bme280[idx].readHumidity() : bme680[idx].readHumidity()) * 100));
 }
 void output_alt(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
     unsigned long ms = millis();
-    outputMeasurement('M', 'A', loc, 0, ms, (signed long) (0.5 + bme280[idx].readAltitude(SEALEVELPRESSURE_HPA)));
+    outputMeasurement('M', 'A', loc, 0, ms, (signed long) (0.5 + 
+      found_bme280[idx] ? 
+        bme280[idx].readAltitude(SEALEVELPRESSURE_HPA) : 
+        bme680[idx].readAltitude(SEALEVELPRESSURE_HPA) 
+      ));
 }
 void output_gas(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
@@ -844,31 +824,6 @@ void loop() {
   }
 
   unsigned long ms = millis();
-
-
-//  if (found_bme[AMBIENT_PRESSURE_SENSOR] && ((ambient_counter % AMB_SAMPLES_PER_WINDOW_ELEMENT) == 0)) {
-//    signed long ambient_pressure = readPressureOnly(AMBIENT_PRESSURE_SENSOR);
-//    ambient_counter = 1;
-//
-//    // experimentally we will report everything in the stream from
-//    // both sensor; sadly the BM# 680 is to slow to do this every sample.
-//    report_full(INSPIRATORY_PRESSURE_SENSOR);
-//    report_full(AMBIENT_PRESSURE_SENSOR);
-//
-//    if (ambient_pressure != LONG_MIN) {
-//      outputMeasurement('M', 'P', 'B', 1, ms, ambient_pressure);
-//      ambient_window[amb_wc] = ambient_pressure;
-//      amb_wc = (amb_wc + 1) % AMB_WINDOW_SIZE;
-//      Serial.println();
-//    } else {
-//      // This should be handled as an error message!!
-//      Serial.print(AMBIENT_PRESSURE_SENSOR_ERROR);
-//      unsigned long ms = millis();  
-//      outputMetaEvent(AMBIENT_PRESSURE_SENSOR_ERROR, ms);
-//    }
-//  } else {
-//    ambient_counter++;
-//  }
 
   for (int i = 0; i < AMB_WINDOW_SIZE; i++) {
     smooth_ambient += ambient_window[i];
@@ -952,15 +907,15 @@ void loop() {
      perform_read(AMBIENT_PRESSURE_SENSOR);
        }
     if ((PERIOD_B_TEMP_ms + PERIOD_B_TEMP)  < ms ) {
-        output_temp(INSPIRATORY_PRESSURE_SENSOR);
+        output_temp(AMBIENT_PRESSURE_SENSOR);
         PERIOD_B_TEMP_ms = ms;
     }
     if ((PERIOD_B_H2O_ms + PERIOD_B_H2O)  < ms ) {
-        output_h2o(INSPIRATORY_PRESSURE_SENSOR);
+        output_h2o(AMBIENT_PRESSURE_SENSOR);
         PERIOD_B_H2O_ms = ms;   
     }
     if ((PERIOD_B_GAS_ms + PERIOD_B_GAS)  < ms ) {
-        output_gas(INSPIRATORY_PRESSURE_SENSOR);
+        output_gas(AMBIENT_PRESSURE_SENSOR);
         PERIOD_B_GAS_ms = ms; 
     }
   }
