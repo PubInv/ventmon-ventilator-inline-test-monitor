@@ -7965,12 +7965,31 @@ chip</description>
 <text x="-2.54" y="-2.54" size="1.778" layer="96">&gt;VALUE</text>
 <pin name="GND" x="0" y="2.54" visible="off" length="short" direction="sup" rot="R270"/>
 </symbol>
+<symbol name="+5V" urn="urn:adsk.eagle:symbol:26929/1" library_version="1">
+<wire x1="1.27" y1="-1.905" x2="0" y2="0" width="0.254" layer="94"/>
+<wire x1="0" y1="0" x2="-1.27" y2="-1.905" width="0.254" layer="94"/>
+<text x="-2.54" y="-5.08" size="1.778" layer="96" rot="R90">&gt;VALUE</text>
+<pin name="+5V" x="0" y="-2.54" visible="off" length="short" direction="sup" rot="R90"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="GND" urn="urn:adsk.eagle:component:26954/1" prefix="GND" library_version="1">
 <description>&lt;b&gt;SUPPLY SYMBOL&lt;/b&gt;</description>
 <gates>
 <gate name="1" symbol="GND" x="0" y="0"/>
+</gates>
+<devices>
+<device name="">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="+5V" urn="urn:adsk.eagle:component:26963/1" prefix="P+" library_version="1">
+<description>&lt;b&gt;SUPPLY SYMBOL&lt;/b&gt;</description>
+<gates>
+<gate name="1" symbol="+5V" x="0" y="0"/>
 </gates>
 <devices>
 <device name="">
@@ -9048,7 +9067,6 @@ Updated by Ella Wu 2019-08-05 &lt;br&gt;
 <part name="GND17" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="+3V21" library="supply1" deviceset="+3V3" device="" value="+3V3D"/>
 <part name="FLOWSENSOR" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" deviceset="QWIIC_CONNECTOR" device="JS-1MM" package3d_urn="urn:adsk.eagle:package:38096/1"/>
-<part name="+3V22" library="supply1" deviceset="+3V3" device="" value="+3V3D"/>
 <part name="U$3" library="microbuilder" deviceset="GND" device=""/>
 <part name="J5" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" deviceset="QWIIC_CONNECTOR" device="JS-1MM" package3d_urn="urn:adsk.eagle:package:38096/1"/>
 <part name="+3V23" library="supply1" deviceset="+3V3" device="" value="+3V3D"/>
@@ -9068,6 +9086,7 @@ Updated by Ella Wu 2019-08-05 &lt;br&gt;
 <part name="J7" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" deviceset="CONN_12" device="" package3d_urn="urn:adsk.eagle:package:38169/1" value="Header-12"/>
 <part name="T1" library="Wurth_Signal &amp; Communications_WE-RJ45_LAN" library_urn="urn:adsk.eagle:library:14284239" deviceset="WE-RJ45_7499210121A" device="" package3d_urn="urn:adsk.eagle:package:12863551/2"/>
 <part name="+3V20" library="supply1" deviceset="+3V3" device="" value="+3V3D"/>
+<part name="P+1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="+5V" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -10133,7 +10152,7 @@ Updated by Ella Wu 2019-08-05 &lt;br&gt;
 <label x="261.62" y="48.26" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="VPOE" class="0">
+<net name="+5V" class="0">
 <segment>
 <label x="128.27" y="24.384" size="1.778" layer="95"/>
 <pinref part="J1" gate="J$1" pin="1"/>
@@ -10285,9 +10304,6 @@ SDI=SDA, SCK=SCL</text>
 <attribute name="VALUE" x="-33.02" y="-78.994" size="1.778" layer="96" font="vector" align="top-left"/>
 <attribute name="NAME" x="-33.02" y="-65.786" size="1.778" layer="95" font="vector"/>
 </instance>
-<instance part="+3V22" gate="G$1" x="-7.62" y="-66.04" smashed="yes">
-<attribute name="VALUE" x="-4.064" y="-63.246" size="1.778" layer="96" rot="R180"/>
-</instance>
 <instance part="U$3" gate="G$1" x="-7.62" y="-82.55" smashed="yes">
 <attribute name="VALUE" x="-9.144" y="-85.09" size="1.27" layer="96"/>
 </instance>
@@ -10349,6 +10365,9 @@ SDI=SDA, SCK=SCL</text>
 <instance part="J7" gate="G$1" x="-78.43" y="52.05" smashed="yes" rot="MR180">
 <attribute name="VALUE" x="-78.43" y="72.116" size="1.778" layer="96" font="vector" rot="MR180"/>
 <attribute name="NAME" x="-78.43" y="36.302" size="1.778" layer="95" font="vector" rot="MR180"/>
+</instance>
+<instance part="P+1" gate="1" x="-7.62" y="-63.5" smashed="yes">
+<attribute name="VALUE" x="-7.62" y="-60.96" size="1.778" layer="96" align="top-center"/>
 </instance>
 </instances>
 <busses>
@@ -10469,12 +10488,6 @@ SDI=SDA, SCK=SCL</text>
 <pinref part="PRESSURE1" gate="G$1" pin="VS"/>
 <pinref part="C19" gate="G$1" pin="P$2"/>
 <junction x="71.12" y="66.04"/>
-</segment>
-<segment>
-<pinref part="FLOWSENSOR" gate="J1" pin="VCC"/>
-<pinref part="+3V22" gate="G$1" pin="+3V3"/>
-<wire x1="-20.32" y1="-73.66" x2="-7.62" y2="-73.66" width="0.1524" layer="91"/>
-<wire x1="-7.62" y1="-73.66" x2="-7.62" y2="-68.58" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="J5" gate="J1" pin="VCC"/>
@@ -10692,12 +10705,18 @@ SDI=SDA, SCK=SCL</text>
 <label x="-120.8" y="47.07" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="VPOE" class="0">
+<net name="+5V" class="0">
 <segment>
 <pinref part="J7" gate="G$1" pin="3"/>
 <wire x1="-68.27" y1="62.21" x2="-58.48" y2="62.21" width="0.1524" layer="91"/>
 <wire x1="-58.48" y1="62.21" x2="-58.48" y2="62.17" width="0.1524" layer="91"/>
 <label x="-66" y="62.42" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="FLOWSENSOR" gate="J1" pin="VCC"/>
+<wire x1="-20.32" y1="-73.66" x2="-7.62" y2="-73.66" width="0.1524" layer="91"/>
+<wire x1="-7.62" y1="-73.66" x2="-7.62" y2="-66.04" width="0.1524" layer="91"/>
+<pinref part="P+1" gate="1" pin="+5V"/>
 </segment>
 </net>
 <net name="N$24" class="0">
