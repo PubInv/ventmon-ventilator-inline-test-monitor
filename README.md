@@ -58,6 +58,10 @@ Initial BOM can be found here: [BOM](https://docs.google.com/document/d/1n-Ja3Ug
 
 ## Status
 
+** August 20th **
+
+We have received 15 populated boards and desigend a 3D printed hat. We are beginning final assembly/manufacture of the 15 units that people have requested to be sent out free-of-charge.
+
 ** June 18th ***
 
 Lauria plans to ship 5 more VentMons on the 23rd. She has added FiO2 sensing, and important feature. Rob Giseburt has create an VentMon-like device using a Raspberry PI; we may switch to that display. The VentMon has been used internationally by several teams to gain important insights into their prototype pandemic ventilators. One team may be constructiong their own VentMon from our Open Source designs.
