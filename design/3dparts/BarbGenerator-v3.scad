@@ -105,7 +105,7 @@ module tometric( unit_type, value )
 module barbnotch( inside_diameter )
 {
   // Generate a single barb notch
-  cylinder( h = inside_diameter * 1.0, r1 = inside_diameter * 0.85 / 2, r2 = inside_diameter * 1.16 / 2, $fa = 0.5, $fs = 0.5 );
+  cylinder( h = inside_diameter * 1.0, r1 = inside_diameter * 0.85 / 2, r2 = inside_diameter * 1.16 / 2, $fa = 0.1, $fs = 0.1 );
 }
 
 module solidbarbstack( inside_diameter, count )
@@ -130,7 +130,7 @@ module barb( inside_diameter, count )
     solidbarbstack( inside_diameter, count );
       // WARNING: Changing this....
 //    translate([0,0,-0.3]) cylinder( h = inside_diameter * (count + 1), r = inside_diameter * 0.75 / 2, $fa = 0.5, $fs = 0.5 );
-      translate([0,0,-0.3]) cylinder( h = inside_diameter * (count + 1), r = inside_diameter * 0.6 / 2, $fa = 0.5, $fs = 0.5 );
+      translate([0,0,-0.3]) cylinder( h = inside_diameter * (count + 1), r = inside_diameter * 0.6 / 2, $fa = 0.1, $fs = 0.1 );
   }
 }
 
@@ -149,11 +149,11 @@ module junction( input_diameter, output_diameter, jheight )
     holeD=input_diameter >= output_diameter ? output_diameter : input_diameter;
   junction_diameter_ratio = (inline_junction_type == "none") ? 1.1 : 1.6;
   translate( [0,0,input_diameter * jheight * 0.9] ) difference() {
-	cylinder( r = max(input_diameter, output_diameter) * junction_diameter_ratio / 2, h = 5, $fa = 0.5, $fs = 0.5 );
-	cylinder( r1 = input_diameter / 2, r2 = output_diameter / 2, h = (jheight + 1), $fa = 0.5, $fs = 0.5 );
+	cylinder( r = max(input_diameter, output_diameter) * junction_diameter_ratio / 2, h = 5, $fa = 0.1, $fs = 0.1 );
+	cylinder( r1 = input_diameter / 2, r2 = output_diameter / 2, h = (jheight + 1), $fa = 0.1, $fs = 0.1 );
 //    cylinder(r=holeD/2, h=jheight*2*5, center=true);
       // WARNING!!! THIS HAS BEEN CHANGED for my specific situation
-    cylinder(r=holeD/4, h=jheight*2*5, center=true,  $fn = 20);
+    cylinder(r=holeD/4, h=jheight*2*5, center=true,  $fn = 30);
   }
 }
 
