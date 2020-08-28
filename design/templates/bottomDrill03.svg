@@ -24,8 +24,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.979899"
-     inkscape:cx="607.67554"
-     inkscape:cy="447.8255"
+     inkscape:cx="505.90267"
+     inkscape:cy="403.88386"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -35,8 +35,8 @@
      inkscape:snap-grids="true"
      inkscape:window-width="2189"
      inkscape:window-height="1248"
-     inkscape:window-x="74"
-     inkscape:window-y="32"
+     inkscape:window-x="189"
+     inkscape:window-y="87"
      inkscape:window-maximized="0"
      units="in">
     <sodipodi:guide
@@ -60,17 +60,37 @@
        orientation="0,-1"
        id="guide1217" />
     <sodipodi:guide
-       position="163.30168,45.916582"
+       position="160.22808,63.957275"
        orientation="1,0"
        id="guide1234" />
     <sodipodi:guide
-       position="51.182115,55.538283"
+       position="109.84778,50.994703"
        orientation="0,-1"
        id="guide1274" />
     <sodipodi:guide
-       position="80.849032,169.26147"
+       position="163.83622,166.98968"
        orientation="0,-1"
        id="guide1276" />
+    <sodipodi:guide
+       id="guide1700"
+       orientation="0,-1"
+       position="97.553377,45.515677" />
+    <sodipodi:guide
+       id="guide1702"
+       orientation="1,0"
+       position="109.84778,50.994703" />
+    <sodipodi:guide
+       id="guide1704"
+       orientation="1,0"
+       position="109.84778,55.538283" />
+    <sodipodi:guide
+       id="guide1818"
+       orientation="1,0"
+       position="134.97111,64.625448" />
+    <sodipodi:guide
+       id="guide1998"
+       orientation="1,0"
+       position="139.38106,58.478249" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -80,7 +100,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -201,29 +221,29 @@
        id="rect1185"
        width="18.91181"
        height="21.179659"
-       x="106.39378"
+       x="101.58293"
        y="154.58575" />
     <ellipse
        transform="scale(-1,1)"
        style="fill:none;stroke:#000000;stroke-width:0.652;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path837-6-7"
-       cx="-163.62587"
+       cx="-160.28499"
        cy="158.14575"
        rx="4.2666345"
        ry="4.1129618" />
     <ellipse
-       ry="4.1102881"
-       rx="4.4529395"
+       ry="6.4221091"
+       rx="7.2992997"
        cy="84.856125"
-       cx="-217.14732"
+       cx="-219.79312"
        id="path837-6-7-3"
-       style="fill:none;stroke:#000000;stroke-width:0.757;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:none;stroke:#000000;stroke-width:1.21148;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        transform="scale(-1,1)" />
     <ellipse
        ry="4.1129618"
        rx="4.2666345"
-       cy="49.137093"
-       cx="-163.24794"
+       cy="48.869823"
+       cx="-160.84251"
        id="path837-6-7-8"
        style="fill:none;stroke:#000000;stroke-width:0.652;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        transform="scale(-1,1)" />
@@ -267,30 +287,30 @@
     <text
        xml:space="preserve"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
-       x="-81.959145"
-       y="229.38443"
+       x="-79.842476"
+       y="230.97191"
        id="text1268"
        transform="rotate(-90)"><tspan
          sodipodi:role="line"
          id="tspan1266"
-         x="-81.959145"
-         y="229.38443"
-         style="stroke-width:0.264583">10mm</tspan><tspan
+         x="-79.842476"
+         y="230.97191"
+         style="stroke-width:0.264583">12mm</tspan><tspan
          sodipodi:role="line"
-         x="-81.959145"
-         y="234.67609"
+         x="-79.842476"
+         y="236.26357"
          style="stroke-width:0.264583"
-         id="tspan1278">5/8&quot;</tspan></text>
+         id="tspan1278">1/2&quot;</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
-       x="105.43783"
-       y="151.1409"
+       x="96.617935"
+       y="150.73999"
        id="text1272"><tspan
          sodipodi:role="line"
          id="tspan1270"
-         x="105.43783"
-         y="151.1409"
+         x="96.617935"
+         y="150.73999"
          style="stroke-width:0.264583">16mm 5/8&quot;</tspan></text>
     <text
        id="text1246-2"
@@ -312,37 +332,37 @@
     <text
        xml:space="preserve"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
-       x="161.69806"
+       x="158.89172"
        y="159.42627"
        id="text1326"><tspan
          sodipodi:role="line"
          id="tspan1324"
-         x="161.69806"
+         x="158.89172"
          y="159.42627"
          style="stroke-width:0.264583">+</tspan></text>
     <text
        id="text1326-2"
        y="86.339432"
-       x="215.4243"
+       x="218.59926"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
        xml:space="preserve"><tspan
          style="stroke-width:0.264583"
          y="86.339432"
-         x="215.4243"
+         x="218.59926"
          id="tspan1324-5"
          sodipodi:role="line">+</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
-       x="161.70312"
-       y="50.391682"
+       x="159.16405"
+       y="50.258049"
        id="text1326-2-7"
        inkscape:transform-center-x="-22.45064"
        inkscape:transform-center-y="12.828937"><tspan
          sodipodi:role="line"
          id="tspan1324-5-6"
-         x="161.70312"
-         y="50.391682"
+         x="159.16405"
+         y="50.258049"
          style="stroke-width:0.264583">+</tspan></text>
     <text
        id="text1238-3"
@@ -418,7 +438,7 @@
        transform="scale(-1,1)"
        style="fill:none;stroke:#000000;stroke-width:0.756999;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path837-6-7-3-3"
-       cx="-214.35016"
+       cx="-218.7601"
        cy="97.018837"
        rx="4.4529395"
        ry="4.1102881" />
@@ -442,19 +462,19 @@
     <text
        xml:space="preserve"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
-       x="212.35072"
+       x="216.76067"
        y="98.232918"
        id="text1326-2-8"><tspan
          sodipodi:role="line"
          id="tspan1324-5-3"
-         x="212.35072"
+         x="216.76067"
          y="98.232918"
          style="stroke-width:0.264583">+</tspan></text>
     <ellipse
        ry="4.1129618"
        rx="4.2666345"
-       cy="170.38431"
-       cx="-144.86009"
+       cy="168.39047"
+       cx="-139.38107"
        id="path837-6-7-81"
        style="fill:none;stroke:#000000;stroke-width:0.651999;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        transform="scale(-1,1)" />
@@ -462,14 +482,27 @@
        inkscape:transform-center-y="-6.8153729"
        inkscape:transform-center-x="-10.557146"
        id="text1326-5"
-       y="171.86569"
-       x="142.99425"
+       y="169.5939"
+       x="137.78249"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
        xml:space="preserve"><tspan
          style="stroke-width:0.264583"
-         y="171.86569"
-         x="142.99425"
+         y="169.5939"
+         x="137.78249"
          id="tspan1324-3"
          sodipodi:role="line">+</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
+       x="109.58556"
+       y="166.25302"
+       id="text1326-5-1"
+       inkscape:transform-center-x="-10.557146"
+       inkscape:transform-center-y="-6.8153729"><tspan
+         sodipodi:role="line"
+         id="tspan1324-3-5"
+         x="109.58556"
+         y="166.25302"
+         style="stroke-width:0.264583">+</tspan></text>
   </g>
 </svg>
