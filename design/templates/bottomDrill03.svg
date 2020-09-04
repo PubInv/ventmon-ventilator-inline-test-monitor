@@ -24,8 +24,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.979899"
-     inkscape:cx="505.90267"
-     inkscape:cy="403.88386"
+     inkscape:cx="614.99914"
+     inkscape:cy="516.01079"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -33,10 +33,10 @@
      showguides="true"
      inkscape:guide-bbox="true"
      inkscape:snap-grids="true"
-     inkscape:window-width="2189"
+     inkscape:window-width="2024"
      inkscape:window-height="1248"
-     inkscape:window-x="189"
-     inkscape:window-y="87"
+     inkscape:window-x="529"
+     inkscape:window-y="104"
      inkscape:window-maximized="0"
      units="in">
     <sodipodi:guide
@@ -64,17 +64,19 @@
        orientation="1,0"
        id="guide1234" />
     <sodipodi:guide
-       position="109.84778,50.994703"
-       orientation="0,-1"
+       inkscape:color="rgb(0,0,255)"
+       inkscape:locked="false"
+       inkscape:label=""
+       position="109.84778,55.538283"
+       orientation="0,1"
        id="guide1274" />
     <sodipodi:guide
-       position="163.83622,166.98968"
-       orientation="0,-1"
-       id="guide1276" />
-    <sodipodi:guide
+       inkscape:color="rgb(0,0,255)"
+       inkscape:locked="false"
+       inkscape:label=""
        id="guide1700"
-       orientation="0,-1"
-       position="97.553377,45.515677" />
+       orientation="0,1"
+       position="97.553377,49.516" />
     <sodipodi:guide
        id="guide1702"
        orientation="1,0"
@@ -90,7 +92,23 @@
     <sodipodi:guide
        id="guide1998"
        orientation="1,0"
-       position="139.38106,58.478249" />
+       position="139.11379,49.516" />
+    <sodipodi:guide
+       id="guide2223"
+       orientation="0,-1"
+       position="54.656618,164.98516" />
+    <sodipodi:guide
+       id="guide2225"
+       orientation="0,-1"
+       position="33.542325,59.948232" />
+    <sodipodi:guide
+       id="guide2246"
+       orientation="1,0"
+       position="216.48832,121.42022" />
+    <sodipodi:guide
+       id="guide2248"
+       orientation="1,0"
+       position="216.48832,119.28207" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -221,29 +239,21 @@
        id="rect1185"
        width="18.91181"
        height="21.179659"
-       x="101.58293"
-       y="154.58575" />
-    <ellipse
-       transform="scale(-1,1)"
-       style="fill:none;stroke:#000000;stroke-width:0.652;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
-       id="path837-6-7"
-       cx="-160.28499"
-       cy="158.14575"
-       rx="4.2666345"
-       ry="4.1129618" />
+       x="97.841156"
+       y="152.71487" />
     <ellipse
        ry="6.4221091"
        rx="7.2992997"
-       cy="84.856125"
-       cx="-219.79312"
+       cy="84.722488"
+       cx="-216.45226"
        id="path837-6-7-3"
        style="fill:none;stroke:#000000;stroke-width:1.21148;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        transform="scale(-1,1)" />
     <ellipse
        ry="4.1129618"
        rx="4.2666345"
-       cy="48.869823"
-       cx="-160.84251"
+       cy="50.740711"
+       cx="-160.4416"
        id="path837-6-7-8"
        style="fill:none;stroke:#000000;stroke-width:0.652;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        transform="scale(-1,1)" />
@@ -271,19 +281,19 @@
     <text
        xml:space="preserve"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
-       x="173.45792"
-       y="170.78523"
+       x="149.13638"
+       y="170.6516"
        id="text1246"><tspan
          sodipodi:role="line"
          id="tspan1244"
-         x="173.45792"
-         y="170.78523"
-         style="stroke-width:0.264583">8mm</tspan><tspan
+         x="149.13638"
+         y="170.6516"
+         style="stroke-width:0.264583">19mm</tspan><tspan
          sodipodi:role="line"
-         x="173.45792"
-         y="176.07689"
+         x="149.13638"
+         y="175.94325"
          style="stroke-width:0.264583"
-         id="tspan1280">5/16&quot;</tspan></text>
+         id="tspan1280">3/4&quot;</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
@@ -311,7 +321,7 @@
          id="tspan1270"
          x="96.617935"
          y="150.73999"
-         style="stroke-width:0.264583">16mm 5/8&quot;</tspan></text>
+         style="stroke-width:0.264583">22mm 7/8&quot;</tspan></text>
     <text
        id="text1246-2"
        y="-42.679108"
@@ -332,37 +342,37 @@
     <text
        xml:space="preserve"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
-       x="158.89172"
-       y="159.42627"
+       x="158.49081"
+       y="157.28812"
        id="text1326"><tspan
          sodipodi:role="line"
          id="tspan1324"
-         x="158.89172"
-         y="159.42627"
+         x="158.49081"
+         y="157.28812"
          style="stroke-width:0.264583">+</tspan></text>
     <text
        id="text1326-2"
        y="86.339432"
-       x="218.59926"
+       x="214.72385"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
        xml:space="preserve"><tspan
          style="stroke-width:0.264583"
          y="86.339432"
-         x="218.59926"
+         x="214.72385"
          id="tspan1324-5"
          sodipodi:role="line">+</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
-       x="159.16405"
-       y="50.258049"
+       x="158.76314"
+       y="52.128937"
        id="text1326-2-7"
        inkscape:transform-center-x="-22.45064"
        inkscape:transform-center-y="12.828937"><tspan
          sodipodi:role="line"
          id="tspan1324-5-6"
-         x="159.16405"
-         y="50.258049"
+         x="158.76314"
+         y="52.128937"
          style="stroke-width:0.264583">+</tspan></text>
     <text
        id="text1238-3"
@@ -438,8 +448,8 @@
        transform="scale(-1,1)"
        style="fill:none;stroke:#000000;stroke-width:0.756999;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="path837-6-7-3-3"
-       cx="-218.7601"
-       cy="97.018837"
+       cx="-213.81561"
+       cy="96.751564"
        rx="4.4529395"
        ry="4.1102881" />
     <text
@@ -462,47 +472,71 @@
     <text
        xml:space="preserve"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
-       x="216.76067"
+       x="212.61798"
        y="98.232918"
        id="text1326-2-8"><tspan
          sodipodi:role="line"
          id="tspan1324-5-3"
-         x="216.76067"
+         x="212.61798"
          y="98.232918"
          style="stroke-width:0.264583">+</tspan></text>
     <ellipse
-       ry="4.1129618"
-       rx="4.2666345"
-       cy="168.39047"
-       cx="-139.38107"
+       ry="7.5797925"
+       rx="7.8670998"
+       cy="169.3259"
+       cx="-139.51469"
        id="path837-6-7-81"
-       style="fill:none;stroke:#000000;stroke-width:0.651999;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       style="fill:none;stroke:#000000;stroke-width:1.20188;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        transform="scale(-1,1)" />
     <text
        inkscape:transform-center-y="-6.8153729"
        inkscape:transform-center-x="-10.557146"
        id="text1326-5"
-       y="169.5939"
-       x="137.78249"
+       y="170.52934"
+       x="138.31703"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
        xml:space="preserve"><tspan
          style="stroke-width:0.264583"
-         y="169.5939"
-         x="137.78249"
+         y="170.52934"
+         x="138.31703"
          id="tspan1324-3"
          sodipodi:role="line">+</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
-       x="109.58556"
-       y="166.25302"
+       x="106.37833"
+       y="163.58032"
        id="text1326-5-1"
        inkscape:transform-center-x="-10.557146"
        inkscape:transform-center-y="-6.8153729"><tspan
          sodipodi:role="line"
          id="tspan1324-3-5"
-         x="109.58556"
-         y="166.25302"
+         x="106.37833"
+         y="163.58032"
          style="stroke-width:0.264583">+</tspan></text>
+    <text
+       id="text1246-8"
+       y="154.43217"
+       x="170.60114"
+       style="font-size:4.23333px;line-height:1.25;font-family:sans-serif;stroke-width:0.264583"
+       xml:space="preserve"><tspan
+         style="stroke-width:0.264583"
+         y="154.43217"
+         x="170.60114"
+         id="tspan1244-5"
+         sodipodi:role="line">16mm</tspan><tspan
+         id="tspan1280-5"
+         style="stroke-width:0.264583"
+         y="159.72383"
+         x="170.60114"
+         sodipodi:role="line">5/16&quot;</tspan></text>
+    <ellipse
+       transform="scale(-1,1)"
+       style="fill:none;stroke:#000000;stroke-width:0.603475;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path837-6-7-81-8"
+       cx="-160.09445"
+       cy="156.21904"
+       rx="4.0236287"
+       ry="3.7363214" />
   </g>
 </svg>
