@@ -42,12 +42,12 @@ bool found_diff_press = false;
 unsigned PERIOD_O2 = 4000;
 unsigned PERIOD_FLOW = 0;
 unsigned PERIOD_I_DPRES = 0; // differential pressure period
-unsigned PERIOD_I_ADPRES = 4000; // differential pressure produced by absolute difference, if avaiable
-unsigned PERIOD_I_PRES = 4000; // Absolute pressure in the inspiratory limb
+unsigned PERIOD_I_ADPRES = 1000; // differential pressure produced by absolute difference, if avaiable
+unsigned PERIOD_I_PRES = 10000; // Absolute pressure in the inspiratory limb
 unsigned PERIOD_I_TEMP = 10000; // Temperature in the insipiratory limb
 unsigned PERIOD_I_H2O = 10000; // Relative humidity in the inspiratory limb
 unsigned PERIOD_I_GAS = 20000; // Gas (Ohms) (only avaialable on BME680)
-unsigned PERIOD_B_PRES = 4000; // Absolute pressure in the inspiratory limb
+unsigned PERIOD_B_PRES = 10000; // Absolute pressure in the inspiratory limb
 unsigned PERIOD_B_TEMP = 10000; // Temperature in the insipiratory limb
 unsigned PERIOD_B_H2O = 10000; // Relative humidity in the inspiratory limb
 unsigned PERIOD_B_GAS = 20000; // Gas (Ohms) (only avaialable on BME680)
@@ -116,16 +116,13 @@ Adafruit_BME280 bme280[2]; // I2C
 Adafruit_BME680 bme680[2]; // I2C
 
 // !!! Unless physical hardware changes the ambient sensor should have an address of
-// 0x76 while the inspiratory limb sensor should have an address of 0x77 on the I2C bus.
+// 0x77 while the inspiratory limb sensor should have an address of 0x76 on the I2C bus.
 // Do not change this unless directed to do so. !!!
+// If you plug an additional ambient sensor in, you must ground one of the pins to make it us 0x77
 // sensor addresses
-#define AMBIENT_SENSOR_ADDRESS  0x76
-#define INSPIRATORY_SENSOR_ADDRESS   0x77
+#define AMBIENT_SENSOR_ADDRESS  0x77
+#define INSPIRATORY_SENSOR_ADDRESS   0x76
 
-// This is for Rob Read's broken board!!!!
-// #define AMBIENT_SENSOR_ADDRESS  0x77
-// #define INSPIRATORY_SENSOR_ADDRESS   0x76
-// these values should match the order the sensors occur in the array addr (below)
 #define INSPIRATORY_PRESSURE_SENSOR  0
 #define AMBIENT_PRESSURE_SENSOR 1
 
@@ -163,8 +160,8 @@ signed long smooth_ambient = 0;
 SFM3X00 flowSensor(0x40);
 
 // Note: The SFM3300-D is compatible with the SFM3200- you should use that for it!
-#define PIRDS_SENSIRION_SFM3200 1
-#define PIRDS_SENSIRION_SFM3400 0
+#define PIRDS_SENSIRION_SFM3200 0
+#define PIRDS_SENSIRION_SFM3400 1
 
 // int sensirion_sensor_type = PIRDS_SENSIRION_SFM3200;
 int sensirion_sensor_type = PIRDS_SENSIRION_SFM3400;
@@ -242,9 +239,8 @@ void report_bme280_not_found(uint16_t id) {
 }
 
 
-unsigned long readHSCPressure()
+long readHSCPressure()
 {
-  unsigned long now = millis();
   struct hsc_data ps;
 
   uint8_t status = load_hsc_data(HSC_ADDR, &ps);
@@ -274,7 +270,7 @@ unsigned long readHSCPressure()
       // convert to 10th of a cm H2O
       p = p *0.0101972 * 10;
   }
-  return p;
+  return (long) p;
 }
 
 // true if we have ANY such sensor...
@@ -426,7 +422,10 @@ void initializeOxygenSensor()
   ads.setGain(GAIN_SIXTEEN);
   ads.begin();
   initialO2 = avgADC(O2CHANNEL);
-  found_O2 = (initialO2 <= UNPLUGGED_MAX && initialO2 >= 0);
+//  Serial.print("intialO2: ");
+//  Serial.println(initialO2);
+ // found_O2 = (initialO2 <= UNPLUGGED_MAX && initialO2 >= 0);
+ found_O2 = (initialO2 <= UNPLUGGED_MAX);
 }
 
 const int NUM_TO_AVERAGE = 5;
@@ -438,6 +437,8 @@ double avgADC(int adcNumber)
   for (int i = 0; i < NUM_TO_AVERAGE; i++)
   {
     int16_t adsread = ads.readADC_SingleEnded(adcNumber);
+//    Serial.print("adsread :");
+//    Serial.println(adsread);
     adc = adc + adsread;
     delay(10);
   }
@@ -632,7 +633,7 @@ void displayLine(int n, char* s) {
 }
 
 void displayPressure(bool max_not_min) {
-  display.print(max_not_min ? "Max" : "Min" );
+  // display.print(max_not_min ? "Max" : "Min" );
   display.print(" cm H2O: ");
   char buffer[32];
   long display_pressure = max_not_min ? display_max_pressure : display_min_pressure;
@@ -724,16 +725,18 @@ void output_O2() {
 }
 void output_I_DPRES() {
     unsigned long ms = millis();
-    outputMeasurement('M', 'D', 'I', 0, ms, readHSCPressure());
+          // really this should be a running max, for now it is instantaneous
+    display_max_pressure = readHSCPressure();
+    outputMeasurement('M', 'D', 'I', 0, ms, display_max_pressure);
 }
 void output_I_ADPRES() {
     unsigned long ms = millis();
     signed long internal_pressure = readPressureOnly(INSPIRATORY_PRESSURE_SENSOR);
     if (internal_pressure != LONG_MIN) {
       // really this should be a running max, for now it is instantaneous
-      display_max_pressure = internal_pressure - smooth_ambient;
+      long diff_pressure = internal_pressure - smooth_ambient;
       // NOTE!!! We are representing this as location "1" to distinguish from the differential pressure sensor!
-      outputMeasurement('M', 'D', 'I', 1, ms, display_max_pressure);
+      outputMeasurement('M', 'D', 'I', 1, ms, diff_pressure);
     } else {
      Serial.print(INSPIRATORY_PRESSURE_SENSOR_ERROR);
      outputMetaEvent(INSPIRATORY_PRESSURE_SENSOR_ERROR, ms);
@@ -816,8 +819,8 @@ void loop() {
       display.clearDisplay();
       display.setCursor(0, 0);
       displayPressure(true);
-      display.setCursor(0, 10);
-      displayPressure(false);
+//      display.setCursor(0, 10);
+//      displayPressure(false);
     }
 
     display.display();
