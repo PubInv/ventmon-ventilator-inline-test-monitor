@@ -1,0 +1,263 @@
+% GENERAL INFORMATION: HardwareX is an open access journal established to promote free and open source designing, building and customizing of scientific infrastructure (hardware). For more details on best practices for sharing open hardware see http://www.oshwa.org/sharing-best-practices/
+
+\documentclass[11pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{titlesec}
+\usepackage{tabu}
+\usepackage{enumitem}
+\usepackage{amssymb}
+\newlist{selectlist}{itemize}{2}
+\setlist[selectlist]{label=$\square$,leftmargin=*,noitemsep,topsep=0pt}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+}
+
+\urlstyle{same}
+
+% Set up the section label formatting
+\titleformat{\section}[block]{\hspace{1em}\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}[block]{\hspace{1em}}{\thesubsection}{0.5em}{}
+
+\begin{document}
+% Create the title block
+\begin{flushleft}
+
+% Remove all text in italics when filling out the template and replace with your manuscripts corresponding text in regular font.
+\textit{Text in italics are template instructions. Remove and replace all instructions with regular font text.}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{10pt}
+% \textbf{\large HardwareX article template}
+
+%Insert title
+%Max. 20 words. A good title should contain the fewest possible words that adequately describe the content of a paper.
+\textbf{Title:} \textit{Max. 20 words. A good title should contain the fewest possible words that adequately describe the content of a paper.}
+
+%Insert Authors
+\textbf{Authors:} \textit{Author one, author two, and author three}
+
+%Insert Affiliations
+\textbf{Affiliations:} \textit{Affiliation one, affiliation two}
+
+%Insert Contact Email
+%Include institutional email address of the corresponding author
+\textbf{Contact email:} \textit{Contact email: Include institutional email address of the corresponding author}
+
+%Insert Abstract
+%Max. 200 words. Remember that the abstract is what readers see first in electronic abstracting and indexing services. This is the advertisement of your article. Make it interesting, and easy to be understood. Be accurate and specific, keep it as brief as possible.
+\textbf{Abstract:} \textit{Max. 200 words. Remember that the abstract is what readers see first in electronic abstracting and indexing services. This is the advertisement of your article. Make it interesting, and easy to be understood. Be accurate and specific, keep it as brief as possible.}
+
+%Insert Keywords
+% At least 3 keywords. There is no limit on the no. of keywords you can list. Please remember that effective keywords should not repeat words appearing in your title, and should be neither too general nor too narrow.
+\textbf{Keywords:} \textit{At least 3 keywords. There is no limit on the no. of keywords you can list. Please remember that effective keywords should not repeat words appearing in your title, and should be neither too general nor too narrow.}
+
+\newpage
+\textbf{Specifications table:}
+
+\tabulinesep=1ex
+\begin{tabu} to \linewidth {|X|X[3,l]|}
+\hline  \textbf{Hardware name} & \textit{Insert hardware name}
+  %Please specify the name of the hardware that you invented / customized
+  \\
+  \hline \textbf{Subject area} & %
+  % Please state the subject area most relevant to the original community for which this hardware was developed. Example subject areas are listed below.
+  \begin{itemize}
+  \item \textit{Engineering and Material Science}
+  \item \textit{Chemistry and Biochemistry}
+  \item \textit{Medical (e.g. Pharmaceutical Science)}
+  \item \textit{Neuroscience}
+  \item \textit{Biological Sciences (e.g. Microbiology and Biochemistry)}
+  \item \textit{Environmental, Planetary and Agricultural Sciences}
+  \item \textit{Educational Tools and Open Source Alternatives to Existing Infrastructure}
+  \item \textit{General}
+  \end{itemize}
+  \\
+  \hline \textbf{Hardware type} &
+  \begin{itemize}
+  \item \textit{Imaging tools}
+  \item \textit{Measuring physical properties and in-lab sensors}
+  \item \textit{Biological sample handling and preparation}
+  \item \textit{Field measurements and sensors}
+  \item \textit{Electrical engineering and computer science}
+  \item \textit{Mechanical engineering and materials science}
+  \item \textit{Other (please specify)}
+  \end{itemize}
+  \\
+\hline \textbf{Open source license} &
+  %Please specify the open source license. For more details see the guide to authors.
+  \textit{Please specify the open source license. For more details see the guide to authors.}
+  \\
+\hline \textbf{Cost of hardware} &
+  %Approximate cost of hardware (complete breakdown will be included in the Bill of Materials).
+  \textit{Approximate cost of hardware (complete breakdown will be included in the Bill of Materials).}
+  \\
+\hline \textbf{Source file repository} &
+  % Link to the source file repository
+      % insert a DOI URL to an approved source file repository:  Mendeley Data, theOSF, or Zenodo (instructions).  For example: "https://doi.org/10.5281/zenodo.3346799"
+      % If there is no external repository write “Available in the article”
+  \textit{DOI URL to an approved source file repository: \href{https://data.mendeley.com/}{Mendeley Data}, the \href{http://osf.io}{OSF}, or \href{https://zenodo.org/}{Zenodo} \href{https://doi.org/10.5281/zenodo.3346799}{(instructions)}. For example:} \textit{https://doi.org/10.5281/zenodo.3346799} \linebreak \linebreak
+  \textit{If there is no external repository write “} \textit{Available in the article} \textit{"}
+\\\hline
+\end{tabu}
+\end{flushleft}
+% create the main body of the paper
+
+\section{Hardware in context}
+% Include a short description of the hardware, putting into context of similar open hardware and proprietary equipment in the field.
+\textit{Include a short description of the hardware, putting into context of similar open hardware and proprietary equipment in the field.}
+\section{Hardware description}
+% Describe the hardware, highlighting the customization rather than the steps of the procedure. Highlight how it differs/which advantage it offers over pre-existing methods. For example, how could this hardware: be compared to other hardware in terms of cost or ease of use, be used in the development of further designs in a particular area, and so on.
+
+% > Add 3-5 bulleted points to broadly explain to other researchers how the hardware could be potentially useful to them, for either standard or novel laboratory tasks, inside or outside of the original user community.
+
+\textit{Describe the hardware, highlighting the customization rather than the steps of the procedure. Highlight how it differs/which advantage it offers over pre-existing methods. For example, how could this hardware: be compared to other hardware in terms of cost or ease of use, be used in the development of further designs in a particular area, and so on. \linebreak \linebreak Add 3-5 bulleted points to broadly explain to other researchers how the hardware could be potentially useful to them, for either standard or novel laboratory tasks, inside or outside of the original user community.}
+\begin{itemize}
+\item \dots
+\item \dots
+\item \dots
+\end{itemize}
+
+\section{Design files}
+% The  complete  design  files  must  be  either  uploaded  to  an  approved  online  repository,  uploaded  at the  time  of  submission  on  the  online  Editorial  Manager  submission  interface  as  supplementary materials [CAD files, videos,. . . ], or included in the body of the manuscript [e.g.  figures].  The three approved  online  repositories  are  Mendeley  Data,  the  Open  Science  Framework,  and  Zenodo. See repository instructions: https://doi.org/10.5281/zenodo.3346799
+
+\textit{The complete design files must be either uploaded to an approved online repository, uploaded at the time of submission on the online \href{https://editorialmanager.com/ohx/}{Editorial Manager} submission interface as supplementary materials [CAD files, videos,\dots], or included in the body of the manuscript [e.g. figures]. The three approved online repositories are \href{https://data.mendeley.com/}{Mendeley Data}, the \href{http://osf.io}{Open Science Framework}, and \href{https://zenodo.org/}{Zenodo}. See repository instructions \href{https://doi.org/10.5281/zenodo.3346799}{here}.}
+\begin{itemize}
+\item \textit{CAD files. Authors are encouraged to use free and open source software packages for creating the files. For CAD files, OpenSCAD, FreeCAD, or Blender are encouraged, but if not available source files from proprietary CAD packages such as Autocad or Solidworks and other drawing packages are acceptable.
+\item 3D printing. Supplementary files that facilitate the digital replication of the devices are encouraged. For example, STL files for 3-D printing components. We recommend uploading CAD files to the NIH 3D Print Exchange as Custom Labware and providing a link to the location.
+\item Electronics. PCB layouts and other electronics design files can be uploaded to the Open Hardware Repository or other repositories.
+\item Software and firmware. All software files used in the design and operation of the hardware should be included in the repository. Provide a description of software and firmware and use extensive comments in the code.}
+\end{itemize}
+
+\subsection{Design Files Summary}
+% Please include a summary of all design files for your hardware by filling rows of the table below
+
+\tabulinesep=1ex
+\begin{tabu} to \linewidth {|X|X|X[1.5,1]|X[1.5,1]|}
+\hline
+\textbf{Design filename} & \textbf{File type} & \textbf{Open source license} & \textbf{Location of the file} \\\hline
+%Insert design files
+\textit{Design file 1} & \textit{e.g. CAD file, figures, videos} & \textit{All designs must be submitted under an open hardware license. Enter the corresponding open source license for the file.} & \textit{Enter a link to the online location or the sentence: ``available with the article'', as appropriate}  \\\hline
+\textit{Design file 2} & \dots & \dots & \dots \\\hline
+% Design file 3 & File type & License & Link \\\hline
+
+\end{tabu}
+
+% For each design file listed in the summary above, include a short description of the file below (one or two sentences)
+\textit{For each design file listed above, include a short description of the file here (one or two sentences)}
+
+\section{Bill of materials}
+% For a complex Bill of Materials, the complete Bill of Materials (editable spreadsheet file e.g., ODS file type or PDF file) can be uploaded in an open access online location such as the Open Science Framework repository. Include the link here. Alternatively, the Bill of Materials can be uploaded at the time of submission on the online Elsevier submission interface as supplementary material.
+
+% > To make it easy to tell which item in the Bill of Materials corresponds to which component in your design file(s), use matching designators in both places, or otherwise explain the correspondence.
+
+% > For material type, select from: Metal, semi-conductor, ceramic, polymer, biomaterial, organic, inorganic, composite, nanomaterial, semiconductor, non-specific, or other
+\textit{For a complex Bill of Materials, the complete Bill of Materials (editable spreadsheet file e.g., ODS file type or PDF file) can be uploaded in an open access online location such as the Open Science Framework repository. Include the link here. Alternatively, the Bill of Materials can be uploaded at the time of submission on the online Elsevier submission interface as supplementary material.}
+\begin{itemize}
+\item \textit{To make it easy to tell which item in the Bill of Materials corresponds to which component in your design file(s), use matching designators in both places, or otherwise explain the correspondence.}
+\item \textit{For material type, select from: Metal, semi-conductor, ceramic, polymer, biomaterial, organic, inorganic, composite, nanomaterial, semiconductor, non-specific, or other}
+\end{itemize}
+
+\tabulinesep=1ex
+\begin{tabu} to \linewidth {|X|X|X|X|X|X|X|}
+\hline
+\textbf{Designator} & \textbf{Component} & \textbf{Number} & \textbf{Cost per unit currency} & \textbf{Total cost} & \textbf{Source of materials} & \textbf{Material type} \\\hline
+
+%Insert items here
+\textit{Designator 1} & \textit{Name of Component 1} & \textit{Number of units} & \textit{Cost per unit} & \textit{Total cost} & \textit{Source} & \textit{Material type} \\\hline
+\textit{Designator 2} & \dots & \dots & \dots & \dots & \dots & \dots \\\hline
+% Designator 3 & Name of Component 2 & Number of units & Cost per unit & Total cost & Source of materials & Material type \\\hline
+\end{tabu}
+
+\section{Build instructions}
+%Provide detailed, step by step instructions for the construction of the reported hardware include all necessary information for reproducing the submitted hardware.
+% > Explain and, when possible, characterize design decisions. Including design alternatives if they exist.
+% > Use visual instructions such as schematics, images, and videos.
+% > Clearly reference design files and component parts described in the Design File Summary and Bill of Materials.
+% >Highlight potential safety concerns that may arise
+
+\textit{Provide detailed, step by step instructions for the construction of the reported hardware
+ include all necessary information for reproducing the submitted hardware.
+\begin{itemize}
+\item Explain and, when possible, characterize design decisions. Including design alternatives if they exist.
+\item Use visual instructions such as schematics, images, and videos.
+\item Clearly reference design files and component parts described in the Design File Summary and Bill of Materials.
+\item Highlight potential safety concerns that may arise
+\end{itemize}}
+
+\section{Operation instructions}
+%Provide detailed instructions for the safe and proper operation of the hardware.
+%> Step-by-step operational instructions for operating the hardware.
+%> Use visual instructions as necessary.
+%> Highlight potential safety hazards.
+
+\textit{Provide detailed instructions for the safe and proper operation of the hardware.
+\begin{itemize}
+\item Step-by-step operational instructions for operating the hardware.
+\item Use visual instructions as necessary.
+\item Highlight potential safety hazards.
+\end{itemize}}
+
+\section{Validation and characterization}
+%Demonstrate the operation of the hardware and characterize its performance over relevant critical metrics
+%> Demonstrate the use of the hardware for a relevant use case.
+%> If possible, characterize performance of the hardware over operational parameters.
+%> Create a bulleted list that describes the capabilities (and limitations) of the hardware. For example consider descriptions of load, operation time, spin speed, coefficient of variation, accuracy, precision and etc.
+
+\textit{Demonstrate the operation of the hardware and characterize its performance over relevant critical metrics
+\begin{itemize}
+\item Demonstrate the use of the hardware for a relevant use case.
+\item If possible, characterize performance of the hardware over operational parameters.
+\item Create a bulleted list that describes the capabilities (and limitations) of the hardware. For example consider descriptions of load, operation time, spin speed, coefficient of variation, accuracy, precision and etc.
+\end{itemize}}
+
+\section{Acknowledgements}
+% [List here those individuals who provided help during the research (e.g., providing language help, writing assistance or proof reading the article, etc.).] Please also identify who provided financial support for the conduct of the research and/or preparation of the article and to briefly describe the role of the sponsor(s), if any, in study design; in the collection, analysis and interpretation of data; in the writing of the report; and in the decision to submit the article for publication. If the funding source(s) had no such involvement then this should be stated.}
+
+\textit{[List here those individuals who provided help during the research (e.g., providing language help, writing assistance or proof reading the article, etc.).] Please also identify who provided financial support for the conduct of the research and/or preparation of the article and to briefly describe the role of the sponsor(s), if any, in study design; in the collection, analysis and interpretation of data; in the writing of the report; and in the decision to submit the article for publication. If the funding source(s) had no such involvement then this should be stated.}
+
+\section{Declaration of interest}
+% a statement must be included even if there is no conflict of interest
+% All authors must disclose any financial and personal relationships with other people or organizations that could inappropriately influence (bias) their work. Examples of potential conflicts of interest include employment, consultancies, stock ownership, honoraria, paid expert testimony, patent applications/registrations, and grants or other funding. Authors must disclose any interests in a summary declaration of interest statement in the manuscript file. If there are no interests to declare then please state this: 'Declarations of interest: none'. This summary statement will be ultimately published if the article is accepted. More information.}
+
+\textit{[a statement must be included even if there is no conflict of interest] \linebreak
+All authors must disclose any financial and personal relationships with other people or organizations that could inappropriately influence (bias) their work. Examples of potential conflicts of interest include employment, consultancies, stock ownership, honoraria, paid expert testimony, patent applications/registrations, and grants or other funding. Authors must disclose any interests in a summary declaration of interest statement in the manuscript file. If there are no interests to declare then please state this: 'Declarations of interest: none'. This summary statement will be ultimately published if the article is accepted. More information.}
+
+\section{Human and animal rights}
+%> If the work involves the use of human subjects, the author should ensure that the work described has been carried out in accordance with the appropriate ethical guidelines.
+%> If the work involves the use of human subjects, the author should ensure that the work described has been carried out in accordance with The Code of Ethics of the World Medical Association (Declaration of Helsinki) for experiments involving humans; Uniform Requirements for manuscripts submitted to Biomedical journals. Authors should include a statement in the manuscript that informed consent was obtained for experimentation with human subjects. The privacy rights of human subjects must always be observed.
+%> All animal experiments should comply with the ARRIVE guidelines and should be carried out in accordance with the U.K. Animals (Scientific Procedures) Act, 1986 and associated guidelines, EU Directive 2010/63/EU for animal experiments, or the National Institutes of Health guide for the care and use of Laboratory animals (NIH Publications No. 8023, revised 1978) and the authors should clearly indicate in the manuscript that such guidelines have been followed
+
+\textit{
+\begin{itemize}
+\item If the work involves the use of human subjects, the author should ensure that the work described has been carried out in accordance with the appropriate ethical guidelines. \item If the work involves the use of human subjects, the author should ensure that the work described has been carried out in accordance with The Code of Ethics of the World Medical Association (Declaration of Helsinki) for experiments involving humans; Uniform Requirements for manuscripts submitted to Biomedical journals. Authors should include a statement in the manuscript that informed consent was obtained for experimentation with human subjects. The privacy rights of human subjects must always be observed. \item All animal experiments should comply with the ARRIVE guidelines and should be carried out in accordance with the U.K. Animals (Scientific Procedures) Act, 1986 and associated guidelines, EU Directive 2010/63/EU for animal experiments, or the National Institutes of Health guide for the care and use of Laboratory animals (NIH Publications No. 8023, revised 1978) and the authors should clearly indicate in the manuscript that such guidelines have been followed.\end{itemize}}
+
+\section*{References}
+%> Include at least one reference, to the original publication of the hardware you customized.
+%> Include other references as required. Include references to put your device in context in the literature. For more information on the reference format in HardwareX please see the Guide for Authors at: https://www.elsevier.com/journals/hardwarex/2468-0672/guide-for-authors
+
+\textit{\begin{itemize}
+\item Include at least one reference, to the original publication of the hardware you customized.
+\item Include other references as required. Include references to put your device in context in the literature. For more information on the reference format in HardwareX please see the Guide for Authors at: https://www.elsevier.com/journals/hardwarex/2468-0672/guide-for-authors
+\end{itemize}}
+
+\end{document}
+
+%> Author manuscript checklist
+%> ●	HardwareX is a journal dedicated to the exhaustive and fully open source communication of advances in scientific infrastructure. Upon submission the author declares that all information necessary to reproduce the subject of the submission (e.g. bill of materials, build instructions, calibration procedures, source files, code, and safety considerations) is communicated in full and is accessible for use under an open source license.
+%> ●	Is the subject of the submission under an open source license - as defined by the Open Source Hardware definition?
+%> ●	Can the hardware be reproduced with the details provided in the submission?
+%> ●	Are all relevant design files available on Mendeley Data, the Open Science Framework, or Zenodo repositories, described in the Summary of Design Files document, and clearly documented? (e.g. descriptive file names, commented code, labeled images, etc.)
+%>      ○	If in the Open Science Framework, the repository has be registered? Instructions
+%>      ○	If in Zenodo, the repository is open access and is published? Instructions
+%>      ○	If in Mendeley Data, the repository is published or the sharable link was included in the additional information of the Editorial Submission interface? Instructions
+%> ●	Are visual instructions used when necessary?
+%> ●	Is the utility of the hardware to the scientific community?
+%> ●	Is the performance of the hardware adequately demonstrated and characterized?
+%> ●	Are all potential safety concerns addressed?
+%> ●	For more information on the article template consult the Guide to Authors.}
