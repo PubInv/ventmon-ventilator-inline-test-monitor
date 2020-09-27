@@ -1,4 +1,4 @@
-% GENERAL INFORMATION: HardwareX is an open access journal established to promote free and open source designing, building and customizing of scientific infrastructure (hardware). For more details on best practices for sharing open hardware see http://www.oshwa.org/sharing-best-practices/
+% GENERAL INFORMATION: HardwareX is an open access journal established to promote free and open source designing, building and customizing of scientific infrastructure (hardware). For more details on best practices for sharing open hardware see http://www.oshwa.org/sharing-best-practices/
 
 \documentclass[11pt, letterpaper]{article}
 \usepackage[utf8]{inputenc}
@@ -29,7 +29,6 @@
 \begin{flushleft}
 
 % Remove all text in italics when filling out the template and replace with your manuscripts corresponding text in regular font.
-\textit{Text in italics are template instructions. Remove and replace all instructions with regular font text.}
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{10pt}
@@ -37,25 +36,26 @@
 
 %Insert title
 %Max. 20 words. A good title should contain the fewest possible words that adequately describe the content of a paper.
-\textbf{Title:} \textit{Max. 20 words. A good title should contain the fewest possible words that adequately describe the content of a paper.}
+\textbf{Title:} VentMon: and Open Source Inline Ventilator Test Fixture and Monitor
 
 %Insert Authors
-\textbf{Authors:} \textit{Author one, author two, and author three}
+\textbf{Authors:} Robert Read, Lauria Clarke
 
 %Insert Affiliations
-\textbf{Affiliations:} \textit{Affiliation one, affiliation two}
+\textbf{Affiliations:} Public Invention with support from the \textit{Protocol Labs} and the \textit{Mozilla Foundation}
 
 %Insert Contact Email
 %Include institutional email address of the corresponding author
-\textbf{Contact email:} \textit{Contact email: Include institutional email address of the corresponding author}
+\textbf{Contact email:} read.robert@gmail.com
 
 %Insert Abstract
 %Max. 200 words. Remember that the abstract is what readers see first in electronic abstracting and indexing services. This is the advertisement of your article. Make it interesting, and easy to be understood. Be accurate and specific, keep it as brief as possible.
-\textbf{Abstract:} \textit{Max. 200 words. Remember that the abstract is what readers see first in electronic abstracting and indexing services. This is the advertisement of your article. Make it interesting, and easy to be understood. Be accurate and specific, keep it as brief as possible.}
+\textbf{Abstract:} 
+A device that plugs into the airway circuit and measures the parameters of an operating ventilator that are carefully controlled by clinicians.
 
 %Insert Keywords
 % At least 3 keywords. There is no limit on the no. of keywords you can list. Please remember that effective keywords should not repeat words appearing in your title, and should be neither too general nor too narrow.
-\textbf{Keywords:} \textit{At least 3 keywords. There is no limit on the no. of keywords you can list. Please remember that effective keywords should not repeat words appearing in your title, and should be neither too general nor too narrow.}
+\textbf{Keywords:} COVID-19, open source medical device, 
 
 \newpage
 \textbf{Specifications table:}
@@ -126,13 +126,7 @@
 \section{Design files}
 % The  complete  design  files  must  be  either  uploaded  to  an  approved  online  repository,  uploaded  at the  time  of  submission  on  the  online  Editorial  Manager  submission  interface  as  supplementary materials [CAD files, videos,. . . ], or included in the body of the manuscript [e.g.  figures].  The three approved  online  repositories  are  Mendeley  Data,  the  Open  Science  Framework,  and  Zenodo. See repository instructions: https://doi.org/10.5281/zenodo.3346799
 
-\textit{The complete design files must be either uploaded to an approved online repository, uploaded at the time of submission on the online \href{https://editorialmanager.com/ohx/}{Editorial Manager} submission interface as supplementary materials [CAD files, videos,\dots], or included in the body of the manuscript [e.g. figures]. The three approved online repositories are \href{https://data.mendeley.com/}{Mendeley Data}, the \href{http://osf.io}{Open Science Framework}, and \href{https://zenodo.org/}{Zenodo}. See repository instructions \href{https://doi.org/10.5281/zenodo.3346799}{here}.}
-\begin{itemize}
-\item \textit{CAD files. Authors are encouraged to use free and open source software packages for creating the files. For CAD files, OpenSCAD, FreeCAD, or Blender are encouraged, but if not available source files from proprietary CAD packages such as Autocad or Solidworks and other drawing packages are acceptable.
-\item 3D printing. Supplementary files that facilitate the digital replication of the devices are encouraged. For example, STL files for 3-D printing components. We recommend uploading CAD files to the NIH 3D Print Exchange as Custom Labware and providing a link to the location.
-\item Electronics. PCB layouts and other electronics design files can be uploaded to the Open Hardware Repository or other repositories.
-\item Software and firmware. All software files used in the design and operation of the hardware should be included in the repository. Provide a description of software and firmware and use extensive comments in the code.}
-\end{itemize}
+TODO Need to make hyperlinks colored in \textit{Location of File} column
 
 \subsection{Design Files Summary}
 % Please include a summary of all design files for your hardware by filling rows of the table below
@@ -142,8 +136,13 @@
 \hline
 \textbf{Design filename} & \textbf{File type} & \textbf{Open source license} & \textbf{Location of the file} \\\hline
 %Insert design files
-\textit{Design file 1} & \textit{e.g. CAD file, figures, videos} & \textit{All designs must be submitted under an open hardware license. Enter the corresponding open source license for the file.} & \textit{Enter a link to the online location or the sentence: ``available with the article'', as appropriate}  \\\hline
-\textit{Design file 2} & \dots & \dots & \dots \\\hline
+Embedded Firmware & C++ Source Code & MIT License &  \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/VentMonFirmware}{VentMon Firmware}\\\hline
+PIRDS Data Viewer & HTML Source Code &  MIT License &  \href{https://github.com/PubInv/vent-display}{Vent Display} \\\hline
+PIRDS Data Logger & C Source Files & MIT License & \href{https://github.com/PubInv/PIRDS-logger}{PIRDS Logger} \\\hline
+VentMon T0.3 PCB & PCB Design Files & MIT License & \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/pcb}{VentMon PCB} \\\hline
+Pressure Sensor and Airway Adaptor & STL File & MIT License &  \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/3dparts}{VentMon Adaptors}\\\hline 
+PIRDS Data Standard & \\\hline
+
 % Design file 3 & File type & License & Link \\\hline
 
 \end{tabu}
@@ -152,27 +151,20 @@
 \textit{For each design file listed above, include a short description of the file here (one or two sentences)}
 
 \section{Bill of materials}
-% For a complex Bill of Materials, the complete Bill of Materials (editable spreadsheet file e.g., ODS file type or PDF file) can be uploaded in an open access online location such as the Open Science Framework repository. Include the link here. Alternatively, the Bill of Materials can be uploaded at the time of submission on the online Elsevier submission interface as supplementary material.
+
+% For a complex Bill of Materials, the complete Bill of Materials (editable spreadsheet file e.g., ODS file type or PDF file) can be uploaded in an open access online location such as the Open Science Frameworks repository. Include the link here. Alternatively, the Bill of Materials can be uploaded at the time of submission on the online Elsevier submission interface as supplementary material.
 
 % > To make it easy to tell which item in the Bill of Materials corresponds to which component in your design file(s), use matching designators in both places, or otherwise explain the correspondence.
 
 % > For material type, select from: Metal, semi-conductor, ceramic, polymer, biomaterial, organic, inorganic, composite, nanomaterial, semiconductor, non-specific, or other
-\textit{For a complex Bill of Materials, the complete Bill of Materials (editable spreadsheet file e.g., ODS file type or PDF file) can be uploaded in an open access online location such as the Open Science Framework repository. Include the link here. Alternatively, the Bill of Materials can be uploaded at the time of submission on the online Elsevier submission interface as supplementary material.}
+
+{\bf Current Link:} \href{https://docs.google.com/spreadsheets/d/1EaXni1Mxnvv0jaeDQ9I1xbvPcNkRtYN8TABCBzB3cpw/edit#gid=1846296871}{VentMon HardwareX BOM}
+
 \begin{itemize}
-\item \textit{To make it easy to tell which item in the Bill of Materials corresponds to which component in your design file(s), use matching designators in both places, or otherwise explain the correspondence.}
-\item \textit{For material type, select from: Metal, semi-conductor, ceramic, polymer, biomaterial, organic, inorganic, composite, nanomaterial, semiconductor, non-specific, or other}
+\item BOM needs to be converted to PDF and uploaded per instructions: \\
+\textit{For a complex Bill of Materials, the complete Bill of Materials (editable spreadsheet file e.g., ODS file type or PDF file) can be uploaded in an open access online location such as the Open Science Frameworks repository. Include the link here. Alternatively, the Bill of Materials can be uploaded at the time of submission on the online Elsevier submission interface as supplementary material.}
 \end{itemize}
 
-\tabulinesep=1ex
-\begin{tabu} to \linewidth {|X|X|X|X|X|X|X|}
-\hline
-\textbf{Designator} & \textbf{Component} & \textbf{Number} & \textbf{Cost per unit currency} & \textbf{Total cost} & \textbf{Source of materials} & \textbf{Material type} \\\hline
-
-%Insert items here
-\textit{Designator 1} & \textit{Name of Component 1} & \textit{Number of units} & \textit{Cost per unit} & \textit{Total cost} & \textit{Source} & \textit{Material type} \\\hline
-\textit{Designator 2} & \dots & \dots & \dots & \dots & \dots & \dots \\\hline
-% Designator 3 & Name of Component 2 & Number of units & Cost per unit & Total cost & Source of materials & Material type \\\hline
-\end{tabu}
 
 \section{Build instructions}
 %Provide detailed, step by step instructions for the construction of the reported hardware include all necessary information for reproducing the submitted hardware.
@@ -181,15 +173,53 @@
 % > Clearly reference design files and component parts described in the Design File Summary and Bill of Materials.
 % >Highlight potential safety concerns that may arise
 
-\textit{Provide detailed, step by step instructions for the construction of the reported hardware
- include all necessary information for reproducing the submitted hardware.
-\begin{itemize}
-\item Explain and, when possible, characterize design decisions. Including design alternatives if they exist.
-\item Use visual instructions such as schematics, images, and videos.
-\item Clearly reference design files and component parts described in the Design File Summary and Bill of Materials.
-\item Highlight potential safety concerns that may arise
-\end{itemize}}
+Two versions of VentMon can be assembled depending on availability of parts and time. The most physically robust and complete version of VentMon requires the purchase and manufacture of a custom PCB as well as a number of 3D printed plastic parts. This version of the device requires the least amount of time to assemble and contains fewest discrete components. Due to the high cost of PCB manufacture and assembly, VentMon can also be created using off the shelf components readily available from DIY electronics suppliers. This version requires significantly more assembly time. Both assembly procedures are outlined below.
 
+
+\subsection{PCB Based VentMon}
+\begin{enumerate}
+
+\item
+PCB Assembly
+
+\item
+Enclosure
+
+\item
+Flow Sensor Assembly
+
+\item 
+Oxygen Sensor Assembly
+
+\item
+Final Assembly
+
+\end{enumerate}
+
+\subsection{PCB Based VentMon}
+\begin{enumerate}
+
+\item
+Qwiic Shield Assembly
+
+\item
+Enclosure
+
+\item
+Flow Sensor Assembly
+
+\item 
+Oxygen Sensor Assembly
+
+\item
+Final Assembly
+
+\end{enumerate}
+
+
+
+
+\iffalse
 \section{Operation instructions}
 %Provide detailed instructions for the safe and proper operation of the hardware.
 %> Step-by-step operational instructions for operating the hardware.
@@ -245,6 +275,8 @@ All authors must disclose any financial and personal relationships with other pe
 \item Include at least one reference, to the original publication of the hardware you customized.
 \item Include other references as required. Include references to put your device in context in the literature. For more information on the reference format in HardwareX please see the Guide for Authors at: https://www.elsevier.com/journals/hardwarex/2468-0672/guide-for-authors
 \end{itemize}}
+
+\fi
 
 \end{document}
 
