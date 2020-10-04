@@ -62,40 +62,25 @@ A device that plugs into the airway circuit and measures the parameters of an op
 
 \tabulinesep=1ex
 \begin{tabu} to \linewidth {|X|X[3,l]|}
-\hline  \textbf{Hardware name} & \textit{Insert hardware name}
+\hline  \textbf{Hardware name} & 
   %Please specify the name of the hardware that you invented / customized
+  VentMon
   \\
   \hline \textbf{Subject area} & %
-  % Please state the subject area most relevant to the original community for which this hardware was developed. Example subject areas are listed below.
-  \begin{itemize}
-  \item \textit{Engineering and Material Science}
-  \item \textit{Chemistry and Biochemistry}
-  \item \textit{Medical (e.g. Pharmaceutical Science)}
-  \item \textit{Neuroscience}
-  \item \textit{Biological Sciences (e.g. Microbiology and Biochemistry)}
-  \item \textit{Environmental, Planetary and Agricultural Sciences}
-  \item \textit{Educational Tools and Open Source Alternatives to Existing Infrastructure}
-  \item \textit{General}
-  \end{itemize}
+  % Please state the subject area most relevant to the original community for which this hardware was developed. Example subject areas are listed below
+ Educational Tools and Open Source Alternatives to Existing Infrastructure
   \\
   \hline \textbf{Hardware type} &
-  \begin{itemize}
-  \item \textit{Imaging tools}
-  \item \textit{Measuring physical properties and in-lab sensors}
-  \item \textit{Biological sample handling and preparation}
-  \item \textit{Field measurements and sensors}
-  \item \textit{Electrical engineering and computer science}
-  \item \textit{Mechanical engineering and materials science}
-  \item \textit{Other (please specify)}
-  \end{itemize}
+Field measurements and sensors,
+Electrical engineering and computer science
   \\
 \hline \textbf{Open source license} &
   %Please specify the open source license. For more details see the guide to authors.
-  \textit{Please specify the open source license. For more details see the guide to authors.}
+ MIT License, CERN-OHL-S
   \\
 \hline \textbf{Cost of hardware} &
   %Approximate cost of hardware (complete breakdown will be included in the Bill of Materials).
-  \textit{Approximate cost of hardware (complete breakdown will be included in the Bill of Materials).}
+\$280
   \\
 \hline \textbf{Source file repository} &
   % Link to the source file repository
@@ -110,13 +95,18 @@ A device that plugs into the airway circuit and measures the parameters of an op
 
 \section{Hardware in context}
 % Include a short description of the hardware, putting into context of similar open hardware and proprietary equipment in the field.
-\textit{Include a short description of the hardware, putting into context of similar open hardware and proprietary equipment in the field.}
+The Coronavirus pandemic has created a global shortage of ventilators. Ventilators are expensive to manufacture and during uncertain times supply chains can be disrupted increasing the cost and scarcity of these devices. Since the beginning of the pandemic in March, there has been a large movement to develop cheaper, more supply chain resilient ventilator. The urgency and goals of this movement have shifted as the global understanding of the virus has evolved. Regardless of the current state of this movement, however, the use of open source medical devices in resources limited emergency situations -- common during a global pandemic -- is a topic that has come to the forefront of may conversations about preparedness and treatment. 
+Medical devices require rigorous testing before they can be used on the general public. Open source medical devices require the same level, if not more scrutiny. If an open source movement is to succeed in this field, the tools to test and validate medical devices should also be community based. The goal of VentMon is to provide an equally open source, community based verification solution to increase the efficiency and accuracy of the development process for teams making open source ventilator devices.
+
+
+
 \section{Hardware description}
 % Describe the hardware, highlighting the customization rather than the steps of the procedure. Highlight how it differs/which advantage it offers over pre-existing methods. For example, how could this hardware: be compared to other hardware in terms of cost or ease of use, be used in the development of further designs in a particular area, and so on.
 
 % > Add 3-5 bulleted points to broadly explain to other researchers how the hardware could be potentially useful to them, for either standard or novel laboratory tasks, inside or outside of the original user community.
 
-\textit{Describe the hardware, highlighting the customization rather than the steps of the procedure. Highlight how it differs/which advantage it offers over pre-existing methods. For example, how could this hardware: be compared to other hardware in terms of cost or ease of use, be used in the development of further designs in a particular area, and so on. \linebreak \linebreak Add 3-5 bulleted points to broadly explain to other researchers how the hardware could be potentially useful to them, for either standard or novel laboratory tasks, inside or outside of the original user community.}
+
+
 \begin{itemize}
 \item \dots
 \item \dots
@@ -177,10 +167,31 @@ Two versions of VentMon can be assembled depending on availability of parts and 
 
 
 \subsection{PCB Based VentMon}
-\begin{enumerate}
 
+This version of VentMon requires two 3D printed parts  -- one encapsulated an on-board pressure sensor and one is an airway adaptor -- as well as a PCB assembly. Before beginning the assembly process make sure that you have manufactured those three parts.
+
+\begin{enumerate}
 \item
 PCB Assembly
+
+\begin{enumerate}[label=1.\arabic*]
+\item Add standoffs to PCB
+\begin{enumerate}[label=1.1.\arabic*]
+\item take hardware and put it in the holes
+\end{enumerate}
+
+\item Mount sensor enclosure for BME280 pressure sensor
+\begin{enumerate}[label=1.2.\arabic*]
+\item Insert plastic part into mounting holes on PCB to check fit and alignment. The barb should face toward the outer edge of the PCB.
+\item Apply glue to bottom edge and mounting pegs of plastic.
+\item Insert plastic back into holes being careful not to get any glue on the sensor.
+\item Allow 24 hours for glue to cure before attaching a hose to the barb.
+\end{enumerate}
+
+
+\end{enumerate}
+
+
 
 \item
 Enclosure
@@ -196,7 +207,7 @@ Final Assembly
 
 \end{enumerate}
 
-\subsection{PCB Based VentMon}
+\subsection{COTS Based VentMon}
 \begin{enumerate}
 
 \item
