@@ -10,8 +10,6 @@ innerLength = 6.5;
 
 // $fn = 30;
 
-$fa = 1;      // Minimum angle fragment
-$fs = .1;     // Minimum size of a fragment
 
 
 barbLength = 7;
@@ -165,13 +163,10 @@ box();
 }
 
 
-translate([-33,0,-10])
+translate([-19,0,-10])
 hat_with_barb();
 
-$fa = 1;      // Minimum angle fragment
-$fs = .1;     // Minimum size of a fragment
 
-CouplerWTap();
 
 
 
