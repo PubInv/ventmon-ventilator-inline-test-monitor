@@ -37,8 +37,8 @@ If you have received a VentMon from us,
 it will have VentMonFirmware.ino installed.
 You are welcome to modify the VentMonFirmware.ino file as needed. To do so, you will
 have to install a library of our creation which encpasulates the PIRDS standard.
-Copy the libary [pirds_library](https://github.com/PubInv/PIRDS-respiration-data-standard/tree/master/pirds_library) into your Arudino library location. You may need to install the Adafruit BME680 library
-and other libaries as well.
+Copy the libary [pirds_library](https://github.com/PubInv/PIRDS-respiration-data-standard/tree/master/pirds_library) into your Arduino library location. You may need to install the Adafruit BME680 library
+and other libraries as well.
 
 
 ## Design and Dependencies
