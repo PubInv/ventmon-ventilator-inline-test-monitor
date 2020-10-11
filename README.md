@@ -1,4 +1,7 @@
-# VentMon 0.1 - Inline Ventilator Test Fixture and Monitor
+
+[![DOI](https://zenodo.org/badge/248134220.svg)](https://zenodo.org/badge/latestdoi/248134220)
+
+# VentMon 0.3 - Inline Ventilator Test Fixture and Monitor
 
 Note: The important file "breath_plot.html" which reneders respiration traces and calculated values from PIRDS 
 data was moved to its own [repo](https://github.com/PubInv/vent-display) on Thursday, June 18, 2020.
@@ -57,6 +60,14 @@ Initial BOM can be found here: [BOM](https://docs.google.com/document/d/1n-Ja3Ug
 
 
 ## Status
+
+** October 10th **
+
+We have now shipped 20 units of the VentMons to open source teams all over the world. Some of them are
+using them successfully. We order 15 printed circuit boards and 15 3D printed sensors ports and I built them
+by hand. There was an error in the PCB which has since been corrected; on the current PCBs I fix it by 
+soldering a wire in place. The current design of the case does not do cable management as well as we should; 
+the flow meter cable tends to fall out. We will improve this in future desgins.
 
 ** August 20th **
 
