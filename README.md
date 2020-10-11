@@ -61,6 +61,14 @@ Initial BOM can be found here: [BOM](https://docs.google.com/document/d/1n-Ja3Ug
 
 ## Status
 
+** October 10th **
+
+We have now shipped 20 units of the VentMons to open source teams all over the world. Some of them are
+using them successfully. We order 15 printed circuit boards and 15 3D printed sensors ports and I built them
+by hand. There was an error in the PCB which has since been corrected; on the current PCBs I fix it by 
+soldering a wire in place. The current design of the case does not do cable management as well as we should; 
+the flow meter cable tends to fall out. We will improve this in future desgins.
+
 ** August 20th **
 
 We have received 15 populated boards and desigend a 3D printed hat. We are beginning final assembly/manufacture of the 15 units that people have requested to be sent out free-of-charge.
