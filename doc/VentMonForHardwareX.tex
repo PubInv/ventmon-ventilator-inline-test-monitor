@@ -39,7 +39,7 @@
 \textbf{Title:} VentMon: and Open Source Inline Ventilator Test Fixture and Monitor
 
 %Insert Authors
-\textbf{Authors:} Robert Read, Lauria Clarke
+\textbf{Authors:} Robert L. Read, Lauria Clarke, Geoff Mulligan
 
 %Insert Affiliations
 \textbf{Affiliations:} Public Invention with support from the \textit{Protocol Labs} and the \textit{Mozilla Foundation}
@@ -50,19 +50,41 @@
 
 %Insert Abstract
 %Max. 200 words. Remember that the abstract is what readers see first in electronic abstracting and indexing services. This is the advertisement of your article. Make it interesting, and easy to be understood. Be accurate and specific, keep it as brief as possible.
-\textbf{Abstract:} 
-A device that plugs into the airway circuit and measures the parameters of an operating ventilator that are carefully controlled by clinicians.
+\textbf{Abstract:}
+
+Humanitarian engineers responded to the pandemic ventilator shortage of March,
+2020, by beginning over 100 open source ventilator projects.
+Inexpensive ventilator test equipment facilitates projects forced
+to be geographically distributed by lockdowns.
+The VentMon is a modular, open source, IoT-enabled
+tester that plugs into a standard 22mm airway
+between a ventilator and a physical test lung to test any ventilator
+by graphing flow, pressure, oxygen fraction, humidity and temperature
+at a data lake accessible to all team members. This is the data
+needed by a test team, but also the data desired by a clinician in
+actual treatment of patients. The open source design of the VentMon
+and its firmware and cloud-based software may
+allow it to be used as a component of modular ventilators to provide
+a clinical readout. This software system has been designd to be as
+modular and composable as possible, for example by defining
+new open published standards, just as the hardware is composable
+and modifiable, forming an open system or eco-system of ventilation data.
+Thanks to grants, 20 VentMons have been given away
+free of charge to pandemic response teams building open source ventilators,
+some of which have been used successfully.
+
+
 
 %Insert Keywords
 % At least 3 keywords. There is no limit on the no. of keywords you can list. Please remember that effective keywords should not repeat words appearing in your title, and should be neither too general nor too narrow.
-\textbf{Keywords:} COVID-19, open source medical device, 
+\textbf{Keywords:} COVID-19, open source medical device, ventilator, pandemic response
 
 \newpage
 \textbf{Specifications table:}
 
 \tabulinesep=1ex
 \begin{tabu} to \linewidth {|X|X[3,l]|}
-\hline  \textbf{Hardware name} & 
+\hline  \textbf{Hardware name} &
   %Please specify the name of the hardware that you invented / customized
   VentMon
   \\
@@ -82,11 +104,27 @@ Electrical engineering and computer science
   %Approximate cost of hardware (complete breakdown will be included in the Bill of Materials).
 \$280
   \\
-\hline \textbf{Source file repository} &
+  \hline \textbf{Source file repository} &
+
+  VentMon: \linebreak
+  \href{https://doi.org/10.5281/zenodo.4079170}{https://doi.org/10.5281/zenodo.4079170}
+  \linebreak
+  PIRDS (Public Invention Respirattion Data Standard): \linebreak
+  \href{http://doi.org/10.5281/zenodo.4079377}{http://doi.org/10.5281/zenodo.4079377}
+  \linebreak
+  PIRDS logger: \linebreak
+  \href{Zenodo. http://doi.org/10.5281/zenodo.4079382}{Zenodo. http://doi.org/10.5281/zenodo.4079382}
+  \linebreak
+  SFM3X00: \linebreak
+  \href{http://doi.org/10.5281/zenodo.4079355}{http://doi.org/10.5281/zenodo.4079355} \linebreak
+  VentDisplay: \linebreak
+  \href{http://doi.org/10.5281/zenodo.4079374}{http://doi.org/10.5281/zenodo.4079374} \linebreak
+  \linebreak
+
   % Link to the source file repository
       % insert a DOI URL to an approved source file repository:  Mendeley Data, theOSF, or Zenodo (instructions).  For example: "https://doi.org/10.5281/zenodo.3346799"
       % If there is no external repository write “Available in the article”
-  \textit{DOI URL to an approved source file repository: \href{https://data.mendeley.com/}{Mendeley Data}, the \href{http://osf.io}{OSF}, or \href{https://zenodo.org/}{Zenodo} \href{https://doi.org/10.5281/zenodo.3346799}{(instructions)}. For example:} \textit{https://doi.org/10.5281/zenodo.3346799} \linebreak \linebreak
+  \textit{DOI URL to an approved source file repository:  \href{https://data.mendeley.com/}{Mendeley Data}, the \href{http://osf.io}{OSF}, or \href{https://zenodo.org/}{Zenodo} \href{https://doi.org/10.5281/zenodo.3346799}{(instructions)}. For example:} \textit{https://doi.org/10.5281/zenodo.3346799} \linebreak \linebreak
   \textit{If there is no external repository write “} \textit{Available in the article} \textit{"}
 \\\hline
 \end{tabu}
@@ -95,8 +133,22 @@ Electrical engineering and computer science
 
 \section{Hardware in context}
 % Include a short description of the hardware, putting into context of similar open hardware and proprietary equipment in the field.
-The Coronavirus pandemic has created a global shortage of ventilators. Ventilators are expensive to manufacture and during uncertain times supply chains can be disrupted increasing the cost and scarcity of these devices. Since the beginning of the pandemic in March, there has been a large movement to develop cheaper, more supply chain resilient ventilator. The urgency and goals of this movement have shifted as the global understanding of the virus has evolved. Regardless of the current state of this movement, however, the use of open source medical devices in resources limited emergency situations -- common during a global pandemic -- is a topic that has come to the forefront of may conversations about preparedness and treatment. 
-Medical devices require rigorous testing before they can be used on the general public. Open source medical devices require the same level, if not more scrutiny. If an open source movement is to succeed in this field, the tools to test and validate medical devices should also be community based. The goal of VentMon is to provide an equally open source, community based verification solution to increase the efficiency and accuracy of the development process for teams making open source ventilator devices.
+The Coronavirus pandemic has created a global shortage of ventilators.
+Ventilators are expensive to manufacture and during uncertain times supply chains can be disrupted
+increasing the cost and scarcity of these devices.
+Since the beginning of the pandemic in March, there has been a large movement to develop cheaper,
+more supply chain resilient ventilator.
+The urgency and goals of this movement have shifted as the global understanding of the virus has evolved.
+Regardless of the current state of this movement, however, the use of open source medical devices in resources
+limited emergency situations -- common during a global pandemic --
+is a topic that has come to the forefront of may conversations about preparedness and treatment.
+Medical devices require rigorous testing before they can be used on the general public.
+Open source medical devices require the same level, if not more scrutiny.
+If an open source movement is to succeed in this field, the tools to test and validate
+medical devices should also be community based.
+The goal of VentMon is to provide an equally open source, community based verification solution
+to increase the efficiency and accuracy of the development process for socially distanced, potentially internationl
+teams making open source ventilator devices.
 
 
 
@@ -105,13 +157,35 @@ Medical devices require rigorous testing before they can be used on the general 
 
 % > Add 3-5 bulleted points to broadly explain to other researchers how the hardware could be potentially useful to them, for either standard or novel laboratory tasks, inside or outside of the original user community.
 
+The VentMon plugs directly into a standard 22mm adult airway. As air or medicaly gases pass through the VentMon, it records
+flow and pressure about 40 times a second, and occasionally records temperature, humdity, and O2 fraction.
+The result is that when placed in the airway between an invasive or non-invasive ventilator
+under test and physcial test lung, it sends
+this data to a public data lake using a clearly defined respiration standard. This data can be graphically
+rendered either live or statically to provide a display that is typical of the clinical display of advance ventilators.
+In this way it allows sophisticated testing of ventilators. This device is therefore similar in function to
+an ASL5000 or a Michigan Test Lung device, which tend to start at USD\$10,000.
 
+A special challenge of teams building open source pandemic ventilators is that they tend to be poorly funded,
+but also geographically distributed. The VentMon is an IoT-enbabled device which sends its data to a public data lake,
+where a team member on a different continent can view it live in real time as a collleagure makes adjustments
+to the ventilator.
 
+The VentMon thus offer benefits to teams developing ventilation devices:
 \begin{itemize}
-\item \dots
-\item \dots
-\item \dots
+\item It is inexpensive.
+\item It is completely open and part of a modular hardware/software system that can be customized and extended.
+\item It is allows remote collaboration.
 \end{itemize}
+
+Moreover, being completely open, it supports modifcation, extension, and importantly but only potentially at present,
+integration into a complete ventilator. A ventilator that chose to offer a graphical trace of pressure and flow,
+which are generally demanded by clinicians for all but emergency transport situations, could incorporate the
+open source VentMon into its complete design.
+
+Although the reliance on the internet is a strength for a distributed engineering team, it would be a disadvantage
+it a field hospital. Although aiming to eventually be safe enough and reliable to be used as a monitor
+on human patients, it requires much improvement before it is ready for that intended use.
 
 \section{Design files}
 % The  complete  design  files  must  be  either  uploaded  to  an  approved  online  repository,  uploaded  at the  time  of  submission  on  the  online  Editorial  Manager  submission  interface  as  supplementary materials [CAD files, videos,. . . ], or included in the body of the manuscript [e.g.  figures].  The three approved  online  repositories  are  Mendeley  Data,  the  Open  Science  Framework,  and  Zenodo. See repository instructions: https://doi.org/10.5281/zenodo.3346799
@@ -130,7 +204,7 @@ Embedded Firmware & C++ Source Code & MIT License &  \href{https://github.com/Pu
 PIRDS Data Viewer & HTML Source Code &  MIT License &  \href{https://github.com/PubInv/vent-display}{Vent Display} \\\hline
 PIRDS Data Logger & C Source Files & MIT License & \href{https://github.com/PubInv/PIRDS-logger}{PIRDS Logger} \\\hline
 VentMon T0.3 PCB & PCB Design Files & MIT License & \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/pcb}{VentMon PCB} \\\hline
-Pressure Sensor and Airway Adaptor & STL File & MIT License &  \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/3dparts}{VentMon Adaptors}\\\hline 
+Pressure Sensor and Airway Adaptor & STL File & MIT License &  \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/3dparts}{VentMon Adaptors}\\\hline
 PIRDS Data Standard & \\\hline
 
 % Design file 3 & File type & License & Link \\\hline
@@ -163,8 +237,16 @@ PIRDS Data Standard & \\\hline
 % > Clearly reference design files and component parts described in the Design File Summary and Bill of Materials.
 % >Highlight potential safety concerns that may arise
 
-Two versions of VentMon can be assembled depending on availability of parts and time. The most physically robust and complete version of VentMon requires the purchase and manufacture of a custom PCB as well as a number of 3D printed plastic parts. This version of the device requires the least amount of time to assemble and contains fewest discrete components. Due to the high cost of PCB manufacture and assembly, VentMon can also be created using off the shelf components readily available from DIY electronics suppliers. This version requires significantly more assembly time. Both assembly procedures are outlined below.
-
+Two versions of VentMon can be assembled depending on availability of parts and time.
+The most physically robust and complete version of VentMon requires the purchase and manufacture of a PCB
+as well as a number of 3D printed plastic parts.
+The designs of the PCB and 3D printed parts are fully open; in practice, due to the fact that PCBs have a high
+set up cost, it makes most sense to use the PCB if you are bulding 10 or more VentMons.
+This version of the device requires the least amount of time to assemble and contains fewest discrete components.
+Due to the high cost of PCB manufacture and assembly, VentMon can also be created using off the shelf components
+readily available from DIY electronics suppliers. This version requires significantly more assembly time.
+We believe this has been done twice by third parties with little interaction with us.
+Both assembly procedures are outlined below.
 
 \subsection{PCB Based VentMon}
 
@@ -199,7 +281,7 @@ Enclosure
 \item
 Flow Sensor Assembly
 
-\item 
+\item
 Oxygen Sensor Assembly
 
 \item
@@ -219,7 +301,7 @@ Enclosure
 \item
 Flow Sensor Assembly
 
-\item 
+\item
 Oxygen Sensor Assembly
 
 \item
@@ -227,10 +309,6 @@ Final Assembly
 
 \end{enumerate}
 
-
-
-
-\iffalse
 \section{Operation instructions}
 %Provide detailed instructions for the safe and proper operation of the hardware.
 %> Step-by-step operational instructions for operating the hardware.
@@ -245,6 +323,8 @@ Final Assembly
 \end{itemize}}
 
 \section{Validation and characterization}
+
+
 %Demonstrate the operation of the hardware and characterize its performance over relevant critical metrics
 %> Demonstrate the use of the hardware for a relevant use case.
 %> If possible, characterize performance of the hardware over operational parameters.
@@ -257,26 +337,56 @@ Final Assembly
 \item Create a bulleted list that describes the capabilities (and limitations) of the hardware. For example consider descriptions of load, operation time, spin speed, coefficient of variation, accuracy, precision and etc.
 \end{itemize}}
 
+Because the VentMon produces pressure and flow graphs at about 25 samples per seconds which is fast compared to
+the physiological process of breathing, it is easy to have confidence in the basic dynamic function of the VentMon
+by simply breathing through it into a plastic test lung. One can easily see that flow and pressure dynamically
+match the breath or changes in the mechanical ventilation, or even changes induces by changes in the resistance of
+compliance of the test lung.
+
+The flow and pressure sensors used in the VentMon require not calibration. Flow was checked with a graduated syringe and
+found to be quite accurate. Pressure sensors can be double checked by checking ambient pressure and, for example, computing
+altitude of the physcial location.
+
+Other aspects of ventilation such as respiration rate, peak inspiratory pressure, Inhalation to Exhalation ratio,
+work of breathing, etc. are dependenent on the VentDisplay software which are a module not technically part of the VentMon
+hardware. This software has been shown to be valuable, although it is dependent on accurate software decisions about
+the beginning and the ending of a breath, which can be subtle in some situations.
+
+
+
 \section{Acknowledgements}
 % [List here those individuals who provided help during the research (e.g., providing language help, writing assistance or proof reading the article, etc.).] Please also identify who provided financial support for the conduct of the research and/or preparation of the article and to briefly describe the role of the sponsor(s), if any, in study design; in the collection, analysis and interpretation of data; in the writing of the report; and in the decision to submit the article for publication. If the funding source(s) had no such involvement then this should be stated.}
 
-\textit{[List here those individuals who provided help during the research (e.g., providing language help, writing assistance or proof reading the article, etc.).] Please also identify who provided financial support for the conduct of the research and/or preparation of the article and to briefly describe the role of the sponsor(s), if any, in study design; in the collection, analysis and interpretation of data; in the writing of the report; and in the decision to submit the article for publication. If the funding source(s) had no such involvement then this should be stated.}
+Robert L. Read conceived of and wrote most of the firmware for the VentMon. Geoff Mulligan created the initial cloud-based
+IoT appoach which became the PIRDS-logger.
+Lauria Clarke did most of the hardware design, including the assembly instructions and the printed circuit board based on an
+open source design from Adafruit\cite[],
+and the SFM3X00 software repo
+for encapsulating Sensirion flow sensors in the Arduino environment. This paper was written by Robert L. Read and Lauria Clarke.
+
+The Mozilla Open Source Software foundation gave Public Invention a grant that allowed us to develop the hardware and
+provide 20 VentMons to open source teams around the world free-of-charge, including paying shipping costs.
+Protocol Labs provided Public Invention a grant that has been used web communication and conference costs.
+
+We would like to thank early adopters of the VentMon on pandemic ventilator teams such as the ARMEE\cite{} and
+DIY-Beatmungsgerät.de\cite{}
+who gave us valuable bug reports and feedback.
+
+Student volunteers on the COVID19-vent-list project\cite{} helped to make the need for the VentMon clear by assessing over 100
+pandemic ventilator teams.
 
 \section{Declaration of interest}
+
+None.
 % a statement must be included even if there is no conflict of interest
 % All authors must disclose any financial and personal relationships with other people or organizations that could inappropriately influence (bias) their work. Examples of potential conflicts of interest include employment, consultancies, stock ownership, honoraria, paid expert testimony, patent applications/registrations, and grants or other funding. Authors must disclose any interests in a summary declaration of interest statement in the manuscript file. If there are no interests to declare then please state this: 'Declarations of interest: none'. This summary statement will be ultimately published if the article is accepted. More information.}
 
-\textit{[a statement must be included even if there is no conflict of interest] \linebreak
-All authors must disclose any financial and personal relationships with other people or organizations that could inappropriately influence (bias) their work. Examples of potential conflicts of interest include employment, consultancies, stock ownership, honoraria, paid expert testimony, patent applications/registrations, and grants or other funding. Authors must disclose any interests in a summary declaration of interest statement in the manuscript file. If there are no interests to declare then please state this: 'Declarations of interest: none'. This summary statement will be ultimately published if the article is accepted. More information.}
 
-\section{Human and animal rights}
-%> If the work involves the use of human subjects, the author should ensure that the work described has been carried out in accordance with the appropriate ethical guidelines.
-%> If the work involves the use of human subjects, the author should ensure that the work described has been carried out in accordance with The Code of Ethics of the World Medical Association (Declaration of Helsinki) for experiments involving humans; Uniform Requirements for manuscripts submitted to Biomedical journals. Authors should include a statement in the manuscript that informed consent was obtained for experimentation with human subjects. The privacy rights of human subjects must always be observed.
-%> All animal experiments should comply with the ARRIVE guidelines and should be carried out in accordance with the U.K. Animals (Scientific Procedures) Act, 1986 and associated guidelines, EU Directive 2010/63/EU for animal experiments, or the National Institutes of Health guide for the care and use of Laboratory animals (NIH Publications No. 8023, revised 1978) and the authors should clearly indicate in the manuscript that such guidelines have been followed
 
-\textit{
-\begin{itemize}
-\item If the work involves the use of human subjects, the author should ensure that the work described has been carried out in accordance with the appropriate ethical guidelines. \item If the work involves the use of human subjects, the author should ensure that the work described has been carried out in accordance with The Code of Ethics of the World Medical Association (Declaration of Helsinki) for experiments involving humans; Uniform Requirements for manuscripts submitted to Biomedical journals. Authors should include a statement in the manuscript that informed consent was obtained for experimentation with human subjects. The privacy rights of human subjects must always be observed. \item All animal experiments should comply with the ARRIVE guidelines and should be carried out in accordance with the U.K. Animals (Scientific Procedures) Act, 1986 and associated guidelines, EU Directive 2010/63/EU for animal experiments, or the National Institutes of Health guide for the care and use of Laboratory animals (NIH Publications No. 8023, revised 1978) and the authors should clearly indicate in the manuscript that such guidelines have been followed.\end{itemize}}
+% This work touched no humans or animals, I belive this section can be ommmited entirely.
+% \section{Human and animal rights}
+
+\iffalse
 
 \section*{References}
 %> Include at least one reference, to the original publication of the hardware you customized.
@@ -286,6 +396,7 @@ All authors must disclose any financial and personal relationships with other pe
 \item Include at least one reference, to the original publication of the hardware you customized.
 \item Include other references as required. Include references to put your device in context in the literature. For more information on the reference format in HardwareX please see the Guide for Authors at: https://www.elsevier.com/journals/hardwarex/2468-0672/guide-for-authors
 \end{itemize}}
+
 
 \fi
 
@@ -304,3 +415,41 @@ All authors must disclose any financial and personal relationships with other pe
 %> ●	Is the performance of the hardware adequately demonstrated and characterized?
 %> ●	Are all potential safety concerns addressed?
 %> ●	For more information on the article template consult the Guide to Authors.}
+
+
+% Notes:
+% Potential reviewers: Michelle Mellenthin, Eric Schulz
+
+% Here is our BibTex entry to the DOI for this version:
+@software{robert_l_read_2020_4079170,
+  author       = {Robert L. Read and
+                  Lauria Clarke and
+                  Darío Hereñú and
+                  Geoff Mulligan},
+  title        = {{PubInv/ventmon-ventilator-inline-test-monitor:
+                   v0.3T - Ventmon Tester 0.3}},
+  month        = oct,
+  year         = 2020,
+  publisher    = {Zenodo},
+  version      = {v0.3T},
+  doi          = {10.5281/zenodo.4079170},
+  url          = {https://doi.org/10.5281/zenodo.4079170}
+}
+
+@misc{
+  author = {Robert L. Read and
+    Avinash Baskaran and
+    Enrique Villacres and
+    Keeshan Patel},
+  title = {COVID-19 Vent List},
+  month        = oct,
+  year         = 2020,
+  url = {https://docs.google.com/spreadsheets/d/1inYw5H4RiL0AC_J9vPWzJxXCdlkMLPBRdPgEVKF8DZw/edit#gid=0}
+  }
+
+@mics{ARMEE,
+  url = {https://armeevent.com/}
+}
+@misc{beatmnug,
+  url = {https://www.xn--diy-beatmungsgert-5qb.de/}
+  }
