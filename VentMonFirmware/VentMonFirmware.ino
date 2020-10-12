@@ -394,18 +394,18 @@ bool send_data_measurement(Measurement ma) {
       Serial.println("send_data_measurement begin failed at begin!");
       return false;
     } else {
-      Serial.println("Packet begun");
+//      Serial.println("Packet begun");
     }
     if (wudpclient.write(m, 14) != 14) {
       Serial.println("Packet Write failed");
     } else {
-      Serial.println("Packet Write succeeded");
+ //     Serial.println("Packet Write succeeded");
     }
     if (wudpclient.endPacket() != 1) {
       Serial.println("send_data_measurement end failed!");
       return false;
     } else {
-      Serial.println("Packet done");
+ //     Serial.println("Packet done");
     }
   }
   return true;
