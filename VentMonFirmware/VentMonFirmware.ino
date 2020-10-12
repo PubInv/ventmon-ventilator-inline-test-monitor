@@ -15,6 +15,7 @@
 #include <Ethernet.h>
 #include <WiFi.h>
 #include <EthernetUdp.h>
+#include <WiFiUdp.h>
 #include <Dns.h>
 
 #include <SFM3X00.h>
@@ -99,11 +100,17 @@ char macs[18];
 #define PARAMPORT 6111
 #define LOCALPORT 6111
 
+#define DEFALUT_HOST_ADDR "13.58.243.230"
+
 char *Loghost = strdup(PARAMHOST);
 uint16_t Logport = PARAMPORT;
 IPAddress LoghostAddr;
+IPAddress DefaultLogHostAddr(13,58,243,230);
 
-EthernetUDP udpclient;
+EthernetUDP eudpclient;
+WiFiUDP wudpclient;
+bool eudpclient_good = false;
+bool wudpclient_good = false;
 
 /* PRESSURE *******************************************/
 
@@ -367,21 +374,40 @@ bool send_data_measurement(Measurement ma) {
 
   m[13] = '\n';
 
-  //  Serial.print(F(" UDP send to "));
-  //  Serial.print(LoghostAddr);
-  //  Serial.print(F(" "));
-  //  Serial.println(Logport);
-
-  if (udpclient.beginPacket(LoghostAddr, Logport) != 1) {
- //   Serial.println("send_data_measurement begin failed!");
-    return false;
+  Serial.print(F(" UDP send to "));
+  Serial.print(LoghostAddr);
+  Serial.print(F(" "));
+  Serial.println(Logport);
+  if (eudpclient_good) {
+    if (eudpclient.beginPacket(LoghostAddr, Logport) != 1) {
+      Serial.println("send_data_measurement begin failed at begin!");
+      return false;
+    }
+    eudpclient.write(m, 14);
+    if (eudpclient.endPacket() != 1) {
+      Serial.println("send_data_measurement end failed!");
+      return false;
+    }
   }
-  udpclient.write(m, 14);
-  if (udpclient.endPacket() != 1) {
- //   Serial.println("send_data_measurement end failed!");
-    return false;
+  if (wudpclient_good) {
+    if (wudpclient.beginPacket(LoghostAddr, Logport) != 1) {
+      Serial.println("send_data_measurement begin failed at begin!");
+      return false;
+    } else {
+      Serial.println("Packet begun");
+    }
+    if (wudpclient.write(m, 14) != 14) {
+      Serial.println("Packet Write failed");
+    } else {
+      Serial.println("Packet Write succeeded");
+    }
+    if (wudpclient.endPacket() != 1) {
+      Serial.println("send_data_measurement end failed!");
+      return false;
+    } else {
+      Serial.println("Packet done");
+    }
   }
-
   return true;
 }
 
@@ -399,16 +425,28 @@ bool send_data_message(Message ma) {
   m[263] = '\n';
 
 
-  if (udpclient.beginPacket(LoghostAddr, Logport) != 1) {
+  if (eudpclient_good) {
+    if (eudpclient.beginPacket(LoghostAddr, Logport) != 1) {
 //    Serial.println("send_data_message begin failed!");
-    return false;
-  }
-  udpclient.write(m, 264);
-  if (udpclient.endPacket() != 1) {
-    Serial.println("send_data_message end failed!");
-    return false;
-  }
-
+      return false;
+    }
+    eudpclient.write(m, 264);
+    if (eudpclient.endPacket() != 1) {
+      Serial.println("send_data_message end failed!");
+      return false;
+    }
+  } 
+  if (wudpclient_good) {
+    if (wudpclient.beginPacket(LoghostAddr, Logport) != 1) {
+//    Serial.println("send_data_message begin failed!");
+      return false;
+    }
+    wudpclient.write(m, 264);
+    if (wudpclient.endPacket() != 1) {
+      Serial.println("send_data_message end failed!");
+      return false;
+    }
+  } 
   return true;
 }
 
@@ -646,6 +684,117 @@ void displayPressure(bool max_not_min) {
 /******************************************************/
 
 /* NETWORKING ******************************************/
+  
+void wifi_setup() {
+
+
+// WiFi network name and password:
+// const char * networkName = "YOUR_NETWORK_HERE";
+// const char * networkPswd = "YOUR_PASSWORD_HERE";
+
+const char * networkName = "readfamilynetwork";
+const char * networkPswd = "magicalsparrow96";
+
+// Internet domain to request from:
+const char * hostDomain = "example.com";
+
+  // Connect to the WiFi network (see function below loop)
+  connectToWiFi(networkName, networkPswd);
+
+}
+
+void connectToWiFi(const char * ssid, const char * pwd)
+{
+ // int ledState = 0;
+
+  printLine();
+  Serial.println("Connecting to WiFi network: " + String(ssid));
+
+  WiFi.begin(ssid, pwd);
+
+  int NUM_RETRIES = 50;
+  int n = 0;
+  while (n < NUM_RETRIES && WiFi.status() != WL_CONNECTED) 
+  {
+    delay(500);
+    Serial.print(".");
+    n++;
+  }
+  if (n == NUM_RETRIES) {
+     Serial.println("WiFi connection failed!");
+  } else {
+
+  Serial.println();
+  Serial.println("WiFi connected!");
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+  //requestURL("google.com",80);
+
+
+  
+  wudpclient_good = (wudpclient.begin(LOCALPORT) == 1);
+  Serial.print("WIFI UDP Connection:");
+  Serial.print(wudpclient_good ? "GOOD" : "BAD");
+  // IPAddress DefaultLogHostAddr(13,58,243,230);
+  LoghostAddr = DefaultLogHostAddr;
+//  DNSClient dns;
+//  dns.begin(Ethernet.dnsServerIP());
+//  if (dns.getHostByName(Loghost, LoghostAddr) == 1) {
+//    Serial.print("host is ");
+//    Serial.println(LoghostAddr);
+//  }
+  }
+}
+
+void requestURL(const char * host, uint8_t port)
+{
+  printLine();
+  Serial.println("Connecting to domain: " + String(host));
+
+  // Use WiFiClient class to create TCP connections
+  WiFiClient client;
+  if (!client.connect(host, port))
+  {
+    Serial.println("connection failed");
+    return;
+  }
+  Serial.println("Connected!");
+  printLine();
+
+  // This will send the request to the server
+  client.print((String)"GET / HTTP/1.1\r\n" +
+               "Host: " + String(host) + "\r\n" +
+               "Connection: close\r\n\r\n");
+  unsigned long timeout = millis();
+  while (client.available() == 0) 
+  {
+    if (millis() - timeout > 5000) 
+    {
+      Serial.println(">>> Client Timeout !");
+      client.stop();
+      return;
+    }
+  }
+
+  // Read all the lines of the reply from server and print them to Serial
+  while (client.available()) 
+  {
+    String line = client.readStringUntil('\r');
+    Serial.print(line);
+  }
+
+  Serial.println();
+  Serial.println("closing connection");
+  client.stop();
+}
+
+void printLine()
+{
+  Serial.println();
+  for (int i=0; i<30; i++)
+    Serial.print("-");
+  Serial.println();
+}
 
 void ethernet_setup() {
   Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
@@ -658,7 +807,7 @@ void ethernet_setup() {
   Serial.println();
 
   int n = 0;
-  const int ETHERNET_TRIES = 5;
+  const int ETHERNET_TRIES = 1;
   while (n < ETHERNET_TRIES) {
     // start the Ethernet connection:
     Serial.println(F("Initialize Ethernet with DHCP:"));
@@ -689,7 +838,7 @@ void ethernet_setup() {
   // give the Ethernet shield a second to initialize:
   delay(1000);
 
-  udpclient.begin(LOCALPORT);
+  eudpclient_good = (eudpclient.begin(LOCALPORT) == 1);
 
   DNSClient dns;
   dns.begin(Ethernet.dnsServerIP());
@@ -991,5 +1140,6 @@ void setup() {
   found_diff_press = (readHSCPressure() != LONG_MIN);
   Serial.println(found_diff_press ? "YES" : "NO");
   Serial.println("XXXXXXXXXXXXXXXXXX");
-  ethernet_setup();
+//  ethernet_setup();
+  wifi_setup();
 }
