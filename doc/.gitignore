@@ -1,0 +1,8 @@
+# small gitignore for LaTeX files
+*.aux
+*.out
+*.log
+*.synctex.giz
+
+.DS_Store
+images/.DS_Store

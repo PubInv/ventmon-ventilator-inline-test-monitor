@@ -7,6 +7,8 @@
 \usepackage{tabu}
 \usepackage{enumitem}
 \usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{float}
 \newlist{selectlist}{itemize}{2}
 \setlist[selectlist]{label=$\square$,leftmargin=*,noitemsep,topsep=0pt}
 
@@ -65,9 +67,9 @@ needed by a test team, but also the data desired by a clinician in
 actual treatment of patients. The open source design of the VentMon
 and its firmware and cloud-based software may
 allow it to be used as a component of modular ventilators to provide
-a clinical readout. This software system has been designd to be as
-modular and composable as possible, for example by defining
-new open published standards, just as the hardware is composable
+a clinical readout. This software system has been designed to be as
+modular and composeable as possible, for example by defining
+new open published standards, just as the hardware is composeable
 and modifiable, forming an open system or eco-system of ventilation data.
 Thanks to grants, 20 VentMons have been given away
 free of charge to pandemic response teams building open source ventilators,
@@ -109,7 +111,7 @@ Electrical engineering and computer science
   VentMon: \linebreak
   \href{https://doi.org/10.5281/zenodo.4079170}{https://doi.org/10.5281/zenodo.4079170}
   \linebreak
-  PIRDS (Public Invention Respirattion Data Standard): \linebreak
+  PIRDS (Public Invention Respiration Data Standard): \linebreak
   \href{http://doi.org/10.5281/zenodo.4079377}{http://doi.org/10.5281/zenodo.4079377}
   \linebreak
   PIRDS logger: \linebreak
@@ -133,38 +135,14 @@ Electrical engineering and computer science
 
 \section{Hardware in context}
 % Include a short description of the hardware, putting into context of similar open hardware and proprietary equipment in the field.
-The Coronavirus pandemic has created a global shortage of ventilators.
-Ventilators are expensive to manufacture and during uncertain times supply chains can be disrupted
-increasing the cost and scarcity of these devices.
-Since the beginning of the pandemic in March, there has been a large movement to develop cheaper,
-more supply chain resilient ventilator.
-The urgency and goals of this movement have shifted as the global understanding of the virus has evolved.
-Regardless of the current state of this movement, however, the use of open source medical devices in resources
-limited emergency situations -- common during a global pandemic --
-is a topic that has come to the forefront of may conversations about preparedness and treatment.
-Medical devices require rigorous testing before they can be used on the general public.
-Open source medical devices require the same level, if not more scrutiny.
-If an open source movement is to succeed in this field, the tools to test and validate
-medical devices should also be community based.
-The goal of VentMon is to provide an equally open source, community based verification solution
-to increase the efficiency and accuracy of the development process for socially distanced, potentially internationl
-teams making open source ventilator devices.
-
-
+The Coronavirus pandemic has created a global shortage of ventilators.Ventilators are expensive to manufacture and during uncertain times supply chains can be disrupted increasing the cost and scarcity of these devices. Since the beginning of the pandemic in March, there has been a large movement to develop cheaper, more supply chain resilient ventilator. The urgency and goals of this movement have shifted as the global understanding of the virus has evolved. Regardless of the current state of this movement, however, the use of open source medical devices in resources limited emergency situations -- common during a global pandemic -- is a topic that has come to the forefront of may conversations about preparedness and treatment. Medical devices require rigorous testing before they can be used on the general public. Open source medical devices require the same level, if not more scrutiny. If an open source movement is to succeed in this field, the tools to test and validate medical devices should also be community based. The goal of VentMon is to provide an equally open source, community based verification solution to increase the efficiency and accuracy of the development process for socially distanced, potentially international teams making open source ventilator devices.
 
 \section{Hardware description}
 % Describe the hardware, highlighting the customization rather than the steps of the procedure. Highlight how it differs/which advantage it offers over pre-existing methods. For example, how could this hardware: be compared to other hardware in terms of cost or ease of use, be used in the development of further designs in a particular area, and so on.
 
 % > Add 3-5 bulleted points to broadly explain to other researchers how the hardware could be potentially useful to them, for either standard or novel laboratory tasks, inside or outside of the original user community.
 
-The VentMon plugs directly into a standard 22mm adult airway. As air or medicaly gases pass through the VentMon, it records
-flow and pressure about 40 times a second, and occasionally records temperature, humdity, and O2 fraction.
-The result is that when placed in the airway between an invasive or non-invasive ventilator
-under test and physcial test lung, it sends
-this data to a public data lake using a clearly defined respiration standard. This data can be graphically
-rendered either live or statically to provide a display that is typical of the clinical display of advance ventilators.
-In this way it allows sophisticated testing of ventilators. This device is therefore similar in function to
-an ASL5000 or a Michigan Test Lung device, which tend to start at USD\$10,000.
+The VentMon plugs directly into a standard 22mm adult airway. As air or medicaly gases pass through the VentMon, it records flow and pressure about 40 times a second, and occasionally records temperature, humdity, and O2 fraction. The result is that when placed in the airway between an invasive or non-invasive ventilator under test and physcial test lung, it sends this data to a public data lake using a clearly defined respiration standard. This data can be graphically rendered either live or statically to provide a display that is typical of the clinical display of advance ventilators. In this way it allows sophisticated testing of ventilators. This device is therefore similar in function to an ASL5000 or a Michigan Test Lung device, which tend to start at USD\$10,000.
 
 A special challenge of teams building open source pandemic ventilators is that they tend to be poorly funded,
 but also geographically distributed. The VentMon is an IoT-enbabled device which sends its data to a public data lake,
@@ -178,14 +156,9 @@ The VentMon thus offer benefits to teams developing ventilation devices:
 \item It is allows remote collaboration.
 \end{itemize}
 
-Moreover, being completely open, it supports modifcation, extension, and importantly but only potentially at present,
-integration into a complete ventilator. A ventilator that chose to offer a graphical trace of pressure and flow,
-which are generally demanded by clinicians for all but emergency transport situations, could incorporate the
-open source VentMon into its complete design.
+Moreover, being completely open, it supports modifcation, extension, and importantly but only potentially at present, integration into a complete ventilator. A ventilator that chose to offer a graphical trace of pressure and flow, which are generally demanded by clinicians for all but emergency transport situations, could incorporate the open source VentMon into its complete design.
 
-Although the reliance on the internet is a strength for a distributed engineering team, it would be a disadvantage
-it a field hospital. Although aiming to eventually be safe enough and reliable to be used as a monitor
-on human patients, it requires much improvement before it is ready for that intended use.
+Although the reliance on the internet is a strength for a distributed engineering team, it would be a disadvantage it a field hospital. Although aiming to eventually be safe enough and reliable to be used as a monitor on human patients, it requires much improvement before it is ready for that intended use.
 
 \section{Design files}
 % The  complete  design  files  must  be  either  uploaded  to  an  approved  online  repository,  uploaded  at the  time  of  submission  on  the  online  Editorial  Manager  submission  interface  as  supplementary materials [CAD files, videos,. . . ], or included in the body of the manuscript [e.g.  figures].  The three approved  online  repositories  are  Mendeley  Data,  the  Open  Science  Framework,  and  Zenodo. See repository instructions: https://doi.org/10.5281/zenodo.3346799
@@ -237,16 +210,7 @@ PIRDS Data Standard & \\\hline
 % > Clearly reference design files and component parts described in the Design File Summary and Bill of Materials.
 % >Highlight potential safety concerns that may arise
 
-Two versions of VentMon can be assembled depending on availability of parts and time.
-The most physically robust and complete version of VentMon requires the purchase and manufacture of a PCB
-as well as a number of 3D printed plastic parts.
-The designs of the PCB and 3D printed parts are fully open; in practice, due to the fact that PCBs have a high
-set up cost, it makes most sense to use the PCB if you are bulding 10 or more VentMons.
-This version of the device requires the least amount of time to assemble and contains fewest discrete components.
-Due to the high cost of PCB manufacture and assembly, VentMon can also be created using off the shelf components
-readily available from DIY electronics suppliers. This version requires significantly more assembly time.
-We believe this has been done twice by third parties with little interaction with us.
-Both assembly procedures are outlined below.
+Two versions of VentMon can be assembled depending on availability of parts and time. The most physically robust and complete version of VentMon requires the purchase and manufacture of a PCB as well as a number of 3D printed plastic parts. The designs of the PCB and 3D printed parts are fully open; in practice, due to the fact that PCBs have a high set up cost, it makes most sense to use the PCB if you are bulding 10 or more VentMons. This version of the device requires the least amount of time to assemble and contains fewest discrete components. Due to the high cost of PCB manufacture and assembly, VentMon can also be created using off the shelf components readily available from DIY electronics suppliers. This version requires significantly more assembly time. We believe this has been done twice by third parties with little interaction with us. Both assembly procedures are outlined below.
 
 \subsection{PCB Based VentMon}
 
@@ -295,11 +259,139 @@ Final Assembly
 \item
 Qwiic Shield Assembly
 
+See Figure \ref{fig:qwiic} on page \pageref{fig:qwiic} for final assembly of Qwiic Shield.
+
+\begin{enumerate}[label=1.\arabic*]
+\item
+Trim two pieces of male header pins that are two positions long and one piece that is four positions long.
+\item
+With the connector side of the board facing up, solder one of the two position headers into the two holes labelled SDA and SCL.
+\item
+Solder the other two position header into the last two holes on the row along the opposite side.
+\item
+Solder the four position header into the last four holes along the right side. This should provide connections to the GND and 3V3 through holes.
+\item
+Connect both sides of the solder bridge to engage the pullup resistors for the I\textsuperscript{2}C bus.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{images/qwiic_top.JPG}
+\includegraphics[width=0.44\textwidth]{images/qwiic_bottom.JPG}
+\caption{SparkFun Qwiic Shield with male headers and I\textsuperscript{2}C pullups connected} 
+\label{fig:qwiic}
+\end{figure}
+
+
 \item
 Enclosure
 
+Before starting this step download and print the drill template. See Figure \ref{fig:enclosure} on page \pageref{fig:enclosure} for finished hole pattern.
+
+\begin{enumerate}[label=2.\arabic*]
+\item
+Cut template and tape it to the enclosure.
+\item
+ 
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{images/qwiic_top.JPG}
+\includegraphics[width=0.44\textwidth]{images/qwiic_bottom.JPG}
+\caption{SparkFun Qwiic Shield with male headers and I$^2$C pullups connected} 
+\label{fig:qwiic}
+\end{figure}
+
 \item
 Flow Sensor Assembly
+
+
+
+\begin{enumerate}[label=3.\arabic*]
+\item
+Assemble Cable
+
+The flow sensor requires a 5 V input, however we will run the I$^2$C bus at 3.3 V necessitating this cable. 
+\\
+\begin{enumerate}[label=3.1.\arabic*]
+\item
+Cut the Qwiic cable in half
+\item
+Cut off the red conductor near the base of the connector
+\item
+Cut a 30 cm length from the USB cable
+\item
+Strip the jacket back 1 $1 / 2$'' from one end
+\item
+Strip the first $1 / 4$'' of each conductor on one end and tin
+\item
+Twist a small portion of the shield into the black GND conductor
+\item
+Place a small piece of heat shrink on each conductor of the Qwicc cable and push them toward the connector end
+\item
+Solder the ends of the Qwiic cable to the ends of the USB cable following Table \ref{tab:flow}.
+\begin{table}[H]
+\centering
+\begin{tabular}{| c | c |}
+\hline
+USB & Qwiic \\  \hline
+black & black (GND) \\  \hline
+green & blue (SDA) \\  \hline
+white & yellow (SCK) \\  \hline
+red & single 6'' wire \\  
+\hline
+\end{tabular}
+\caption{flow sensor wiring}
+\label{tab:flow}
+\end{table}
+\item
+Connect the red wire to the red condutor in the USB cable and solder the extra long male header pin to the end
+\item
+Cover the finished joints with a short $1 / 4$'' piece of heat shrink
+\end{enumerate}
+
+\item
+Connect cable to sensor
+
+\begin{enumerate}[label=3.2.\arabic*]
+\item
+Apply a small quantity of solder to the four center pads on the SFM3400 flow sensor
+\item
+Remove $5/8$'' of the jacket on the bare end of the USB cable
+\item
+Strip back $1/8$'' from each conductor and tin the ends
+\item
+Thread the cable through the hole in the sensor as shown in the photo and make sure the tinned leads can reach the sensor pads
+\item
+Connect the end of each lead to the pads you have prepared by touching the tip of the soldering iron to the pad and then placing the tinned lead onto it.
+\item
+Refer to the SFM3400 datasheet to be sure you are connecting them in the proper position.
+\end{enumerate}
+
+\item
+Assemble sensor adapters
+
+\begin{enumerate}[label=3.3.\arabic*]
+\item
+Cut a 1 $1/2$'' section of petex tubing
+\item
+Insert the tubing into the wide end of the flow sensor
+\item
+Insert the frosted 15 mm to 22 mm adapter over the petex
+\item
+Add the clear 15 mm to 22 mm adapter over the small end of the flow sensor
+\item
+Place the bleed adapter over the clear adapter
+\item
+Use electrical tape to secure any loose connections
+\end{enumerate}
+
+
+\end{enumerate}
+
+
+
 
 \item
 Oxygen Sensor Assembly
