@@ -107,10 +107,13 @@ uint16_t Logport = PARAMPORT;
 IPAddress LoghostAddr;
 IPAddress DefaultLogHostAddr(13,58,243,230);
 
+UDP* udpclient;
 EthernetUDP eudpclient;
 WiFiUDP wudpclient;
+
 bool eudpclient_good = false;
 bool wudpclient_good = false;
+
 
 /* PRESSURE *******************************************/
 
@@ -161,8 +164,6 @@ signed long ambient_window[AMB_WINDOW_SIZE];
 signed long smooth_ambient = 0;
 
 /* FLOW ***********************************************/
-
-
 
 SFM3X00 flowSensor(0x40);
 
@@ -367,44 +368,26 @@ Message get_message(uint32_t ms, char *msg) {
 }
 
 bool send_data_measurement(Measurement ma) {
+  if (eudpclient_good || wudpclient_good) {
+    unsigned char m[14];
 
-  unsigned char m[14];
+    fill_byte_buffer_measurement(&ma, m, 13);
 
-  fill_byte_buffer_measurement(&ma, m, 13);
+    m[13] = '\n';
 
-  m[13] = '\n';
-
- // Serial.print(F(" UDP send to "));
- // Serial.print(LoghostAddr);
-//  Serial.print(F(" "));
-//  Serial.println(Logport);
-  // Note: this would be better done with an abstract class to handle both!
-  if (eudpclient_good) {
-    if (eudpclient.beginPacket(LoghostAddr, Logport) != 1) {
-      Serial.println("eudpclient");
-      Serial.println("send_data_measurement begin failed at begin!");
-      return false;
-    }
-    eudpclient.write(m, 14);
-    if (eudpclient.endPacket() != 1) {
-      Serial.println("eudpclient");
-      Serial.println("send_data_measurement end failed!");
-      return false;
-    }
-  } else if (wudpclient_good) {
-    if (wudpclient.beginPacket(LoghostAddr, Logport) != 1) {
+    if (udpclient->beginPacket(LoghostAddr, Logport) != 1) {
       Serial.println("wudpclient");
       Serial.println("send_data_measurement begin failed at begin!");
       return false;
     } else {
 //      Serial.println("Packet begun");
     }
-    if (wudpclient.write(m, 14) != 14) {
+    if (udpclient->write(m, 14) != 14) {
       Serial.println("Packet Write failed");
     } else {
  //     Serial.println("Packet Write succeeded");
     }
-    if (wudpclient.endPacket() != 1) {
+    if (udpclient->endPacket() != 1) {
       Serial.println("wudpclient");
       Serial.println("send_data_measurement end failed!");
       return false;
@@ -421,31 +404,23 @@ bool send_data(char event, char mtype, char loc, uint8_t num, uint32_t ms, int32
 }
 
 bool send_data_message(Message ma) {
+  if (eudpclient_good || wudpclient_good) {
+    unsigned char m[264];
 
-  unsigned char m[264];
+    fill_byte_buffer_message(&ma, m, 264);
+    // I don't know how to compute this byte.
+    m[263] = '\n';
 
-  fill_byte_buffer_message(&ma, m, 264);
-  // I don't know how to compute this byte.
-  m[263] = '\n';
-
-
-  if (eudpclient_good) {
-    if (eudpclient.beginPacket(LoghostAddr, Logport) != 1) {
+    if (udpclient->beginPacket(LoghostAddr, Logport) != 1) {
 //    Serial.println("send_data_message begin failed!");
       return false;
     }
-    eudpclient.write(m, 264);
-    if (eudpclient.endPacket() != 1) {
-      Serial.println("send_data_message end failed!");
-      return false;
+    if (udpclient->write(m, 264) != 264) {
+      Serial.println("Packet Write failed");
+    } else {
+ //     Serial.println("Packet Write succeeded");
     }
-  } else if (wudpclient_good) {
-    if (wudpclient.beginPacket(LoghostAddr, Logport) != 1) {
-//    Serial.println("send_data_message begin failed!");
-      return false;
-    }
-    wudpclient.write(m, 264);
-    if (wudpclient.endPacket() != 1) {
+    if (udpclient->endPacket() != 1) {
       Serial.println("send_data_message end failed!");
       return false;
     }
@@ -669,7 +644,24 @@ void displayLine(int n, char* s) {
   display.setCursor(0, 10);
   display.print(s);
 }
-
+#define DISPLAY_STAT 0
+#define DISPLAY_GRAPH 1
+#define DISPLAY_ROTATION_MS = 5000;
+int current_display_mode = 0;
+long long_display_ms = 0;
+void displayFromMS(long ms) {
+  current_display_mode = (ms / 5000) % 3;
+  displayFromMode(current_display_mode);
+}
+void displayFromMode(int mode) {
+  switch (mode) {
+    case DISPLAY_STAT:
+      displayPressure(true);
+      break;
+      case DISPLAY_GRAPH:
+      break;
+  }
+}
 void displayPressure(bool max_not_min) {
   // display.print(max_not_min ? "Max" : "Min" );
   display.print(" cm H2O: ");
@@ -686,13 +678,6 @@ void displayPressure(bool max_not_min) {
 /* NETWORKING ******************************************/
   
 bool wifi_setup() {
-// WiFi network name and password:
-// const char * networkName = "YOUR_NETWORK_HERE";
-// const char * networkPswd = "YOUR_PASSWORD_HERE";
-
-const char * networkName = "readfamilynetwork";
-const char * networkPswd = "magicalsparrow96";
-
   char ssid[33];
   char password[121];
   getSSIDFromEEPROM(ssid);
@@ -700,13 +685,12 @@ const char * networkPswd = "magicalsparrow96";
 
   // Connect to the WiFi network (see function below loop)
   return connectToWiFi(ssid, password);
-
 }
 
 bool connectToWiFi(const char * ssid, const char * pwd)
 {
  // int ledState = 0;
-
+  wudpclient_good = false;
   printLine();
   Serial.println("Connecting to WiFi network: " + String(ssid));
 
@@ -723,26 +707,16 @@ bool connectToWiFi(const char * ssid, const char * pwd)
   if (n == NUM_RETRIES) {
      Serial.println("WiFi connection failed!");
   } else {
+    Serial.println();
+    Serial.println("WiFi connected!");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
 
-  Serial.println();
-  Serial.println("WiFi connected!");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-  //requestURL("google.com",80);
+    wudpclient_good = (wudpclient.begin(LOCALPORT) == 1);
 
-
-  
-  wudpclient_good = (wudpclient.begin(LOCALPORT) == 1);
-  Serial.print("WIFI UDP Connection:");
-  Serial.println(wudpclient_good ? "GOOD" : "BAD");
-  // IPAddress DefaultLogHostAddr(13,58,243,230);
-  LoghostAddr = DefaultLogHostAddr;
-//  DNSClient dns;
-//  dns.begin(Ethernet.dnsServerIP());
-//  if (dns.getHostByName(Loghost, LoghostAddr) == 1) {
-//    Serial.print("host is ");
-//    Serial.println(LoghostAddr);
-//  }
+    Serial.print("WIFI UDP Connection:");
+    Serial.println(wudpclient_good ? "GOOD" : "BAD");
+    LoghostAddr = DefaultLogHostAddr;
   }
   return wudpclient_good;
 }
@@ -806,7 +780,8 @@ bool ethernet_setup() {
   Serial.print(F("Mac: "));
   Serial.print(macs);
   Serial.println();
-
+  
+  eudpclient_good = false;
   int n = 0;
   const int ETHERNET_TRIES = 1;
   while (n < ETHERNET_TRIES) {
@@ -840,12 +815,13 @@ bool ethernet_setup() {
     delay(1000);
 
     eudpclient_good = (eudpclient.begin(LOCALPORT) == 1);
-
-    DNSClient dns;
-    dns.begin(Ethernet.dnsServerIP());
-    if (dns.getHostByName(Loghost, LoghostAddr) == 1) {
-      Serial.print("host is ");
-      Serial.println(LoghostAddr);
+    if (eudpclient_good) {
+      DNSClient dns;
+      dns.begin(Ethernet.dnsServerIP());
+      if (dns.getHostByName(Loghost, LoghostAddr) == 1) {
+        Serial.print("host is ");
+        Serial.println(LoghostAddr);
+      }
     }
   }
   return eudpclient_good;
@@ -1027,7 +1003,8 @@ void loop() {
     }
     Serial.setTimeout(0);
   }
-    
+  
+  unsigned long ms = millis();  
 
   if (found_display) {
     // experimental OLED test code
@@ -1050,7 +1027,8 @@ void loop() {
     } else {
       display.clearDisplay();
       display.setCursor(0, 0);
-      displayPressure(true);
+      displayFromMS(ms);
+//    displayPressure(true);
 //      display.setCursor(0, 10);
 //      displayPressure(false);
     }
@@ -1058,7 +1036,6 @@ void loop() {
     display.display();
   }
 
-  unsigned long ms = millis();
 
   for (int i = 0; i < AMB_WINDOW_SIZE; i++) {
     smooth_ambient += ambient_window[i];
@@ -1226,6 +1203,8 @@ void setup() {
   Serial.println("XXXXXXXXXXXXXXXXXX");
   ethernet_setup();
   wifi_setup();
+  udpclient = (UDP *) (eudpclient_good ? (UDP *) &eudpclient : (wudpclient_good ? (UDP *) &wudpclient : NULL));
+
   printCurrentCredentials();
   Serial.println("Type the character 'r' to reset wifi ssid and password");
 }
