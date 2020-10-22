@@ -17,7 +17,7 @@
 #include <EthernetUdp.h>
 #include <WiFiUdp.h>
 #include <Dns.h>
-
+#include <EEPROM.h>
 #include <SFM3X00.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
@@ -197,7 +197,7 @@ char* flow_too_low = FLOW_TOO_LOW;
 #define AMBIENT_PRESSURE_SENSOR_ERROR "Ambient pressure sensor error"
 
 /******************************************************/
-void ethernet_setup();
+bool ethernet_setup();
 void setupOLED();
 signed long readPressureOnly(int idx);
 void init_ambient(signed long v);
@@ -374,23 +374,26 @@ bool send_data_measurement(Measurement ma) {
 
   m[13] = '\n';
 
-  Serial.print(F(" UDP send to "));
-  Serial.print(LoghostAddr);
-  Serial.print(F(" "));
-  Serial.println(Logport);
+ // Serial.print(F(" UDP send to "));
+ // Serial.print(LoghostAddr);
+//  Serial.print(F(" "));
+//  Serial.println(Logport);
+  // Note: this would be better done with an abstract class to handle both!
   if (eudpclient_good) {
     if (eudpclient.beginPacket(LoghostAddr, Logport) != 1) {
+      Serial.println("eudpclient");
       Serial.println("send_data_measurement begin failed at begin!");
       return false;
     }
     eudpclient.write(m, 14);
     if (eudpclient.endPacket() != 1) {
+      Serial.println("eudpclient");
       Serial.println("send_data_measurement end failed!");
       return false;
     }
-  }
-  if (wudpclient_good) {
+  } else if (wudpclient_good) {
     if (wudpclient.beginPacket(LoghostAddr, Logport) != 1) {
+      Serial.println("wudpclient");
       Serial.println("send_data_measurement begin failed at begin!");
       return false;
     } else {
@@ -402,6 +405,7 @@ bool send_data_measurement(Measurement ma) {
  //     Serial.println("Packet Write succeeded");
     }
     if (wudpclient.endPacket() != 1) {
+      Serial.println("wudpclient");
       Serial.println("send_data_measurement end failed!");
       return false;
     } else {
@@ -435,8 +439,7 @@ bool send_data_message(Message ma) {
       Serial.println("send_data_message end failed!");
       return false;
     }
-  } 
-  if (wudpclient_good) {
+  } else if (wudpclient_good) {
     if (wudpclient.beginPacket(LoghostAddr, Logport) != 1) {
 //    Serial.println("send_data_message begin failed!");
       return false;
@@ -628,10 +631,7 @@ void setupOLED() {
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
   display.setCursor(0, 0);
-  display.print("Connecting to SSID\n'adafruit':");
-  display.print("connected!");
-  display.println("IP: 10.0.1.23");
-  display.println("Sending val #0");
+  display.print("Starting up...");
   display.setCursor(0, 0);
   display.display(); // actually display all of the above
 }
@@ -685,9 +685,7 @@ void displayPressure(bool max_not_min) {
 
 /* NETWORKING ******************************************/
   
-void wifi_setup() {
-
-
+bool wifi_setup() {
 // WiFi network name and password:
 // const char * networkName = "YOUR_NETWORK_HERE";
 // const char * networkPswd = "YOUR_PASSWORD_HERE";
@@ -695,15 +693,17 @@ void wifi_setup() {
 const char * networkName = "readfamilynetwork";
 const char * networkPswd = "magicalsparrow96";
 
-// Internet domain to request from:
-const char * hostDomain = "example.com";
+  char ssid[33];
+  char password[121];
+  getSSIDFromEEPROM(ssid);
+  getPasswordFromEEPROM(password);
 
   // Connect to the WiFi network (see function below loop)
-  connectToWiFi(networkName, networkPswd);
+  return connectToWiFi(ssid, password);
 
 }
 
-void connectToWiFi(const char * ssid, const char * pwd)
+bool connectToWiFi(const char * ssid, const char * pwd)
 {
  // int ledState = 0;
 
@@ -734,7 +734,7 @@ void connectToWiFi(const char * ssid, const char * pwd)
   
   wudpclient_good = (wudpclient.begin(LOCALPORT) == 1);
   Serial.print("WIFI UDP Connection:");
-  Serial.print(wudpclient_good ? "GOOD" : "BAD");
+  Serial.println(wudpclient_good ? "GOOD" : "BAD");
   // IPAddress DefaultLogHostAddr(13,58,243,230);
   LoghostAddr = DefaultLogHostAddr;
 //  DNSClient dns;
@@ -744,6 +744,7 @@ void connectToWiFi(const char * ssid, const char * pwd)
 //    Serial.println(LoghostAddr);
 //  }
   }
+  return wudpclient_good;
 }
 
 void requestURL(const char * host, uint8_t port)
@@ -796,7 +797,7 @@ void printLine()
   Serial.println();
 }
 
-void ethernet_setup() {
+bool ethernet_setup() {
   Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
 
   WiFi.macAddress(mac); // Get MAC address of wifi chip for ethernet address
@@ -833,19 +834,21 @@ void ethernet_setup() {
   }
   if (n==ETHERNET_TRIES) {
     Serial.println("FAILED TO FIND ETHERNET, GIVING UP!");
+  } else {
+
+    // give the Ethernet shield a second to initialize:
+    delay(1000);
+
+    eudpclient_good = (eudpclient.begin(LOCALPORT) == 1);
+
+    DNSClient dns;
+    dns.begin(Ethernet.dnsServerIP());
+    if (dns.getHostByName(Loghost, LoghostAddr) == 1) {
+      Serial.print("host is ");
+      Serial.println(LoghostAddr);
+    }
   }
-
-  // give the Ethernet shield a second to initialize:
-  delay(1000);
-
-  eudpclient_good = (eudpclient.begin(LOCALPORT) == 1);
-
-  DNSClient dns;
-  dns.begin(Ethernet.dnsServerIP());
-  if (dns.getHostByName(Loghost, LoghostAddr) == 1) {
-    Serial.print("host is ");
-    Serial.println(LoghostAddr);
-  }
+  return eudpclient_good;
 }
 
 
@@ -943,8 +946,88 @@ void output_gas(int idx) {
     outputMeasurement('M', 'G', loc, 0, ms, (signed long) (0.5 + bme680[idx].gas_resistance));
 }
 
+void setSSIDIntoEEPROM(char *ssid) {
+  int i = 0;
+  while(i < 33 && ssid[i] != '\0') {
+    EEPROM.write(i, ssid[i]);
+    i++;        
+  }
+  EEPROM.write(i, '\0'); 
+}
+
+void setPasswordIntoEEPROM(char *password) {
+   int i = 0;
+   while(i < 120 && password[i] != '\0') {
+     EEPROM.write(32+i, password[i]);
+     i++;        
+   }
+   EEPROM.write(32+i, '\0'); 
+}
+
+void getSSIDFromEEPROM(char *buffer) {
+  for(int i = 0; i < 32; i++) {
+     buffer[i] = EEPROM.read(i);
+  }
+  // A tereminator may occure before this, but his handles the extreme
+  buffer[32] = '\0';
+}
+
+void getPasswordFromEEPROM(char *buffer) {
+   for(int i = 0; i < 120; i++) {
+     buffer[i] = EEPROM.read(32 + i);
+  }
+    // A tereminator may occure before this, but his handles the extreme
+  buffer[120] = '\0'; 
+}
+
+void printCurrentCredentials() {
+    
+  char ssid[33];
+  char password[121];
+  getSSIDFromEEPROM(ssid);
+  getPasswordFromEEPROM(password);
+  Serial.println("Current wifi credentials:");
+  Serial.print("SSSID: ");
+  Serial.println(ssid);
+  Serial.print("Password: ");
+  Serial.println(password);
+}
 
 void loop() {
+  if (Serial.available() > 0) {
+    Serial.setTimeout(100*1000);
+    Serial.println("Reading!");
+    // read the incoming byte:
+    
+    String str = Serial.readStringUntil('\n');
+    if (str.startsWith("r")) {
+ //     char discard = Serial.read();
+      // discard the end of line..
+      Serial.println("Enter SSID:");
+      char ssid[33];
+      
+      String str = Serial.readStringUntil('\n');
+      Serial.println("Read a string!");
+      
+      str.toCharArray(ssid, 33);
+      Serial.println("ssid");
+      Serial.println(ssid);
+      
+      Serial.println("Enter password:");
+      char password[121];
+      str = Serial.readStringUntil('\n'); 
+      str.toCharArray(password,121);
+      Serial.println("Read password");
+      Serial.println(password);      
+      setSSIDIntoEEPROM(ssid);
+      setPasswordIntoEEPROM(password);
+      EEPROM.commit();
+      Serial.println("XXX");
+      printCurrentCredentials();
+    }
+    Serial.setTimeout(0);
+  }
+    
 
   if (found_display) {
     // experimental OLED test code
@@ -1075,6 +1158,7 @@ void loop() {
 }
 
 void setup() {
+  EEPROM.begin(32+120);
 
   Serial.begin(500000);
   Wire.begin();
@@ -1083,7 +1167,7 @@ void setup() {
 
   setupOLED();
   
-  delay(100);
+ // delay(100);
 
   while (!Serial);
   
@@ -1140,6 +1224,8 @@ void setup() {
   found_diff_press = (readHSCPressure() != LONG_MIN);
   Serial.println(found_diff_press ? "YES" : "NO");
   Serial.println("XXXXXXXXXXXXXXXXXX");
-//  ethernet_setup();
+  ethernet_setup();
   wifi_setup();
+  printCurrentCredentials();
+  Serial.println("Type the character 'r' to reset wifi ssid and password");
 }
