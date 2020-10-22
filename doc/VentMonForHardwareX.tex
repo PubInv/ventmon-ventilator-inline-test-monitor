@@ -256,6 +256,8 @@ Final Assembly
 \subsection{COTS Based VentMon}
 \begin{enumerate}
 
+%-----------------------------------------------------------
+% QWIIC SHIELD
 \item
 Qwiic Shield Assembly
 
@@ -282,7 +284,8 @@ Connect both sides of the solder bridge to engage the pullup resistors for the I
 \label{fig:qwiic}
 \end{figure}
 
-
+%-----------------------------------------------------------
+% ENCLOSURE
 \item
 Enclosure
 
@@ -303,18 +306,96 @@ Cut template and tape it to the enclosure.
 \label{fig:qwiic}
 \end{figure}
 
+%-----------------------------------------------------------
+% PRESSURE SENSOR
+\item
+Pressure Sensor Assembly
+\begin{enumerate}[label=3.\arabic*]
+\item
+Drill out mounting holes
+\begin{enumerate}[label=3.1.\arabic*]
+\item
+Using the 7/64? drill bit, carefully enlarge the mounting holes in each corner of the sensor
+\item
+You can do all four or just two - one on the left side of one board and one on the right side of the other
+\end{enumerate}
+\item
+Cut trace from SDO through hole to sensor 
+\begin{enumerate}[label=3.2.\arabic*]
+\item
+Carefully cut the trace coming from the SDO hole on the back side of one board
+\item
+This board will be used to measure the airway pressure
+\end{enumerate}
+\item
+Assemble Cable
+\begin{enumerate}[label=3.3.\arabic*]
+\item
+Cut one connector off the Qwiic cable
+\item
+Strip and tin the last ?? of the leads 
+\end{enumerate}
+\item
+Connect Sensors to Cable
+\begin{enumerate}[label=3.4.\arabic*]
+\item
+Stack the two sensors on the breadboard and use two paper clips to anchor them
+\item
+Be sure the airway board with the cut trace is facing down
+\item
+Starting with Vin or GND insert the tinned lead through the appropriate hole and apply solder
+\item
+Flip the sensor assembly over and make sure solder has flowed through both through holes, adding some if needed
+\item
+Don?t worry if the solder does not flow perfectly
+\item
+Pin the assembly back down and move to another connection following the connection table below
+\item
+Repeat the steps above until the two boards have been secured and all leads are connected
+\item
+Re-flow all the joints to ensure a good connection
+\end{enumerate}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{| c | c |}
+\hline
+Signal & Qwiic Color\\  \hline
+GND & black  \\  \hline
+VIN & red \\  \hline
+SDA & blue \\  \hline
+SCL & yellow \\  
+\hline
+\end{tabular}
+\caption{pressure sensor wiring}
+\label{tab:pressure}
+\end{table}
+
+\item
+Add address jumper to ambient pressure sensor
+\begin{enumerate}[label=3.5.\arabic*]
+\item
+Take a ?? piece of hookup wire and strip both ends
+\item
+Flow the solder in the GND through hole and poke one end of the hook up wire into the hole
+\item
+Put the other end of the wire into the SDO through hole and apply solder
+\end{enumerate}
+
+\end{enumerate}
+
+%-----------------------------------------------------------
+% FLOW SENSOR
 \item
 Flow Sensor Assembly
 
-
-
-\begin{enumerate}[label=3.\arabic*]
+\begin{enumerate}[label=4.\arabic*]
 \item
 Assemble Cable
 
 The flow sensor requires a 5 V input, however we will run the I$^2$C bus at 3.3 V necessitating this cable. 
 \\
-\begin{enumerate}[label=3.1.\arabic*]
+\begin{enumerate}[label=4.1.\arabic*]
 \item
 Cut the Qwiic cable in half
 \item
@@ -333,13 +414,13 @@ Place a small piece of heat shrink on each conductor of the Qwicc cable and push
 Solder the ends of the Qwiic cable to the ends of the USB cable following Table \ref{tab:flow}.
 \begin{table}[H]
 \centering
-\begin{tabular}{| c | c |}
+\begin{tabular}{| c | c | c |}
 \hline
-USB & Qwiic \\  \hline
-black & black (GND) \\  \hline
-green & blue (SDA) \\  \hline
-white & yellow (SCK) \\  \hline
-red & single 6'' wire \\  
+USB & Qwiic & Signal \\  \hline
+black & black & GND \\  \hline
+green & blue & SDA \\  \hline
+white & yellow & SCK \\  \hline
+red & single 6'' wire & 5V \\  
 \hline
 \end{tabular}
 \caption{flow sensor wiring}
@@ -354,7 +435,7 @@ Cover the finished joints with a short $1 / 4$'' piece of heat shrink
 \item
 Connect cable to sensor
 
-\begin{enumerate}[label=3.2.\arabic*]
+\begin{enumerate}[label=4.2.\arabic*]
 \item
 Apply a small quantity of solder to the four center pads on the SFM3400 flow sensor
 \item
@@ -372,7 +453,7 @@ Refer to the SFM3400 datasheet to be sure you are connecting them in the proper 
 \item
 Assemble sensor adapters
 
-\begin{enumerate}[label=3.3.\arabic*]
+\begin{enumerate}[label=4.3.\arabic*]
 \item
 Cut a 1 $1/2$'' section of petex tubing
 \item
@@ -387,19 +468,74 @@ Place the bleed adapter over the clear adapter
 Use electrical tape to secure any loose connections
 \end{enumerate}
 
-
 \end{enumerate}
 
-
-
-
-\item
-Oxygen Sensor Assembly
-
+%-----------------------------------------------------------
+% FINAL ASSEMBLY
 \item
 Final Assembly
 
+\begin{enumerate}[label=5.\arabic*]
+\item
+Glue oxygen hose to pressure sensor assembly
+\begin{enumerate}[label=5.1.\arabic*]
+\item
+Cut a section of oxygen hose approximately the same length as the flow sensor cable
+\item
+Make sure your cut is flat on the end
+\item
+Place one end of the hose over the airway pressure sensor and apply glue around the edges
+\item
+Be very careful not to get glue on the sensor and make sure that the hose is securely attached to the pcb
 \end{enumerate}
+
+\item
+Install pressure sensor assembly
+\begin{enumerate}[label=5.2.\arabic*]
+\item
+Add two standoffs to opposite corners of the pressure sensor assembly
+\item
+These should correspond to the mounting holes you drilled in the enclosure
+\item
+Thread the bare end of the oxygen hose through its hole in the enclose from the inside until the sensor assembly is pressed against the wall of the  enclosure
+\item
+Attach the standoffs into the enclosure from the outside using two machine screws
+\end{enumerate}
+\item
+Zip tie sensor cable to enclosure
+\begin{enumerate}[label=5.3.\arabic*]
+\item
+Thread the small zip tie through the two mounting holes in the enclosure
+\item
+Push the qwiic connector end of the flow sensor cable through its hole in the enclosure. It?s a tight fit.
+\item
+Zip tie the cable to the side of the enclosure making sure that the jacket of the USB cable is engaged by the zip tie
+\end{enumerate}
+\begin{enumerate}[label=5.4.\arabic*]
+\item
+Install ethernet shield and processor
+\item
+Attach standoffs to the four corners of the ethernet shield
+\item
+Screw the standoffs into the enclosure from the bottom
+\item
+Place the ESP32, OLED wing, and Qwiic shield on top of the ethernet shield as depicted in the diagram
+\item
+Plug the flow sensor and pressure sensor assembly into the qwiic shield
+\end{enumerate}
+\item
+Add a small piece of electrical tape every 5 inches attaching the oxygen tubing and flow sensor cable
+\item
+Wrap a piece of electrical tape around the flow sensor covering the exposed pads of the flow sensor
+\item
+Add identification card on the next page card to enclosure.
+
+\end{enumerate}
+
+\end{enumerate}
+%-----------------------------------------------------------
+
+
 
 \section{Operation instructions}
 %Provide detailed instructions for the safe and proper operation of the hardware.
