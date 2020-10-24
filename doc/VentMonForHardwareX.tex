@@ -212,47 +212,6 @@ PIRDS Data Standard & \\\hline
 
 Two versions of VentMon can be assembled depending on availability of parts and time. The most physically robust and complete version of VentMon requires the purchase and manufacture of a PCB as well as a number of 3D printed plastic parts. The designs of the PCB and 3D printed parts are fully open; in practice, due to the fact that PCBs have a high set up cost, it makes most sense to use the PCB if you are bulding 10 or more VentMons. This version of the device requires the least amount of time to assemble and contains fewest discrete components. Due to the high cost of PCB manufacture and assembly, VentMon can also be created using off the shelf components readily available from DIY electronics suppliers. This version requires significantly more assembly time. We believe this has been done twice by third parties with little interaction with us. Both assembly procedures are outlined below.
 
-\subsection{PCB Based VentMon}
-
-This version of VentMon requires two 3D printed parts  -- one encapsulated an on-board pressure sensor and one is an airway adaptor -- as well as a PCB assembly. Before beginning the assembly process make sure that you have manufactured those three parts.
-
-\begin{enumerate}
-\item
-PCB Assembly
-
-\begin{enumerate}[label=1.\arabic*]
-\item Add standoffs to PCB
-\begin{enumerate}[label=1.1.\arabic*]
-\item take hardware and put it in the holes
-\end{enumerate}
-
-\item Mount sensor enclosure for BME280 pressure sensor
-\begin{enumerate}[label=1.2.\arabic*]
-\item Insert plastic part into mounting holes on PCB to check fit and alignment. The barb should face toward the outer edge of the PCB.
-\item Apply glue to bottom edge and mounting pegs of plastic.
-\item Insert plastic back into holes being careful not to get any glue on the sensor.
-\item Allow 24 hours for glue to cure before attaching a hose to the barb.
-\end{enumerate}
-
-
-\end{enumerate}
-
-
-
-\item
-Enclosure
-
-\item
-Flow Sensor Assembly
-
-\item
-Oxygen Sensor Assembly
-
-\item
-Final Assembly
-
-\end{enumerate}
-
 \subsection{COTS Based VentMon}
 \begin{enumerate}
 
@@ -293,9 +252,11 @@ Before starting this step download and print the drill template. See Figure \ref
 
 \begin{enumerate}[label=2.\arabic*]
 \item
-Cut template and tape it to the enclosure.
+Cut out the template and tape it to the enclosure.
 \item
- 
+Make sure the lid of the enclosure is firmly screwed on before drilling
+\item
+Drill holes in the locations denoted on template using the recommended drill sizes for each hole. 
 \end{enumerate}
 
 \begin{figure}[H]
@@ -375,7 +336,7 @@ SCL & yellow \\
 Add address jumper to ambient pressure sensor
 \begin{enumerate}[label=3.5.\arabic*]
 \item
-Take a ?? piece of hookup wire and strip both ends
+Take a $1/2$ piece of hookup wire and strip both ends
 \item
 Flow the solder in the GND through hole and poke one end of the hook up wire into the hole
 \item
@@ -403,9 +364,9 @@ Cut off the red conductor near the base of the connector
 \item
 Cut a 30 cm length from the USB cable
 \item
-Strip the jacket back 1 $1 / 2$'' from one end
+Strip the jacket back 1 $1/2$'' from one end
 \item
-Strip the first $1 / 4$'' of each conductor on one end and tin
+Strip the first $1/4$'' of each conductor on one end and tin
 \item
 Twist a small portion of the shield into the black GND conductor
 \item
@@ -429,7 +390,7 @@ red & single 6'' wire & 5V \\
 \item
 Connect the red wire to the red condutor in the USB cable and solder the extra long male header pin to the end
 \item
-Cover the finished joints with a short $1 / 4$'' piece of heat shrink
+Cover the finished joints with a short $1/4$'' piece of heat shrink
 \end{enumerate}
 
 \item
@@ -535,7 +496,55 @@ Add identification card on the next page card to enclosure.
 \end{enumerate}
 %-----------------------------------------------------------
 
+\subsection{PCB Based VentMon}
 
+This version of VentMon requires two 3D printed parts  -- one encapsulated an on-board pressure sensor and one is an airway adaptor -- as well as a PCB assembly. Before beginning the assembly process make sure that you have manufactured those three parts.
+
+\begin{enumerate}
+\item
+PCB Assembly
+
+\begin{enumerate}[label=1.\arabic*]
+\item Add standoffs to PCB
+\begin{enumerate}[label=1.1.\arabic*]
+\item take hardware and put it in the holes
+\end{enumerate}
+
+\item Mount sensor enclosure for BME280 pressure sensor
+\begin{enumerate}[label=1.2.\arabic*]
+\item Insert plastic part into mounting holes on PCB to check fit and alignment. The barb should face toward the outer edge of the PCB.
+\item Apply glue to bottom edge and mounting pegs of plastic.
+\item Insert plastic back into holes being careful not to get any glue on the sensor.
+\item Allow 24 hours for glue to cure before attaching a hose to the barb.
+\end{enumerate}
+
+
+\end{enumerate}
+
+
+
+\item
+Enclosure
+
+Follow assembly instructions in section *enclosure*
+
+
+\item
+Flow Sensor Assembly
+
+Follow assembly instructions in section *flow sensor assembly*
+
+\item
+Oxygen Sensor Assembly
+
+
+
+\item
+Final Assembly
+
+\end{enumerate}
+
+%----------------------------------------------------------
 
 \section{Operation instructions}
 %Provide detailed instructions for the safe and proper operation of the hardware.
