@@ -190,6 +190,7 @@ int initialO2 = 0;
 // bool oxygenSensing = true;
 unsigned long lastFiO2Sample = 0;
 
+
 /* ERROR MESSAGE STRINGS ******************************/
 
 char* flow_too_high = FLOW_TOO_HIGH;
@@ -638,7 +639,7 @@ void buttonC() {
   strcpy(buffer + n, "test_file_name");
   outputMetaEvent(buffer, ms);
 }
-
+/* DISPLAY FOR OUR OLED (128 x 32) */
 // Trying to make simple, I will define 3 lines..
 void displayLine(int n, char* s) {
   display.setCursor(0, 10);
@@ -649,18 +650,51 @@ void displayLine(int n, char* s) {
 #define DISPLAY_ROTATION_MS = 5000;
 int current_display_mode = 0;
 long long_display_ms = 0;
+
+// This is implementing a rotating graph
+#define GRAPH_X_PIXELS 128
+#define GRAPH_Y_PIXELS 32
+uint8_t graph_samples[GRAPH_X_PIXELS]; 
+
+#define MAX_PRESSURE_SCALE 45.0
+// push a sample on the end and shift all the others...
+void push_sample(uint8_t s) {
+  for(int i = 0; i < GRAPH_X_PIXELS-1; i++) {
+    graph_samples[i] = graph_samples[i+1]; 
+  }
+  graph_samples[GRAPH_X_PIXELS-1] = s;
+}
+
 void displayFromMS(long ms) {
-  current_display_mode = (ms / 5000) % 3;
-  displayFromMode(current_display_mode);
+  current_display_mode = (ms / 5000) % 2;
+ // displayFromMode(current_display_mode);
+  displayFromMode(DISPLAY_GRAPH);
 }
 void displayFromMode(int mode) {
   switch (mode) {
     case DISPLAY_STAT:
       displayPressure(true);
       break;
-      case DISPLAY_GRAPH:
+    case DISPLAY_GRAPH:
+      displayGraph();
       break;
   }
+}
+// #define WHITE    0xFFFF
+void displayGraph() {
+  display.clearDisplay();
+  for(int i = 0; i < GRAPH_X_PIXELS; i++) {
+    display.drawPixel(i,(GRAPH_Y_PIXELS -1) - graph_samples[i],1);
+  }
+  display.display();
+//  display.println("graph:");
+//  display.println("abc");
+//  display.println("def");
+//  display.println("ghi");
+//  // we only get 4 lines of text!
+//  display.println("jkl");
+
+  
 }
 void displayPressure(bool max_not_min) {
   // display.print(max_not_min ? "Max" : "Min" );
@@ -704,7 +738,7 @@ bool connectToWiFi(const char * ssid, const char * pwd)
     Serial.print(".");
     n++;
   }
-  if (n == NUM_RETRIES) {
+  if (WiFi.status() != WL_CONNECTED) {
      Serial.println("WiFi connection failed!");
   } else {
     Serial.println();
@@ -856,6 +890,9 @@ void output_I_DPRES() {
           // really this should be a running max, for now it is instantaneous
     display_max_pressure = readHSCPressure();
     outputMeasurement('M', 'D', 'I', 0, ms, display_max_pressure);
+    // This arbitrarily make 45 cm H20 the limit;
+    uint8_t s = (GRAPH_Y_PIXELS * display_max_pressure) / 450;
+    push_sample(s);
 }
 void output_I_ADPRES() {
     unsigned long ms = millis();
@@ -969,10 +1006,20 @@ void printCurrentCredentials() {
   Serial.println(password);
 }
 
-void loop() {
-  if (Serial.available() > 0) {
-    Serial.setTimeout(100*1000);
-    Serial.println("Reading!");
+bool need_to_configure = true;
+#define WAIT_TIME_S 10
+void configure() {
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print("Configuring...");
+  display.display();
+  Serial.println("Enter 'c' to re-enter this configuration while running.");
+  Serial.println("Type the character 'r' to reset wifi ssid and password.");
+  Serial.print("Type the character 'x' or wait ");
+  Serial.print(WAIT_TIME_S);
+  Serial.println(" seconds to begin/resume operation:");
+//  if (Serial.available() > 0) {
+    Serial.setTimeout(WAIT_TIME_S*1000);
     // read the incoming byte:
     
     String str = Serial.readStringUntil('\n');
@@ -998,10 +1045,29 @@ void loop() {
       setSSIDIntoEEPROM(ssid);
       setPasswordIntoEEPROM(password);
       EEPROM.commit();
-      Serial.println("XXX");
       printCurrentCredentials();
-    }
-    Serial.setTimeout(0);
+      wifi_setup();
+      udpclient = (UDP *) (eudpclient_good ? (UDP *) &eudpclient : (wudpclient_good ? (UDP *) &wudpclient : NULL));
+    } 
+     Serial.setTimeout(1000);
+     Serial.println("Enter 'c' to re-enter this configuration while running.");
+  need_to_configure = false;
+}
+
+String inputString = "";         // a String to hold incoming data
+bool stringComplete = false;  // whether the string is complete
+
+void loop() {
+  if (need_to_configure) {
+    configure();
+  }
+  if (Serial.available() > 0) {
+      // read the incoming byte:  
+      String str = Serial.readStringUntil('\n');
+      if (str.startsWith("c")) {
+        Serial.println("Configuring!");
+        configure();
+      }
   }
   
   unsigned long ms = millis();  
@@ -1028,9 +1094,6 @@ void loop() {
       display.clearDisplay();
       display.setCursor(0, 0);
       displayFromMS(ms);
-//    displayPressure(true);
-//      display.setCursor(0, 10);
-//      displayPressure(false);
     }
 
     display.display();
@@ -1131,21 +1194,20 @@ void loop() {
         PERIOD_B_GAS_ms = ms; 
     }
   }
-  Serial.flush();
 }
 
+
+#define BAUD_RATE 500000
 void setup() {
   EEPROM.begin(32+120);
 
-  Serial.begin(500000);
+  Serial.begin(BAUD_RATE);
   Wire.begin();
 
   flowSensor.begin();
 
   setupOLED();
-  
- // delay(100);
-
+ 
   while (!Serial);
   
   seekBME680(INSPIRATORY_PRESSURE_SENSOR);
@@ -1201,10 +1263,12 @@ void setup() {
   found_diff_press = (readHSCPressure() != LONG_MIN);
   Serial.println(found_diff_press ? "YES" : "NO");
   Serial.println("XXXXXXXXXXXXXXXXXX");
+  // TODO: Comment out for graphics testing...
   ethernet_setup();
   wifi_setup();
   udpclient = (UDP *) (eudpclient_good ? (UDP *) &eudpclient : (wudpclient_good ? (UDP *) &wudpclient : NULL));
 
   printCurrentCredentials();
-  Serial.println("Type the character 'r' to reset wifi ssid and password");
+  need_to_configure = true;
+
 }
