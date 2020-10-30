@@ -111,6 +111,10 @@ UDP* udpclient;
 EthernetUDP eudpclient;
 WiFiUDP wudpclient;
 
+// These are configurable through the serial port
+int ethernet_enabled;
+int wifi_enabled;
+
 bool eudpclient_good = false;
 bool wudpclient_good = false;
 
@@ -653,16 +657,18 @@ long long_display_ms = 0;
 
 // This is implementing a rotating graph
 #define GRAPH_X_PIXELS 128
+#define LEFT_PREFIX_AREA_X 28
 #define GRAPH_Y_PIXELS 32
-uint8_t graph_samples[GRAPH_X_PIXELS]; 
+#define SAMPLE_PIXELS (GRAPH_X_PIXELS-LEFT_PREFIX_AREA_X)
+uint8_t graph_samples[SAMPLE_PIXELS]; 
 
 #define MAX_PRESSURE_SCALE 45.0
 // push a sample on the end and shift all the others...
 void push_sample(uint8_t s) {
-  for(int i = 0; i < GRAPH_X_PIXELS-1; i++) {
+  for(int i = 0; i < SAMPLE_PIXELS-1; i++) {
     graph_samples[i] = graph_samples[i+1]; 
   }
-  graph_samples[GRAPH_X_PIXELS-1] = s;
+  graph_samples[SAMPLE_PIXELS-1] = s;
 }
 
 void displayFromMS(long ms) {
@@ -683,16 +689,19 @@ void displayFromMode(int mode) {
 // #define WHITE    0xFFFF
 void displayGraph() {
   display.clearDisplay();
-  for(int i = 0; i < GRAPH_X_PIXELS; i++) {
-    display.drawPixel(i,(GRAPH_Y_PIXELS -1) - graph_samples[i],1);
+  char buffer[32];
+  sprintf(buffer, "%.1f", MAX_PRESSURE_SCALE);
+  display.println(buffer);
+  display.println("cm ");
+  display.println("H2O:");
+  display.println("0.0");
+ 
+
+  for(int i = 0; i < SAMPLE_PIXELS; i++) {
+    display.drawPixel(i+LEFT_PREFIX_AREA_X,(GRAPH_Y_PIXELS -1) - graph_samples[i],1);
   }
   display.display();
-//  display.println("graph:");
-//  display.println("abc");
-//  display.println("def");
-//  display.println("ghi");
-//  // we only get 4 lines of text!
-//  display.println("jkl");
+
 
   
 }
@@ -891,7 +900,7 @@ void output_I_DPRES() {
     display_max_pressure = readHSCPressure();
     outputMeasurement('M', 'D', 'I', 0, ms, display_max_pressure);
     // This arbitrarily make 45 cm H20 the limit;
-    uint8_t s = (GRAPH_Y_PIXELS * display_max_pressure) / 450;
+    uint8_t s = (GRAPH_Y_PIXELS * display_max_pressure) / MAX_PRESSURE_SCALE * 10;
     push_sample(s);
 }
 void output_I_ADPRES() {
@@ -993,6 +1002,23 @@ void getPasswordFromEEPROM(char *buffer) {
   buffer[120] = '\0'; 
 }
 
+int getEthernetEnabledFromEEPROM() {
+  char e = EEPROM.read(32 + 120 + 0);
+  return (int) e;
+}
+void setEthernetEnabledFromEEPROM(char enabled) {
+  EEPROM.write(32 + 120 + 0, enabled);
+}
+
+int getWiFiEnabledFromEEPROM() {
+  char e = EEPROM.read(32 + 120 + 1);
+  return (int) e;
+}
+void setWiFiEnabledFromEEPROM(char enabled) {
+  EEPROM.write(32 + 120 + 1, enabled);
+}
+
+
 void printCurrentCredentials() {
     
   char ssid[33];
@@ -1014,8 +1040,15 @@ void configure() {
   display.print("Configuring...");
   display.display();
   Serial.println("Enter 'c' to re-enter this configuration while running.");
+  int wifiEnabled = getWiFiEnabledFromEEPROM();
+  Serial.println(wifiEnabled ? "WiFi ENABLED" : "WiFi DISABLED");
+
+  Serial.println("Enter 'w' to enable WiFi, 'x' to disable WiFi");
+  int ethernetEnabled = getEthernetEnabledFromEEPROM();
+  Serial.println(wifiEnabled ? "Ethernet ENABLED" : "Ethernet DISABLED");
+  Serial.println("Enter 'e' to enable Ethernet, 'f' to disable Ethernet.");
   Serial.println("Type the character 'r' to reset wifi ssid and password.");
-  Serial.print("Type the character 'x' or wait ");
+  Serial.print("Type the character 'c' to continue or wait ");
   Serial.print(WAIT_TIME_S);
   Serial.println(" seconds to begin/resume operation:");
 //  if (Serial.available() > 0) {
@@ -1023,7 +1056,10 @@ void configure() {
     // read the incoming byte:
     
     String str = Serial.readStringUntil('\n');
-    if (str.startsWith("r")) {
+    char c = str.charAt(0);
+    switch (c) {
+      case 'r':
+      {
  //     char discard = Serial.read();
       // discard the end of line..
       Serial.println("Enter SSID:");
@@ -1047,8 +1083,37 @@ void configure() {
       EEPROM.commit();
       printCurrentCredentials();
       wifi_setup();
-      udpclient = (UDP *) (eudpclient_good ? (UDP *) &eudpclient : (wudpclient_good ? (UDP *) &wudpclient : NULL));
+      }
+      break;
+      case 'w':
+      wifi_enabled = true;
+      setWiFiEnabledFromEEPROM(1);
+      Serial.println("WiFi Enabled");  
+      wifi_setup();
+      break;
+      case 'x':
+      wifi_enabled = false;
+      setWiFiEnabledFromEEPROM(0);
+      Serial.println("WiFi Disabled");
+      wudpclient_good = false;
+      break;
+      case 'e':
+      setEthernetEnabledFromEEPROM(1);
+      ethernet_setup();
+      ethernet_enabled = true;
+      Serial.println("Ethernet Enabled");
+      break;
+      case 'f':
+      setEthernetEnabledFromEEPROM(0);
+      ethernet_enabled = false;
+      Serial.println("Ethernet Disabled");
+      eudpclient_good = false;
+      break;
+      // just continue;
+      case 'c':
+      break;
     } 
+     udpclient = (UDP *) (eudpclient_good ? (UDP *) &eudpclient : (wudpclient_good ? (UDP *) &wudpclient : NULL));
      Serial.setTimeout(1000);
      Serial.println("Enter 'c' to re-enter this configuration while running.");
   need_to_configure = false;
@@ -1199,7 +1264,8 @@ void loop() {
 
 #define BAUD_RATE 500000
 void setup() {
-  EEPROM.begin(32+120);
+  // 32 for the ssid, 120 for the pasword, 1 for ethernet, 1 for wifi
+  EEPROM.begin(32+120+1+1);
 
   Serial.begin(BAUD_RATE);
   Wire.begin();
@@ -1264,8 +1330,16 @@ void setup() {
   Serial.println(found_diff_press ? "YES" : "NO");
   Serial.println("XXXXXXXXXXXXXXXXXX");
   // TODO: Comment out for graphics testing...
-  ethernet_setup();
-  wifi_setup();
+  int ethernetEnabled = getEthernetEnabledFromEEPROM();
+  if (ethernetEnabled)
+    ethernet_setup();
+  else 
+    Serial.println("Ethernet currently disabled");
+  int wifiEnabled = getWiFiEnabledFromEEPROM();
+  if (wifiEnabled)
+    wifi_setup();
+  else 
+    Serial.println("WiFi currently disabled");
   udpclient = (UDP *) (eudpclient_good ? (UDP *) &eudpclient : (wudpclient_good ? (UDP *) &wudpclient : NULL));
 
   printCurrentCredentials();
