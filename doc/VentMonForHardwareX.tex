@@ -248,7 +248,7 @@ Connect both sides of the solder bridge to engage the pullup resistors for the I
 \item
 Enclosure
 
-Before starting this step download and print the drill template. See Figure \ref{fig:enclosure} on page \pageref{fig:enclosure} for finished hole pattern.
+Before starting this step download and print the drill template. 
 
 \begin{enumerate}[label=2.\arabic*]
 \item
@@ -259,21 +259,13 @@ Make sure the lid of the enclosure is firmly screwed on before drilling
 Drill holes in the locations denoted on template using the recommended drill sizes for each hole. 
 \end{enumerate}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.45\textwidth]{images/qwiic_top.JPG}
-\includegraphics[width=0.44\textwidth]{images/qwiic_bottom.JPG}
-\caption{SparkFun Qwiic Shield with male headers and I$^2$C pullups connected} 
-\label{fig:qwiic}
-\end{figure}
-
 %-----------------------------------------------------------
 % PRESSURE SENSOR
 \item
 Pressure Sensor Assembly
 \begin{enumerate}[label=3.\arabic*]
 \item
-Drill out mounting holes
+Drill out mounting holes refer to figure \ref{fig:bme_1} on page \pageref{fig:bme_1}
 \begin{enumerate}[label=3.1.\arabic*]
 \item
 Using the 7/64? drill bit, carefully enlarge the mounting holes in each corner of the sensor
@@ -281,23 +273,36 @@ Using the 7/64? drill bit, carefully enlarge the mounting holes in each corner o
 You can do all four or just two - one on the left side of one board and one on the right side of the other
 \end{enumerate}
 \item
-Cut trace from SDO through hole to sensor 
+Cut trace from SDO through hole to sensor. Refer to figure \ref{fig:bme_1} on page \pageref{fig:bme_1}.
 \begin{enumerate}[label=3.2.\arabic*]
 \item
 Carefully cut the trace coming from the SDO hole on the back side of one board
 \item
 This board will be used to measure the airway pressure
 \end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{images/bme_1.JPG}
+\caption{BME 280 Eval board with drilled out holes and trace cut} 
+\label{fig:bme_1}
+\end{figure}
+
 \item
-Assemble Cable
+Assemble Cable. Refer to figure \ref{fig:bme_qwiic_cable} on page \pageref{fig:bme_qwiic_cable}.
 \begin{enumerate}[label=3.3.\arabic*]
 \item
 Cut one connector off the Qwiic cable
 \item
-Strip and tin the last ?? of the leads 
+Strip and tin the last $1/4$" of the leads 
 \end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{images/bme_qwiic_cable.JPG}
+\caption{Prepared Qwiic cable for BME sensor assembly} 
+\label{fig:bme_qwiic_cable}
+\end{figure}
 \item
-Connect Sensors to Cable
+Connect Sensors to Cable. Refer to figure \ref{fig:bme_and_qwiic_cable} on page \pageref{fig:bme_and_qwiic_cable} and table \ref{tab:pressure} on page \pageref{tab:pressure} for electrical connection.
 \begin{enumerate}[label=3.4.\arabic*]
 \item
 Stack the two sensors on the breadboard and use two paper clips to anchor them
@@ -332,8 +337,15 @@ SCL & yellow \\
 \label{tab:pressure}
 \end{table}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\textwidth]{images/bme_and_qwiic_cable.JPG}
+\caption{Qwiic cable soldered to BME sensor assembly} 
+\label{fig:bme_and_qwiic_cable}
+\end{figure}
+
 \item
-Add address jumper to ambient pressure sensor
+Add address jumper to ambient pressure sensor. Refer to figure \ref{fig:bme_diagram} on page \pageref{fig:bme_diagram}
 \begin{enumerate}[label=3.5.\arabic*]
 \item
 Take a $1/2$ piece of hookup wire and strip both ends
@@ -342,6 +354,13 @@ Flow the solder in the GND through hole and poke one end of the hook up wire int
 \item
 Put the other end of the wire into the SDO through hole and apply solder
 \end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{images/bme_diagram.JPG}
+\caption{Qwiic cable soldered to BME sensor assembly} 
+\label{fig:bme_diagram}
+\end{figure}
 
 \end{enumerate}
 
@@ -352,7 +371,7 @@ Flow Sensor Assembly
 
 \begin{enumerate}[label=4.\arabic*]
 \item
-Assemble Cable
+Assemble Cable. Refer to figure \ref{fig:flow_cable} on page \pageref{fig:flow_cable}
 
 The flow sensor requires a 5 V input, however we will run the I$^2$C bus at 3.3 V necessitating this cable. 
 \\
@@ -388,13 +407,23 @@ red & single 6'' wire & 5V \\
 \label{tab:flow}
 \end{table}
 \item
-Connect the red wire to the red condutor in the USB cable and solder the extra long male header pin to the end
+Connect the red wire to the red conductor in the USB cable and solder the extra long male header pin to the end
 \item
 Cover the finished joints with a short $1/4$'' piece of heat shrink
 \end{enumerate}
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{images/flow_1.JPG} 
+\includegraphics[width=0.45\textwidth]{images/flow_2.JPG} \\ 
+\includegraphics[width=0.45\textwidth]{images/flow_4.JPG} 
+\includegraphics[width=0.45\textwidth]{images/flow_3.JPG} 
+\caption{Clockwise progression of sensor cable assembly.} 
+\label{fig:flow_cable}
+\end{figure}
+
 \item
-Connect cable to sensor
+Connect cable to sensor.  Refer to figure \ref{fig:flow_sensor} on page \pageref{fig:flow_sensor}.
 
 \begin{enumerate}[label=4.2.\arabic*]
 \item
@@ -410,9 +439,15 @@ Connect the end of each lead to the pads you have prepared by touching the tip o
 \item
 Refer to the SFM3400 datasheet to be sure you are connecting them in the proper position.
 \end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{images/flow_cable.JPG} 
+\caption{Sensor connected to cable assembly.} 
+\label{fig:flow_sesor}
+\end{figure}
 
 \item
-Assemble sensor adapters
+Assemble sensor adapters. Refer to figure \ref{fig:adapters} on page \pageref{fig:adapters}.
 
 \begin{enumerate}[label=4.3.\arabic*]
 \item
@@ -428,6 +463,13 @@ Place the bleed adapter over the clear adapter
 \item
 Use electrical tape to secure any loose connections
 \end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/adapters_1.JPG} \\
+\includegraphics[width=0.6\textwidth]{images/adapters_2.JPG} \\
+\caption{Adapters assembled inline with sensor.} 
+\label{fig:adapters}
+\end{figure}
 
 \end{enumerate}
 
@@ -438,7 +480,8 @@ Final Assembly
 
 \begin{enumerate}[label=5.\arabic*]
 \item
-Glue oxygen hose to pressure sensor assembly
+Glue oxygen hose to pressure sensor assembly. Refer to figure \ref{fig:bme_glue} on page \pageref{fig:bme_glue}.
+
 \begin{enumerate}[label=5.1.\arabic*]
 \item
 Cut a section of oxygen hose approximately the same length as the flow sensor cable
@@ -449,9 +492,16 @@ Place one end of the hose over the airway pressure sensor and apply glue around 
 \item
 Be very careful not to get glue on the sensor and make sure that the hose is securely attached to the pcb
 \end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.4\textwidth]{images/bme_standoffs.JPG}
+\includegraphics[width=0.6\textwidth, angle =90 ]{images/hotglue.JPG} 
+\caption{Standoffs installed on pressure sensor assembly and oxygen hose prepared for gluing.} 
+\label{fig:bme_glue}
+\end{figure}
 
 \item
-Install pressure sensor assembly
+Install pressure sensor assembly. Refer to figure \ref{fig:bmeinbox} on page \pageref{fig:bmeinbox}.
 \begin{enumerate}[label=5.2.\arabic*]
 \item
 Add two standoffs to opposite corners of the pressure sensor assembly
@@ -462,8 +512,14 @@ Thread the bare end of the oxygen hose through its hole in the enclose from the 
 \item
 Attach the standoffs into the enclosure from the outside using two machine screws
 \end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/bmeinbox.JPG} 
+\caption{Pressure sensor assembly installed in enclosure.} 
+\label{fig:bmeinbox}
+\end{figure}
 \item
-Zip tie sensor cable to enclosure
+Zip tie sensor cable to enclosure. Refer to figure \ref{fig:ziptie} on page \pageref{fig:ziptie}.
 \begin{enumerate}[label=5.3.\arabic*]
 \item
 Thread the small zip tie through the two mounting holes in the enclosure
@@ -472,9 +528,17 @@ Push the qwiic connector end of the flow sensor cable through its hole in the en
 \item
 Zip tie the cable to the side of the enclosure making sure that the jacket of the USB cable is engaged by the zip tie
 \end{enumerate}
-\begin{enumerate}[label=5.4.\arabic*]
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/ziptie.JPG} 
+\caption{Flow sensor cable with strain relief.} 
+\label{fig:ziptie}
+\end{figure}
+
+
 \item
-Install ethernet shield and processor
+Install ethernet shield and processor and add final touches.  Refer to figure \ref{fig:ziptie} on page \pageref{fig:ziptie}.
+\begin{enumerate}[label=5.4.\arabic*]
 \item
 Attach standoffs to the four corners of the ethernet shield
 \item
@@ -483,17 +547,23 @@ Screw the standoffs into the enclosure from the bottom
 Place the ESP32, OLED wing, and Qwiic shield on top of the ethernet shield as depicted in the diagram
 \item
 Plug the flow sensor and pressure sensor assembly into the qwiic shield
-\end{enumerate}
 \item
 Add a small piece of electrical tape every 5 inches attaching the oxygen tubing and flow sensor cable
 \item
 Wrap a piece of electrical tape around the flow sensor covering the exposed pads of the flow sensor
 \item
 Add identification card on the next page card to enclosure.
-
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/final_assembly_with_tape.JPG} 
+\caption{Final assembly.} 
+\label{fig:final}
+\end{figure}
+%\begin{enumerate}[label=5.4.\arabic*]
+\end{enumerate}
+\end{enumerate}
 \end{enumerate}
 
-\end{enumerate}
 %-----------------------------------------------------------
 
 \subsection{PCB Based VentMon}
