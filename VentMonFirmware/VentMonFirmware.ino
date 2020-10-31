@@ -1008,6 +1008,7 @@ int getEthernetEnabledFromEEPROM() {
 }
 void setEthernetEnabledFromEEPROM(char enabled) {
   EEPROM.write(32 + 120 + 0, enabled);
+  EEPROM.commit();
 }
 
 int getWiFiEnabledFromEEPROM() {
@@ -1016,6 +1017,7 @@ int getWiFiEnabledFromEEPROM() {
 }
 void setWiFiEnabledFromEEPROM(char enabled) {
   EEPROM.write(32 + 120 + 1, enabled);
+  EEPROM.commit();
 }
 
 
@@ -1045,21 +1047,21 @@ void configure() {
 
   Serial.println("Enter 'w' to enable WiFi, 'x' to disable WiFi");
   int ethernetEnabled = getEthernetEnabledFromEEPROM();
-  Serial.println(wifiEnabled ? "Ethernet ENABLED" : "Ethernet DISABLED");
+  Serial.println(ethernetEnabled ? "Ethernet ENABLED" : "Ethernet DISABLED");
   Serial.println("Enter 'e' to enable Ethernet, 'f' to disable Ethernet.");
   Serial.println("Type the character 'r' to reset wifi ssid and password.");
   Serial.print("Type the character 'c' to continue or wait ");
   Serial.print(WAIT_TIME_S);
   Serial.println(" seconds to begin/resume operation:");
 //  if (Serial.available() > 0) {
-    Serial.setTimeout(WAIT_TIME_S*1000);
+  Serial.setTimeout(WAIT_TIME_S*1000);
     // read the incoming byte:
     
-    String str = Serial.readStringUntil('\n');
-    char c = str.charAt(0);
-    switch (c) {
-      case 'r':
-      {
+  String str = Serial.readStringUntil('\n');
+  char c = str.charAt(0);
+  switch (c) {
+    case 'r':
+    {
  //     char discard = Serial.read();
       // discard the end of line..
       Serial.println("Enter SSID:");
@@ -1083,39 +1085,39 @@ void configure() {
       EEPROM.commit();
       printCurrentCredentials();
       wifi_setup();
-      }
-      break;
-      case 'w':
+    }
+    break;
+    case 'w':
       wifi_enabled = true;
       setWiFiEnabledFromEEPROM(1);
       Serial.println("WiFi Enabled");  
       wifi_setup();
-      break;
-      case 'x':
+    break;
+    case 'x':
       wifi_enabled = false;
       setWiFiEnabledFromEEPROM(0);
       Serial.println("WiFi Disabled");
       wudpclient_good = false;
-      break;
-      case 'e':
+    break;
+    case 'e':
       setEthernetEnabledFromEEPROM(1);
       ethernet_setup();
       ethernet_enabled = true;
       Serial.println("Ethernet Enabled");
-      break;
-      case 'f':
+    break;
+    case 'f':
       setEthernetEnabledFromEEPROM(0);
       ethernet_enabled = false;
       Serial.println("Ethernet Disabled");
       eudpclient_good = false;
-      break;
+    break;
       // just continue;
-      case 'c':
-      break;
-    } 
-     udpclient = (UDP *) (eudpclient_good ? (UDP *) &eudpclient : (wudpclient_good ? (UDP *) &wudpclient : NULL));
-     Serial.setTimeout(1000);
-     Serial.println("Enter 'c' to re-enter this configuration while running.");
+    case 'c':
+    break;
+  } 
+  udpclient = (UDP *) (eudpclient_good ? (UDP *) &eudpclient : (wudpclient_good ? (UDP *) &wudpclient : NULL));
+  Serial.setTimeout(1000);
+  Serial.println("Enter 'c' to re-enter this configuration while running.");
   need_to_configure = false;
 }
 
@@ -1331,15 +1333,19 @@ void setup() {
   Serial.println("XXXXXXXXXXXXXXXXXX");
   // TODO: Comment out for graphics testing...
   int ethernetEnabled = getEthernetEnabledFromEEPROM();
-  if (ethernetEnabled)
+  if (ethernetEnabled) {
+    Serial.println("Ethernet currently: ENABLED");
     ethernet_setup();
-  else 
-    Serial.println("Ethernet currently disabled");
+  } else {
+    Serial.println("Ethernet currently: DISABLED");
+  }
   int wifiEnabled = getWiFiEnabledFromEEPROM();
-  if (wifiEnabled)
+  if (wifiEnabled) {
+    Serial.println("WiFi currently: ENABLED");
     wifi_setup();
-  else 
-    Serial.println("WiFi currently disabled");
+  } else {
+    Serial.println("WiFi currently DISABLED");
+  }
   udpclient = (UDP *) (eudpclient_good ? (UDP *) &eudpclient : (wudpclient_good ? (UDP *) &wudpclient : NULL));
 
   printCurrentCredentials();
