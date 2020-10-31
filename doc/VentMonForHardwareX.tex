@@ -7,6 +7,8 @@
 \usepackage{tabu}
 \usepackage{enumitem}
 \usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{float}
 \newlist{selectlist}{itemize}{2}
 \setlist[selectlist]{label=$\square$,leftmargin=*,noitemsep,topsep=0pt}
 
@@ -65,9 +67,9 @@ needed by a test team, but also the data desired by a clinician in
 actual treatment of patients. The open source design of the VentMon
 and its firmware and cloud-based software may
 allow it to be used as a component of modular ventilators to provide
-a clinical readout. This software system has been designd to be as
-modular and composable as possible, for example by defining
-new open published standards, just as the hardware is composable
+a clinical readout. This software system has been designed to be as
+modular and composeable as possible, for example by defining
+new open published standards, just as the hardware is composeable
 and modifiable, forming an open system or eco-system of ventilation data.
 Thanks to grants, 20 VentMons have been given away
 free of charge to pandemic response teams building open source ventilators,
@@ -109,7 +111,7 @@ Electrical engineering and computer science
   VentMon: \linebreak
   \href{https://doi.org/10.5281/zenodo.4079170}{https://doi.org/10.5281/zenodo.4079170}
   \linebreak
-  PIRDS (Public Invention Respirattion Data Standard): \linebreak
+  PIRDS (Public Invention Respiration Data Standard): \linebreak
   \href{http://doi.org/10.5281/zenodo.4079377}{http://doi.org/10.5281/zenodo.4079377}
   \linebreak
   PIRDS logger: \linebreak
@@ -133,38 +135,14 @@ Electrical engineering and computer science
 
 \section{Hardware in context}
 % Include a short description of the hardware, putting into context of similar open hardware and proprietary equipment in the field.
-The Coronavirus pandemic has created a global shortage of ventilators.
-Ventilators are expensive to manufacture and during uncertain times supply chains can be disrupted
-increasing the cost and scarcity of these devices.
-Since the beginning of the pandemic in March, there has been a large movement to develop cheaper,
-more supply chain resilient ventilator.
-The urgency and goals of this movement have shifted as the global understanding of the virus has evolved.
-Regardless of the current state of this movement, however, the use of open source medical devices in resources
-limited emergency situations -- common during a global pandemic --
-is a topic that has come to the forefront of may conversations about preparedness and treatment.
-Medical devices require rigorous testing before they can be used on the general public.
-Open source medical devices require the same level, if not more scrutiny.
-If an open source movement is to succeed in this field, the tools to test and validate
-medical devices should also be community based.
-The goal of VentMon is to provide an equally open source, community based verification solution
-to increase the efficiency and accuracy of the development process for socially distanced, potentially internationl
-teams making open source ventilator devices.
-
-
+The Coronavirus pandemic has created a global shortage of ventilators.Ventilators are expensive to manufacture and during uncertain times supply chains can be disrupted increasing the cost and scarcity of these devices. Since the beginning of the pandemic in March, there has been a large movement to develop cheaper, more supply chain resilient ventilator. The urgency and goals of this movement have shifted as the global understanding of the virus has evolved. Regardless of the current state of this movement, however, the use of open source medical devices in resources limited emergency situations -- common during a global pandemic -- is a topic that has come to the forefront of may conversations about preparedness and treatment. Medical devices require rigorous testing before they can be used on the general public. Open source medical devices require the same level, if not more scrutiny. If an open source movement is to succeed in this field, the tools to test and validate medical devices should also be community based. The goal of VentMon is to provide an equally open source, community based verification solution to increase the efficiency and accuracy of the development process for socially distanced, potentially international teams making open source ventilator devices.
 
 \section{Hardware description}
 % Describe the hardware, highlighting the customization rather than the steps of the procedure. Highlight how it differs/which advantage it offers over pre-existing methods. For example, how could this hardware: be compared to other hardware in terms of cost or ease of use, be used in the development of further designs in a particular area, and so on.
 
 % > Add 3-5 bulleted points to broadly explain to other researchers how the hardware could be potentially useful to them, for either standard or novel laboratory tasks, inside or outside of the original user community.
 
-The VentMon plugs directly into a standard 22mm adult airway. As air or medicaly gases pass through the VentMon, it records
-flow and pressure about 40 times a second, and occasionally records temperature, humdity, and O2 fraction.
-The result is that when placed in the airway between an invasive or non-invasive ventilator
-under test and physcial test lung, it sends
-this data to a public data lake using a clearly defined respiration standard. This data can be graphically
-rendered either live or statically to provide a display that is typical of the clinical display of advance ventilators.
-In this way it allows sophisticated testing of ventilators. This device is therefore similar in function to
-an ASL5000 or a Michigan Test Lung device, which tend to start at USD\$10,000.
+The VentMon plugs directly into a standard 22mm adult airway. As air or medicaly gases pass through the VentMon, it records flow and pressure about 40 times a second, and occasionally records temperature, humdity, and O2 fraction. The result is that when placed in the airway between an invasive or non-invasive ventilator under test and physcial test lung, it sends this data to a public data lake using a clearly defined respiration standard. This data can be graphically rendered either live or statically to provide a display that is typical of the clinical display of advance ventilators. In this way it allows sophisticated testing of ventilators. This device is therefore similar in function to an ASL5000 or a Michigan Test Lung device, which tend to start at USD\$10,000.
 
 A special challenge of teams building open source pandemic ventilators is that they tend to be poorly funded,
 but also geographically distributed. The VentMon is an IoT-enbabled device which sends its data to a public data lake,
@@ -178,14 +156,9 @@ The VentMon thus offer benefits to teams developing ventilation devices:
 \item It is allows remote collaboration.
 \end{itemize}
 
-Moreover, being completely open, it supports modifcation, extension, and importantly but only potentially at present,
-integration into a complete ventilator. A ventilator that chose to offer a graphical trace of pressure and flow,
-which are generally demanded by clinicians for all but emergency transport situations, could incorporate the
-open source VentMon into its complete design.
+Moreover, being completely open, it supports modifcation, extension, and importantly but only potentially at present, integration into a complete ventilator. A ventilator that chose to offer a graphical trace of pressure and flow, which are generally demanded by clinicians for all but emergency transport situations, could incorporate the open source VentMon into its complete design.
 
-Although the reliance on the internet is a strength for a distributed engineering team, it would be a disadvantage
-it a field hospital. Although aiming to eventually be safe enough and reliable to be used as a monitor
-on human patients, it requires much improvement before it is ready for that intended use.
+Although the reliance on the internet is a strength for a distributed engineering team, it would be a disadvantage it a field hospital. Although aiming to eventually be safe enough and reliable to be used as a monitor on human patients, it requires much improvement before it is ready for that intended use.
 
 \section{Design files}
 % The  complete  design  files  must  be  either  uploaded  to  an  approved  online  repository,  uploaded  at the  time  of  submission  on  the  online  Editorial  Manager  submission  interface  as  supplementary materials [CAD files, videos,. . . ], or included in the body of the manuscript [e.g.  figures].  The three approved  online  repositories  are  Mendeley  Data,  the  Open  Science  Framework,  and  Zenodo. See repository instructions: https://doi.org/10.5281/zenodo.3346799
@@ -237,16 +210,361 @@ PIRDS Data Standard & \\\hline
 % > Clearly reference design files and component parts described in the Design File Summary and Bill of Materials.
 % >Highlight potential safety concerns that may arise
 
-Two versions of VentMon can be assembled depending on availability of parts and time.
-The most physically robust and complete version of VentMon requires the purchase and manufacture of a PCB
-as well as a number of 3D printed plastic parts.
-The designs of the PCB and 3D printed parts are fully open; in practice, due to the fact that PCBs have a high
-set up cost, it makes most sense to use the PCB if you are bulding 10 or more VentMons.
-This version of the device requires the least amount of time to assemble and contains fewest discrete components.
-Due to the high cost of PCB manufacture and assembly, VentMon can also be created using off the shelf components
-readily available from DIY electronics suppliers. This version requires significantly more assembly time.
-We believe this has been done twice by third parties with little interaction with us.
-Both assembly procedures are outlined below.
+Two versions of VentMon can be assembled depending on availability of parts and time. The most physically robust and complete version of VentMon requires the purchase and manufacture of a PCB as well as a number of 3D printed plastic parts. The designs of the PCB and 3D printed parts are fully open; in practice, due to the fact that PCBs have a high set up cost, it makes most sense to use the PCB if you are bulding 10 or more VentMons. This version of the device requires the least amount of time to assemble and contains fewest discrete components. Due to the high cost of PCB manufacture and assembly, VentMon can also be created using off the shelf components readily available from DIY electronics suppliers. This version requires significantly more assembly time. We believe this has been done twice by third parties with little interaction with us. Both assembly procedures are outlined below.
+
+\subsection{COTS Based VentMon}
+\begin{enumerate}
+
+%-----------------------------------------------------------
+% QWIIC SHIELD
+\item
+Qwiic Shield Assembly
+
+See Figure \ref{fig:qwiic} on page \pageref{fig:qwiic} for final assembly of Qwiic Shield.
+
+\begin{enumerate}[label=1.\arabic*]
+\item
+Trim two pieces of male header pins that are two positions long and one piece that is four positions long.
+\item
+With the connector side of the board facing up, solder one of the two position headers into the two holes labelled SDA and SCL.
+\item
+Solder the other two position header into the last two holes on the row along the opposite side.
+\item
+Solder the four position header into the last four holes along the right side. This should provide connections to the GND and 3V3 through holes.
+\item
+Connect both sides of the solder bridge to engage the pullup resistors for the I\textsuperscript{2}C bus.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{images/qwiic_top.JPG}
+\includegraphics[width=0.44\textwidth]{images/qwiic_bottom.JPG}
+\caption{SparkFun Qwiic Shield with male headers and I\textsuperscript{2}C pullups connected} 
+\label{fig:qwiic}
+\end{figure}
+
+%-----------------------------------------------------------
+% ENCLOSURE
+\item
+Enclosure
+
+Before starting this step download and print the drill template. 
+
+\begin{enumerate}[label=2.\arabic*]
+\item
+Cut out the template and tape it to the enclosure.
+\item
+Make sure the lid of the enclosure is firmly screwed on before drilling
+\item
+Drill holes in the locations denoted on template using the recommended drill sizes for each hole. 
+\end{enumerate}
+
+%-----------------------------------------------------------
+% PRESSURE SENSOR
+\item
+Pressure Sensor Assembly
+\begin{enumerate}[label=3.\arabic*]
+\item
+Drill out mounting holes refer to figure \ref{fig:bme_1} on page \pageref{fig:bme_1}
+\begin{enumerate}[label=3.1.\arabic*]
+\item
+Using the 7/64? drill bit, carefully enlarge the mounting holes in each corner of the sensor
+\item
+You can do all four or just two - one on the left side of one board and one on the right side of the other
+\end{enumerate}
+\item
+Cut trace from SDO through hole to sensor. Refer to figure \ref{fig:bme_1} on page \pageref{fig:bme_1}.
+\begin{enumerate}[label=3.2.\arabic*]
+\item
+Carefully cut the trace coming from the SDO hole on the back side of one board
+\item
+This board will be used to measure the airway pressure
+\end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{images/bme_1.JPG}
+\caption{BME 280 Eval board with drilled out holes and trace cut} 
+\label{fig:bme_1}
+\end{figure}
+
+\item
+Assemble Cable. Refer to figure \ref{fig:bme_qwiic_cable} on page \pageref{fig:bme_qwiic_cable}.
+\begin{enumerate}[label=3.3.\arabic*]
+\item
+Cut one connector off the Qwiic cable
+\item
+Strip and tin the last $1/4$" of the leads 
+\end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.5\textwidth]{images/bme_qwiic_cable.JPG}
+\caption{Prepared Qwiic cable for BME sensor assembly} 
+\label{fig:bme_qwiic_cable}
+\end{figure}
+\item
+Connect Sensors to Cable. Refer to figure \ref{fig:bme_and_qwiic_cable} on page \pageref{fig:bme_and_qwiic_cable} and table \ref{tab:pressure} on page \pageref{tab:pressure} for electrical connection.
+\begin{enumerate}[label=3.4.\arabic*]
+\item
+Stack the two sensors on the breadboard and use two paper clips to anchor them
+\item
+Be sure the airway board with the cut trace is facing down
+\item
+Starting with Vin or GND insert the tinned lead through the appropriate hole and apply solder
+\item
+Flip the sensor assembly over and make sure solder has flowed through both through holes, adding some if needed
+\item
+Don?t worry if the solder does not flow perfectly
+\item
+Pin the assembly back down and move to another connection following the connection table below
+\item
+Repeat the steps above until the two boards have been secured and all leads are connected
+\item
+Re-flow all the joints to ensure a good connection
+\end{enumerate}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{| c | c |}
+\hline
+Signal & Qwiic Color\\  \hline
+GND & black  \\  \hline
+VIN & red \\  \hline
+SDA & blue \\  \hline
+SCL & yellow \\  
+\hline
+\end{tabular}
+\caption{pressure sensor wiring}
+\label{tab:pressure}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.65\textwidth]{images/bme_and_qwiic_cable.JPG}
+\caption{Qwiic cable soldered to BME sensor assembly} 
+\label{fig:bme_and_qwiic_cable}
+\end{figure}
+
+\item
+Add address jumper to ambient pressure sensor. Refer to figure \ref{fig:bme_diagram} on page \pageref{fig:bme_diagram}
+\begin{enumerate}[label=3.5.\arabic*]
+\item
+Take a $1/2$ piece of hookup wire and strip both ends
+\item
+Flow the solder in the GND through hole and poke one end of the hook up wire into the hole
+\item
+Put the other end of the wire into the SDO through hole and apply solder
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{images/bme_diagram.JPG}
+\caption{Qwiic cable soldered to BME sensor assembly} 
+\label{fig:bme_diagram}
+\end{figure}
+
+\end{enumerate}
+
+%-----------------------------------------------------------
+% FLOW SENSOR
+\item
+Flow Sensor Assembly
+
+\begin{enumerate}[label=4.\arabic*]
+\item
+Assemble Cable. Refer to figure \ref{fig:flow_cable} on page \pageref{fig:flow_cable}
+
+The flow sensor requires a 5 V input, however we will run the I$^2$C bus at 3.3 V necessitating this cable. 
+\\
+\begin{enumerate}[label=4.1.\arabic*]
+\item
+Cut the Qwiic cable in half
+\item
+Cut off the red conductor near the base of the connector
+\item
+Cut a 30 cm length from the USB cable
+\item
+Strip the jacket back 1 $1/2$'' from one end
+\item
+Strip the first $1/4$'' of each conductor on one end and tin
+\item
+Twist a small portion of the shield into the black GND conductor
+\item
+Place a small piece of heat shrink on each conductor of the Qwicc cable and push them toward the connector end
+\item
+Solder the ends of the Qwiic cable to the ends of the USB cable following Table \ref{tab:flow}.
+\begin{table}[H]
+\centering
+\begin{tabular}{| c | c | c |}
+\hline
+USB & Qwiic & Signal \\  \hline
+black & black & GND \\  \hline
+green & blue & SDA \\  \hline
+white & yellow & SCK \\  \hline
+red & single 6'' wire & 5V \\  
+\hline
+\end{tabular}
+\caption{flow sensor wiring}
+\label{tab:flow}
+\end{table}
+\item
+Connect the red wire to the red conductor in the USB cable and solder the extra long male header pin to the end
+\item
+Cover the finished joints with a short $1/4$'' piece of heat shrink
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.45\textwidth]{images/flow_1.JPG} 
+\includegraphics[width=0.45\textwidth]{images/flow_2.JPG} \\ 
+\includegraphics[width=0.45\textwidth]{images/flow_4.JPG} 
+\includegraphics[width=0.45\textwidth]{images/flow_3.JPG} 
+\caption{Clockwise progression of sensor cable assembly.} 
+\label{fig:flow_cable}
+\end{figure}
+
+\item
+Connect cable to sensor.  Refer to figure \ref{fig:flow_sensor} on page \pageref{fig:flow_sensor}.
+
+\begin{enumerate}[label=4.2.\arabic*]
+\item
+Apply a small quantity of solder to the four center pads on the SFM3400 flow sensor
+\item
+Remove $5/8$'' of the jacket on the bare end of the USB cable
+\item
+Strip back $1/8$'' from each conductor and tin the ends
+\item
+Thread the cable through the hole in the sensor as shown in the photo and make sure the tinned leads can reach the sensor pads
+\item
+Connect the end of each lead to the pads you have prepared by touching the tip of the soldering iron to the pad and then placing the tinned lead onto it.
+\item
+Refer to the SFM3400 datasheet to be sure you are connecting them in the proper position.
+\end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.6\textwidth]{images/flow_cable.JPG} 
+\caption{Sensor connected to cable assembly.} 
+\label{fig:flow_sesor}
+\end{figure}
+
+\item
+Assemble sensor adapters. Refer to figure \ref{fig:adapters} on page \pageref{fig:adapters}.
+
+\begin{enumerate}[label=4.3.\arabic*]
+\item
+Cut a 1 $1/2$'' section of petex tubing
+\item
+Insert the tubing into the wide end of the flow sensor
+\item
+Insert the frosted 15 mm to 22 mm adapter over the petex
+\item
+Add the clear 15 mm to 22 mm adapter over the small end of the flow sensor
+\item
+Place the bleed adapter over the clear adapter
+\item
+Use electrical tape to secure any loose connections
+\end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/adapters_1.JPG} \\
+\includegraphics[width=0.6\textwidth]{images/adapters_2.JPG} \\
+\caption{Adapters assembled inline with sensor.} 
+\label{fig:adapters}
+\end{figure}
+
+\end{enumerate}
+
+%-----------------------------------------------------------
+% FINAL ASSEMBLY
+\item
+Final Assembly
+
+\begin{enumerate}[label=5.\arabic*]
+\item
+Glue oxygen hose to pressure sensor assembly. Refer to figure \ref{fig:bme_glue} on page \pageref{fig:bme_glue}.
+
+\begin{enumerate}[label=5.1.\arabic*]
+\item
+Cut a section of oxygen hose approximately the same length as the flow sensor cable
+\item
+Make sure your cut is flat on the end
+\item
+Place one end of the hose over the airway pressure sensor and apply glue around the edges
+\item
+Be very careful not to get glue on the sensor and make sure that the hose is securely attached to the pcb
+\end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.4\textwidth]{images/bme_standoffs.JPG}
+\includegraphics[width=0.6\textwidth, angle =90 ]{images/hotglue.JPG} 
+\caption{Standoffs installed on pressure sensor assembly and oxygen hose prepared for gluing.} 
+\label{fig:bme_glue}
+\end{figure}
+
+\item
+Install pressure sensor assembly. Refer to figure \ref{fig:bmeinbox} on page \pageref{fig:bmeinbox}.
+\begin{enumerate}[label=5.2.\arabic*]
+\item
+Add two standoffs to opposite corners of the pressure sensor assembly
+\item
+These should correspond to the mounting holes you drilled in the enclosure
+\item
+Thread the bare end of the oxygen hose through its hole in the enclose from the inside until the sensor assembly is pressed against the wall of the  enclosure
+\item
+Attach the standoffs into the enclosure from the outside using two machine screws
+\end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/bmeinbox.JPG} 
+\caption{Pressure sensor assembly installed in enclosure.} 
+\label{fig:bmeinbox}
+\end{figure}
+\item
+Zip tie sensor cable to enclosure. Refer to figure \ref{fig:ziptie} on page \pageref{fig:ziptie}.
+\begin{enumerate}[label=5.3.\arabic*]
+\item
+Thread the small zip tie through the two mounting holes in the enclosure
+\item
+Push the qwiic connector end of the flow sensor cable through its hole in the enclosure. It?s a tight fit.
+\item
+Zip tie the cable to the side of the enclosure making sure that the jacket of the USB cable is engaged by the zip tie
+\end{enumerate}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/ziptie.JPG} 
+\caption{Flow sensor cable with strain relief.} 
+\label{fig:ziptie}
+\end{figure}
+
+
+\item
+Install ethernet shield and processor and add final touches.  Refer to figure \ref{fig:ziptie} on page \pageref{fig:ziptie}.
+\begin{enumerate}[label=5.4.\arabic*]
+\item
+Attach standoffs to the four corners of the ethernet shield
+\item
+Screw the standoffs into the enclosure from the bottom
+\item
+Place the ESP32, OLED wing, and Qwiic shield on top of the ethernet shield as depicted in the diagram
+\item
+Plug the flow sensor and pressure sensor assembly into the qwiic shield
+\item
+Add a small piece of electrical tape every 5 inches attaching the oxygen tubing and flow sensor cable
+\item
+Wrap a piece of electrical tape around the flow sensor covering the exposed pads of the flow sensor
+\item
+Add identification card on the next page card to enclosure.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/final_assembly_with_tape.JPG} 
+\caption{Final assembly.} 
+\label{fig:final}
+\end{figure}
+%\begin{enumerate}[label=5.4.\arabic*]
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+
+%-----------------------------------------------------------
 
 \subsection{PCB Based VentMon}
 
@@ -278,36 +596,25 @@ PCB Assembly
 \item
 Enclosure
 
+Follow assembly instructions in section *enclosure*
+
+
 \item
 Flow Sensor Assembly
 
+Follow assembly instructions in section *flow sensor assembly*
+
 \item
 Oxygen Sensor Assembly
+
+
 
 \item
 Final Assembly
 
 \end{enumerate}
 
-\subsection{COTS Based VentMon}
-\begin{enumerate}
-
-\item
-Qwiic Shield Assembly
-
-\item
-Enclosure
-
-\item
-Flow Sensor Assembly
-
-\item
-Oxygen Sensor Assembly
-
-\item
-Final Assembly
-
-\end{enumerate}
+%----------------------------------------------------------
 
 \section{Operation instructions}
 %Provide detailed instructions for the safe and proper operation of the hardware.
