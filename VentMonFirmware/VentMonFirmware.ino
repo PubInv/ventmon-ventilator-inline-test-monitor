@@ -146,6 +146,10 @@ uint8_t addr[2] = {INSPIRATORY_SENSOR_ADDRESS, AMBIENT_SENSOR_ADDRESS};
 // Eventually we will put this into running window
 signed long display_max_pressure = 0;
 signed long display_min_pressure = 0;
+signed long display_pressure_val;
+signed long display_fiO2_val;
+signed long display_flow_val;
+
 
 // Only need to sample the ambient air occasinally
 // (say once a minute) for PEEP analysis
@@ -307,6 +311,7 @@ void outputMeasurement(char e, char t, char loc, unsigned short int n, unsigned 
   output_on_serial_print_PIRDS(e, t, loc, n, ms, val);
   Serial.println();
   send_data(e, t, loc, n, ms, val);
+  display_print_pirds(e, t, loc, n, ms, val);
 }
 
 void outputMetaEvent(char *msg, unsigned long ms) {
@@ -572,6 +577,38 @@ signed long readPressureOnly680(int idx)
 
 /* DISPLAY ********************************************/
 
+#define ROW_HEIGHT 10
+#define ROW_LENGTH 128
+#define ROW_NUM 3
+#define SCROLL_DELAY 500
+String display_rows[ROW_NUM];
+int row_index = 0;
+void displayPrintScroll(String s){
+  //Serial.print(s);
+  
+  display.clearDisplay();
+
+  int a = row_index+1;
+  if (a > ROW_NUM) {
+    row_index = ROW_NUM;
+    display_rows[0] = display_rows[1]; 
+    display_rows[1] = display_rows[2];
+    display_rows[2] = s;
+  } else {
+    display_rows[row_index] = s;
+  }
+  
+  row_index++;
+  
+  for (int i = 0; i < ROW_NUM; i++){
+    display.setCursor(0, i*ROW_HEIGHT);
+    display.print(display_rows[i]);
+  }
+  
+  display.display();
+  delay(SCROLL_DELAY);
+}
+
 void setupOLED() {
   // Here we initialize the OLED...
   Serial.println("OLED FeatherWing test");
@@ -607,10 +644,27 @@ void setupOLED() {
   // text display tests
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
-  display.print("Starting up...");
-  display.setCursor(0, 0);
-  display.display(); // actually display all of the above
+  //display.setCursor(0, 0);
+  //display.print("Starting up...");
+  //display.setCursor(0, 0);
+  //display.display(); // actually display all of the above
+
+  // VentMon splash screen
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(7, 0);
+  display.println(F("VentMon"));
+  display.setCursor(0, 20);
+  display.setTextSize(1);
+  display.println(F("Public Invention"));
+  display.display();
+
+  delay(3000);
+  display.clearDisplay();
+
+  delay(1000);
+  
+  //displayPrintScroll("Starting VentMon...");
 }
 
 void buttonA() {
@@ -670,13 +724,16 @@ void push_sample(uint8_t s) {
 
 void displayFromMS(long ms) {
   current_display_mode = (ms / 5000) % 2;
- // displayFromMode(current_display_mode);
-  displayFromMode(DISPLAY_GRAPH);
+  displayFromMode(current_display_mode);
+  //displayFromMode(DISPLAY_GRAPH);
+  //displayFromMode(DISPLAY_STAT);
 }
+
 void displayFromMode(int mode) {
   switch (mode) {
     case DISPLAY_STAT:
-      displayPressure(true);
+      //displayPressure(true);
+      display_stat();
       break;
     case DISPLAY_GRAPH:
       displayGraph();
@@ -684,12 +741,47 @@ void displayFromMode(int mode) {
   }
 }
 
+
+void display_stat(){
+  display_pressure(display_pressure_val);
+  display_flow(display_flow_val, true);
+  display_oxygen(display_fiO2_val);
+}
+
+void display_pressure(long display_airway_pressure) {
+  // 1 Pa =  0.010197442889221 cmH20
+  display.print("cmH20: ");
+  display.println(display_airway_pressure * 0.01);
+}
+
+void display_oxygen(signed long fiO2) {
+  if (fiO2 > 0 && fiO2 <= 100){
+    char buffer[18];
+    sprintf (buffer, "FiO2: %2d", fiO2);
+    display.println(buffer);
+  } else {
+    display.println("error");
+  }
+}
+
+void display_flow(signed long flow, bool isLPM){
+  char buffer[18];
+  if (isLPM){
+    sprintf(buffer, "LPM: %2d", flow/1000);
+  } else {
+    sprintf(buffer, "mm/min: %2d", flow);
+  }
+  
+  display.println(buffer);
+}
+
 // #define WHITE    0xFFFF
 void displayGraph() {
   display.clearDisplay();
   char buffer[32];
   sprintf(buffer, "%.1f", MAX_PRESSURE_SCALE);
-  display.println(buffer);
+  display.print(buffer);
+  
   display.println("cm ");
   display.println("H2O:");
   display.println("0.0"); 
@@ -698,7 +790,6 @@ void displayGraph() {
     display.drawPixel(i+LEFT_PREFIX_AREA_X,(GRAPH_Y_PIXELS -1) - graph_samples[i],1);
   }
   display.display();
-
 }
 
 void displayPressure(bool max_not_min) {
@@ -711,6 +802,20 @@ void displayPressure(bool max_not_min) {
   sprintf(buffer, "%d.1", display_pressure / 10);
   display.println(buffer);
 }
+
+void display_print_pirds(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
+  switch (t) {
+    case 'D': //pressure
+      display_pressure_val = val;
+      break;
+    case 'O': //oxygen
+      display_fiO2_val = val;
+    case 'F': //flow
+      display_flow_val = val;
+      break;
+  }
+}
+
 
 /******************************************************/
 
@@ -732,7 +837,7 @@ bool connectToWiFi(const char * ssid, const char * pwd)
   wudpclient_good = false;
   printLine();
   Serial.println("Connecting to WiFi network: " + String(ssid));
-
+  displayPrintScroll("Connecting...");
   WiFi.begin(ssid, pwd);
 
   int NUM_RETRIES = 50;
@@ -745,12 +850,16 @@ bool connectToWiFi(const char * ssid, const char * pwd)
   }
   if (WiFi.status() != WL_CONNECTED) {
      Serial.println("WiFi connection failed!");
+     displayPrintScroll("WiFi failed!");
   } else {
     Serial.println();
     Serial.println("WiFi connected!");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
+    displayPrintScroll("WiFi connected!");
+    displayPrintScroll((String)WiFi.localIP());
+    
     wudpclient_good = (wudpclient.begin(LOCALPORT) == 1);
 
     Serial.print("WIFI UDP Connection:");
@@ -819,35 +928,58 @@ bool ethernet_setup() {
   Serial.print(F("Mac: "));
   Serial.print(macs);
   Serial.println();
+
+  displayPrintScroll(macs);
   
   eudpclient_good = false;
   int n = 0;
   const int ETHERNET_TRIES = 1;
   while (n < ETHERNET_TRIES) {
     // start the Ethernet connection:
+    displayPrintScroll("Ethernet initializing");
     Serial.println(F("Initialize Ethernet with DHCP:"));
-    if (Ethernet.begin(mac) == 0) {
-      Serial.println(F("Failed to configure Ethernet using DHCP"));
-      // Check for Ethernet hardware present
-      if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-        Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
-      }
-      if (Ethernet.linkStatus() == LinkOFF) {
+
+    // Check for Ethernet hardware present
+    /*if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+      Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
+      displayPrintScroll("Ethernet shield not found!");
+      return false;
+    }*/
+        
+    if (Ethernet.linkStatus() == LinkOFF) {
         Serial.println(F("Ethernet cable is not connected."));
-        delay(3000);
-      }
+        displayPrintScroll("Cable not connected!");
+        delay(1000);
+        return false;
+    }
+    
+    if (Ethernet.begin(mac) == 0) {
+        Serial.println(F("Failed to configure Ethernet using DHCP"));
+        // Check for Ethernet hardware present
+        if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+          Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
+          displayPrintScroll("No ethernet shield!");
+        }
+        /*if (Ethernet.linkStatus() == LinkOFF) {
+          Serial.println(F("Ethernet cable is not connected."));
+          displayPrintScroll("Cable not connected!");
+          delay(3000);
+        }*/
     } else {
       Serial.print(F("  DHCP assigned IP "));
       Serial.println(Ethernet.localIP());
-      delay(5000);
+      displayPrintScroll((String)Ethernet.localIP());
+      delay(5000); // does this delay need to be this long?
       break;
     }
+    
     Serial.print("FAILED TO FIND, TRY #"); 
     Serial.println(n);
     n++;
   }
   if (n==ETHERNET_TRIES) {
     Serial.println("FAILED TO FIND ETHERNET, GIVING UP!");
+    displayPrintScroll("Connection FAILED!");
   } else {
 
     // give the Ethernet shield a second to initialize:
@@ -860,6 +992,8 @@ bool ethernet_setup() {
       if (dns.getHostByName(Loghost, LoghostAddr) == 1) {
         Serial.print("host is ");
         Serial.println(LoghostAddr);
+        displayPrintScroll("Ethernet host:");
+        displayPrintScroll((String)LoghostAddr);
       }
     }
   }
@@ -995,7 +1129,7 @@ void getSSIDFromEEPROM(char *buffer) {
   for(int i = 0; i < 32; i++) {
      buffer[i] = EEPROM.read(i);
   }
-  // A tereminator may occure before this, but his handles the extreme
+  // A terminator may occur before this, but this handles the extreme
   buffer[32] = '\0';
 }
 
@@ -1003,7 +1137,7 @@ void getPasswordFromEEPROM(char *buffer) {
    for(int i = 0; i < 120; i++) {
      buffer[i] = EEPROM.read(32 + i);
   }
-    // A tereminator may occure before this, but his handles the extreme
+  // A terminator may occur before this, but this handles the extreme
   buffer[120] = '\0'; 
 }
 
@@ -1040,10 +1174,11 @@ void printCurrentCredentials() {
 bool need_to_configure = true;
 #define WAIT_TIME_S 10
 void configure() {
-  display.clearDisplay();
-  display.setCursor(0, 0);
-  display.print("Configuring...");
-  display.display();
+  //display.clearDisplay();
+  //display.setCursor(0, 0);
+  //display.print("Configuring...");
+  //display.display();
+  displayPrintScroll("Configuring...");
   Serial.println("Enter 'c' to re-enter this configuration while running.");
   int wifiEnabled = getWiFiEnabledFromEEPROM();
   Serial.println(wifiEnabled ? "WiFi ENABLED" : "WiFi DISABLED");
@@ -1265,7 +1400,6 @@ void loop() {
   }
 }
 
-
 #define BAUD_RATE 500000
 void setup() {
   // 32 for the ssid, 120 for the pasword, 1 for ethernet, 1 for wifi
@@ -1274,11 +1408,15 @@ void setup() {
   Serial.begin(BAUD_RATE);
   Wire.begin();
 
+  Serial.println("----------------- VENTMON STARTING -----------------");
+  
   flowSensor.begin();
 
   setupOLED();
  
   while (!Serial);
+
+  displayPrintScroll("Checking sensors...");
   
   seekBME680(INSPIRATORY_PRESSURE_SENSOR);
   seekBME680(AMBIENT_PRESSURE_SENSOR);
@@ -1299,7 +1437,7 @@ void setup() {
   init_ambient(v);
 
   initializeOxygenSensor();
-
+  
   Serial.print("Ambient Pressure Sensor     : ");
   if (found_bme280[AMBIENT_PRESSURE_SENSOR]) {
     Serial.println("BME280");
@@ -1334,20 +1472,27 @@ void setup() {
   found_diff_press = (readHSCPressure() != LONG_MIN);
   Serial.println(found_diff_press ? "YES" : "NO");
   Serial.println("----------------- SENSOR TEST COMPLETE -----------------");
+
+  displayPrintScroll("Sensor test complete!");
+  
   // TODO: Comment out for graphics testing...
   int ethernetEnabled = getEthernetEnabledFromEEPROM();
   if (ethernetEnabled) {
     Serial.println("Ethernet currently: ENABLED");
+    displayPrintScroll("Ethernet ENABLED");
     ethernet_setup();
   } else {
     Serial.println("Ethernet currently: DISABLED");
+    displayPrintScroll("Ethernet ENABLED");
   }
   int wifiEnabled = getWiFiEnabledFromEEPROM();
   if (wifiEnabled) {
     Serial.println("WiFi currently: ENABLED");
+    displayPrintScroll("WiFi ENABLED");
     wifi_setup();
   } else {
     Serial.println("WiFi currently DISABLED");
+    displayPrintScroll("WiFi DISABLED");
   }
   udpclient = (UDP *) (eudpclient_good ? (UDP *) &eudpclient : (wudpclient_good ? (UDP *) &wudpclient : NULL));
 
