@@ -1,6 +1,6 @@
 
 /***************************************************************************
- Copyrigh Robert L. Read, 2020
+  Copyright Robert L. Read, 2020
   Networking code by Geoff Mulligan 2020
   Additional work by Lauria Clarke 2020
   designed to support ethernet using esp wifi chip
@@ -30,7 +30,7 @@
 /* In theory, some of these components are optional, so we track what we find... */
 bool found_display = false;
 
-/* These are all the supported sensor. Each sensor has a "period".
+/*  These are all the supported sensor. Each sensor has a "period".
  *  The Period is the number of milliseconds to wait before the next event for that sensor.
  *  This is complicated somewhat by multi-sensor boards.
  */
@@ -100,7 +100,7 @@ char macs[18];
 #define PARAMPORT 6111
 #define LOCALPORT 6111
 
-#define DEFALUT_HOST_ADDR "13.58.243.230"
+#define DEFAULT_HOST_ADDR "13.58.243.230"
 
 char *Loghost = strdup(PARAMHOST);
 uint16_t Logport = PARAMPORT;
@@ -142,18 +142,18 @@ Adafruit_BME680 bme680[2]; // I2C
 
 uint8_t addr[2] = {INSPIRATORY_SENSOR_ADDRESS, AMBIENT_SENSOR_ADDRESS};
 
-// we will ust this as a pressure to display to make the OLED useful...
+// We will just this as a pressure to display to make the OLED useful...
 // Eventually we will put this into running window
 signed long display_max_pressure = 0;
 signed long display_min_pressure = 0;
 
-// only need to sample the ambient air occasinally
+// Only need to sample the ambient air occasinally
 // (say once a minute) for PEEP analysis
 int ambient_counter = 0;
 
 // unsigned long sample_millis = 0;
 
-// We could send out only raw data, and let more powerful computers process thing.
+// We could send out only raw data, and let more powerful computers process things.
 // But we have a powerful micro controller here, so we will try to be useful!
 // Instead of outputting only the absolute pressure, we will output the differential
 // pressure in the inspiratory limb. We will compute a differential pressure against the
@@ -183,7 +183,7 @@ bool SENSOR_INSTALLED_BACKWARD = false;
 
 /* FiO2 ***********************************************/
 
-// oxygen sensor is connecte to channel 3 of ADS115
+// Oxygen sensor is connected to channel 3 of ADS115
 #define O2CHANNEL        3
 #define UNPLUGGED_MAX    400
 #define FIO2_SAMPLE_RATE 4000
@@ -193,7 +193,6 @@ Adafruit_ADS1115 ads;
 int initialO2 = 0;
 // bool oxygenSensing = true;
 unsigned long lastFiO2Sample = 0;
-
 
 /* ERROR MESSAGE STRINGS ******************************/
 
@@ -251,7 +250,6 @@ void report_bme280_not_found(uint16_t id) {
    Serial.print("        ID of 0x61 represents a BME 680.\n");
 }
 
-
 long readHSCPressure()
 {
   struct hsc_data ps;
@@ -305,11 +303,9 @@ void output_on_serial_print_PIRDS(char e, char t, char loc, unsigned short int n
 }
 
 void outputMeasurement(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
-
   output_on_serial_print_PIRDS(e, t, loc, n, ms, val);
   Serial.println();
   send_data(e, t, loc, n, ms, val);
-
 }
 
 void outputMetaEvent(char *msg, unsigned long ms) {
@@ -547,10 +543,11 @@ signed long readPressureOnly280(int idx)
     return LONG_MIN;
   }
 }
+
 signed long readPressureOnly680(int idx)
 {
   if (idx < 2) {
-        if (! bme680[idx].performReading()) {
+    if (! bme680[idx].performReading()) {
       Serial.println("Failed to perform reading :( for:");
       Serial.println(addr[idx], HEX);
       found_bme680[idx] = false;
@@ -567,7 +564,6 @@ signed long readPressureOnly680(int idx)
     return LONG_MIN;
   }
 }
-
 
 
 
@@ -630,7 +626,7 @@ void buttonB() {
   display.print("B");
 }
 
-// This is an experimental used of this event!!!
+// This is an experimental use of this event!!!
 void buttonC() {
   display.clearDisplay();
   display.setCursor(0, 10);
@@ -686,6 +682,7 @@ void displayFromMode(int mode) {
       break;
   }
 }
+
 // #define WHITE    0xFFFF
 void displayGraph() {
   display.clearDisplay();
@@ -694,17 +691,15 @@ void displayGraph() {
   display.println(buffer);
   display.println("cm ");
   display.println("H2O:");
-  display.println("0.0");
- 
+  display.println("0.0"); 
 
   for(int i = 0; i < SAMPLE_PIXELS; i++) {
     display.drawPixel(i+LEFT_PREFIX_AREA_X,(GRAPH_Y_PIXELS -1) - graph_samples[i],1);
   }
   display.display();
 
-
-  
 }
+
 void displayPressure(bool max_not_min) {
   // display.print(max_not_min ? "Max" : "Min" );
   display.print(" cm H2O: ");
@@ -888,12 +883,14 @@ void output_flow() {
       outputMeasurement('M', 'F', 'I', 0, ms, flow_milliliters_per_minute);
     }
 }
+
 void output_O2() {
    unsigned long fiO2Timer = millis(); 
    float fiO2 = (avgADC(O2CHANNEL) / initialO2) * 20.9;
    unsigned long ms = millis();
    outputMeasurement('M', 'O', 'I', 0, ms, fiO2);
 }
+
 void output_I_DPRES() {
     unsigned long ms = millis();
           // really this should be a running max, for now it is instantaneous
@@ -903,6 +900,7 @@ void output_I_DPRES() {
     uint8_t s = (GRAPH_Y_PIXELS * display_max_pressure) / MAX_PRESSURE_SCALE * 10;
     push_sample(s);
 }
+
 void output_I_ADPRES() {
     unsigned long ms = millis();
     signed long internal_pressure = readPressureOnly(INSPIRATORY_PRESSURE_SENSOR);
@@ -916,12 +914,15 @@ void output_I_ADPRES() {
      outputMetaEvent(INSPIRATORY_PRESSURE_SENSOR_ERROR, ms);
     }
 }
+
 void output_I_PRES() {
     output_PRES(0);
 }
+
 void output_B_PRES() {
   output_PRES(1);
 }
+
 void output_PRES(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
     int sensor = (idx == 0) ? INSPIRATORY_PRESSURE_SENSOR : AMBIENT_PRESSURE_SENSOR;
@@ -947,12 +948,14 @@ void output_temp(int idx) {
     outputMeasurement('M', 'T', loc, 0, ms, (signed long) (0.5 + 
       (found_bme280[idx] ? bme280[idx].readTemperature() : bme680[idx].readTemperature()) * 100));
 }
+
 void output_h2o(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
     unsigned long ms = millis();
     outputMeasurement('M', 'H', loc, 0, ms, (signed long) (0.5 + 
       (found_bme280[idx] ? bme280[idx].readHumidity() : bme680[idx].readHumidity()) * 100));
 }
+
 void output_alt(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
     unsigned long ms = millis();
@@ -962,6 +965,7 @@ void output_alt(int idx) {
         bme680[idx].readAltitude(SEALEVELPRESSURE_HPA) 
       ));
 }
+
 void output_gas(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
     unsigned long ms = millis();
@@ -1020,9 +1024,7 @@ void setWiFiEnabledFromEEPROM(char enabled) {
   EEPROM.commit();
 }
 
-
-void printCurrentCredentials() {
-    
+void printCurrentCredentials() {    
   char ssid[33];
   char password[121];
   getSSIDFromEEPROM(ssid);
@@ -1216,10 +1218,9 @@ void loop() {
     PERIOD_FLOW_ms = ms;
   }
 
-
   // Measures other than flow and pressure...
   // Some of these require a preparatory call to "peform_read", complicating the logic a bit..
-  // after we perform that, we can out put the ones that are demanded by the period...
+  // after we perform that, we can output the ones that are demanded by the period...
   ms = millis();
   if (found_bme(INSPIRATORY_PRESSURE_SENSOR)) {
     if (((PERIOD_I_TEMP_ms + PERIOD_I_TEMP)  < ms ) ||
@@ -1319,15 +1320,15 @@ void setup() {
   Serial.println(found_O2 ? "YES" : "NO");
 
   float raw_flow = flowSensor.readFlow();
-  // Let's wait and re-red to see if it is present...
+  // Let's wait and re-read to see if it is present...
   delay(50);
   raw_flow = flowSensor.readFlow(); 
   Serial.print("Found Flow Sensor : ");
   found_flow = !flowSensor.checkRange(raw_flow);
   Serial.println(found_flow ? "YES" : "NO");
 
-// Differential Pressure Sensor
-  Serial.print("Differentintial Pressure Sensor: ");
+  // Differential Pressure Sensor
+  Serial.print("Differential Pressure Sensor: ");
   found_diff_press = (readHSCPressure() != LONG_MIN);
   Serial.println(found_diff_press ? "YES" : "NO");
   Serial.println("XXXXXXXXXXXXXXXXXX");
