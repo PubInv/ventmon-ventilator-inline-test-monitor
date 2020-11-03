@@ -264,6 +264,7 @@ long readHSCPressure()
     if ( status == 3 ) {
        Serial.print("err diagnostic fault ");
        Serial.println(ps.status, BIN);
+       return LONG_MIN;
      }
      if ( status == 2 ) {
        // if data has already been feched since the last
@@ -1316,22 +1317,23 @@ void setup() {
     Serial.println("NO");
   }
   
-  Serial.println("Found O2 Sensor:");
+  Serial.print("Found O2 Sensor: ");
   Serial.println(found_O2 ? "YES" : "NO");
 
   float raw_flow = flowSensor.readFlow();
   // Let's wait and re-read to see if it is present...
   delay(50);
   raw_flow = flowSensor.readFlow(); 
-  Serial.print("Found Flow Sensor : ");
+  Serial.print("Found Flow Sensor: ");
   found_flow = !flowSensor.checkRange(raw_flow);
   Serial.println(found_flow ? "YES" : "NO");
 
   // Differential Pressure Sensor
   Serial.print("Differential Pressure Sensor: ");
+  // Differential Pressure Sensor: err diagnostic fault 11
   found_diff_press = (readHSCPressure() != LONG_MIN);
   Serial.println(found_diff_press ? "YES" : "NO");
-  Serial.println("XXXXXXXXXXXXXXXXXX");
+  Serial.println("----------------- SENSOR TEST COMPLETE -----------------");
   // TODO: Comment out for graphics testing...
   int ethernetEnabled = getEthernetEnabledFromEEPROM();
   if (ethernetEnabled) {
