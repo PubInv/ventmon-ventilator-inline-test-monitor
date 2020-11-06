@@ -245,7 +245,7 @@ Connect both sides of the solder bridge to engage the pullup resistors for the I
 
 %-----------------------------------------------------------
 % ENCLOSURE
-\item
+\item \label{itm:enclosure}
 Enclosure
 
 Before starting this step download and print the drill template. 
@@ -268,7 +268,7 @@ Pressure Sensor Assembly
 Drill out mounting holes refer to figure \ref{fig:bme_1} on page \pageref{fig:bme_1}
 \begin{enumerate}[label=3.1.\arabic*]
 \item
-Using the 7/64? drill bit, carefully enlarge the mounting holes in each corner of the sensor
+Using the 7/64'' drill bit, carefully enlarge the mounting holes in each corner of the sensor
 \item
 You can do all four or just two - one on the left side of one board and one on the right side of the other
 \end{enumerate}
@@ -313,7 +313,7 @@ Starting with Vin or GND insert the tinned lead through the appropriate hole and
 \item
 Flip the sensor assembly over and make sure solder has flowed through both through holes, adding some if needed
 \item
-Don?t worry if the solder does not flow perfectly
+Don't worry if the solder does not flow perfectly
 \item
 Pin the assembly back down and move to another connection following the connection table below
 \item
@@ -348,7 +348,7 @@ SCL & yellow \\
 Add address jumper to ambient pressure sensor. Refer to figure \ref{fig:bme_diagram} on page \pageref{fig:bme_diagram}
 \begin{enumerate}[label=3.5.\arabic*]
 \item
-Take a $1/2$ piece of hookup wire and strip both ends
+Take a $1/2$" piece of hookup wire and strip both ends
 \item
 Flow the solder in the GND through hole and poke one end of the hook up wire into the hole
 \item
@@ -366,7 +366,7 @@ Put the other end of the wire into the SDO through hole and apply solder
 
 %-----------------------------------------------------------
 % FLOW SENSOR
-\item
+\item \label{itm:flow}
 Flow Sensor Assembly
 
 \begin{enumerate}[label=4.\arabic*]
@@ -524,7 +524,7 @@ Zip tie sensor cable to enclosure. Refer to figure \ref{fig:ziptie} on page \pag
 \item
 Thread the small zip tie through the two mounting holes in the enclosure
 \item
-Push the qwiic connector end of the flow sensor cable through its hole in the enclosure. It?s a tight fit.
+Push the qwiic connector end of the flow sensor cable through its hole in the enclosure. It's a tight fit.
 \item
 Zip tie the cable to the side of the enclosure making sure that the jacket of the USB cable is engaged by the zip tie
 \end{enumerate}
@@ -596,16 +596,32 @@ PCB Assembly
 \item
 Enclosure
 
-Follow assembly instructions in section *enclosure*
+Follow assembly instructions in section \ref{itm:enclosure}.
 
 
 \item
 Flow Sensor Assembly
 
-Follow assembly instructions in section *flow sensor assembly*
+Follow assembly instructions in section \ref{itm:flow}.
 
 \item
 Oxygen Sensor Assembly
+
+\begin{enumerate}[label=4.\arabic*]
+\item
+Screw the airflow flange on to the oxygen sensor
+\item
+Plug sensor into the blue airway adaptor piece
+\item
+Plug one end of mono audio cable into bottom of oxygen sensor
+\item
+Plug the other end into the audio connector on the PCB
+\end{enumerate}
+
+
+
+
+
 
 
 
@@ -636,13 +652,6 @@ Final Assembly
 %> Demonstrate the use of the hardware for a relevant use case.
 %> If possible, characterize performance of the hardware over operational parameters.
 %> Create a bulleted list that describes the capabilities (and limitations) of the hardware. For example consider descriptions of load, operation time, spin speed, coefficient of variation, accuracy, precision and etc.
-
-\textit{Demonstrate the operation of the hardware and characterize its performance over relevant critical metrics
-\begin{itemize}
-\item Demonstrate the use of the hardware for a relevant use case.
-\item If possible, characterize performance of the hardware over operational parameters.
-\item Create a bulleted list that describes the capabilities (and limitations) of the hardware. For example consider descriptions of load, operation time, spin speed, coefficient of variation, accuracy, precision and etc.
-\end{itemize}}
 
 Because the VentMon produces pressure and flow graphs at about 25 samples per seconds which is fast compared to
 the physiological process of breathing, it is easy to have confidence in the basic dynamic function of the VentMon
