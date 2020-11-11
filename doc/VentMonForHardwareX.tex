@@ -20,6 +20,9 @@
     urlcolor=cyan,
 }
 
+\usepackage[backend=biber]{biblatex}
+\addbibresource{VentMon.bib}
+
 \urlstyle{same}
 
 % Set up the section label formatting
@@ -55,7 +58,7 @@
 \textbf{Abstract:}
 
 Humanitarian engineers responded to the pandemic ventilator shortage of March,
-2020, by beginning over 100 open source ventilator projects.
+2020, by beginning over 100 open source ventilator project\cite{COVID19VENTLIST}.
 Inexpensive ventilator test equipment facilitates projects forced
 to be geographically distributed by lockdowns.
 The VentMon is a modular, open source, IoT-enabled
@@ -127,7 +130,6 @@ Electrical engineering and computer science
       % insert a DOI URL to an approved source file repository:  Mendeley Data, theOSF, or Zenodo (instructions).  For example: "https://doi.org/10.5281/zenodo.3346799"
       % If there is no external repository write “Available in the article”
   \textit{DOI URL to an approved source file repository:  \href{https://data.mendeley.com/}{Mendeley Data}, the \href{http://osf.io}{OSF}, or \href{https://zenodo.org/}{Zenodo} \href{https://doi.org/10.5281/zenodo.3346799}{(instructions)}. For example:} \textit{https://doi.org/10.5281/zenodo.3346799} \linebreak \linebreak
-  \textit{If there is no external repository write “} \textit{Available in the article} \textit{"}
 \\\hline
 \end{tabu}
 \end{flushleft}
@@ -239,7 +241,7 @@ Connect both sides of the solder bridge to engage the pullup resistors for the I
 \centering
 \includegraphics[width=0.45\textwidth]{images/qwiic_top.JPG}
 \includegraphics[width=0.44\textwidth]{images/qwiic_bottom.JPG}
-\caption{SparkFun Qwiic Shield with male headers and I\textsuperscript{2}C pullups connected} 
+\caption{SparkFun Qwiic Shield with male headers and I\textsuperscript{2}C pullups connected}
 \label{fig:qwiic}
 \end{figure}
 
@@ -248,7 +250,7 @@ Connect both sides of the solder bridge to engage the pullup resistors for the I
 \item \label{itm:enclosure}
 Enclosure
 
-Before starting this step download and print the drill template. 
+Before starting this step download and print the drill template.
 
 \begin{enumerate}[label=2.\arabic*]
 \item
@@ -256,7 +258,7 @@ Cut out the template and tape it to the enclosure.
 \item
 Make sure the lid of the enclosure is firmly screwed on before drilling
 \item
-Drill holes in the locations denoted on template using the recommended drill sizes for each hole. 
+Drill holes in the locations denoted on template using the recommended drill sizes for each hole.
 \end{enumerate}
 
 %-----------------------------------------------------------
@@ -281,10 +283,10 @@ Carefully cut the trace coming from the SDO hole on the back side of one board
 This board will be used to measure the airway pressure
 \end{enumerate}
 \begin{figure}[H]
+\label{fig:bme_1}
 \centering
 \includegraphics[width=0.45\textwidth]{images/bme_1.JPG}
-\caption{BME 280 Eval board with drilled out holes and trace cut} 
-\label{fig:bme_1}
+\caption{BME 280 Eval board with drilled out holes and trace cut}
 \end{figure}
 
 \item
@@ -293,12 +295,12 @@ Assemble Cable. Refer to figure \ref{fig:bme_qwiic_cable} on page \pageref{fig:b
 \item
 Cut one connector off the Qwiic cable
 \item
-Strip and tin the last $1/4$" of the leads 
+Strip and tin the last $1/4$" of the leads
 \end{enumerate}
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.5\textwidth]{images/bme_qwiic_cable.JPG}
-\caption{Prepared Qwiic cable for BME sensor assembly} 
+\caption{Prepared Qwiic cable for BME sensor assembly}
 \label{fig:bme_qwiic_cable}
 \end{figure}
 \item
@@ -330,7 +332,7 @@ Signal & Qwiic Color\\  \hline
 GND & black  \\  \hline
 VIN & red \\  \hline
 SDA & blue \\  \hline
-SCL & yellow \\  
+SCL & yellow \\
 \hline
 \end{tabular}
 \caption{pressure sensor wiring}
@@ -338,10 +340,10 @@ SCL & yellow \\
 \end{table}
 
 \begin{figure}[H]
+\label{fig:bme_and_qwiic_cable}
 \centering
 \includegraphics[width=0.65\textwidth]{images/bme_and_qwiic_cable.JPG}
-\caption{Qwiic cable soldered to BME sensor assembly} 
-\label{fig:bme_and_qwiic_cable}
+\caption{Qwiic cable soldered to BME sensor assembly}
 \end{figure}
 
 \item
@@ -358,7 +360,7 @@ Put the other end of the wire into the SDO through hole and apply solder
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth]{images/bme_diagram.JPG}
-\caption{Qwiic cable soldered to BME sensor assembly} 
+\caption{Qwiic cable soldered to BME sensor assembly}
 \label{fig:bme_diagram}
 \end{figure}
 
@@ -373,7 +375,7 @@ Flow Sensor Assembly
 \item
 Assemble Cable. Refer to figure \ref{fig:flow_cable} on page \pageref{fig:flow_cable}
 
-The flow sensor requires a 5 V input, however we will run the I$^2$C bus at 3.3 V necessitating this cable. 
+The flow sensor requires a 5 V input, however we will run the I$^2$C bus at 3.3 V necessitating this cable.
 \\
 \begin{enumerate}[label=4.1.\arabic*]
 \item
@@ -400,7 +402,7 @@ USB & Qwiic & Signal \\  \hline
 black & black & GND \\  \hline
 green & blue & SDA \\  \hline
 white & yellow & SCK \\  \hline
-red & single 6'' wire & 5V \\  
+red & single 6'' wire & 5V \\
 \hline
 \end{tabular}
 \caption{flow sensor wiring}
@@ -414,11 +416,11 @@ Cover the finished joints with a short $1/4$'' piece of heat shrink
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.45\textwidth]{images/flow_1.JPG} 
-\includegraphics[width=0.45\textwidth]{images/flow_2.JPG} \\ 
-\includegraphics[width=0.45\textwidth]{images/flow_4.JPG} 
-\includegraphics[width=0.45\textwidth]{images/flow_3.JPG} 
-\caption{Clockwise progression of sensor cable assembly.} 
+\includegraphics[width=0.45\textwidth]{images/flow_1.JPG}
+\includegraphics[width=0.45\textwidth]{images/flow_2.JPG} \\
+\includegraphics[width=0.45\textwidth]{images/flow_4.JPG}
+\includegraphics[width=0.45\textwidth]{images/flow_3.JPG}
+\caption{Clockwise progression of sensor cable assembly.}
 \label{fig:flow_cable}
 \end{figure}
 
@@ -440,10 +442,10 @@ Connect the end of each lead to the pads you have prepared by touching the tip o
 Refer to the SFM3400 datasheet to be sure you are connecting them in the proper position.
 \end{enumerate}
 \begin{figure}[H]
+\label{fig:flow_sensor}
 \centering
-\includegraphics[width=0.6\textwidth]{images/flow_cable.JPG} 
-\caption{Sensor connected to cable assembly.} 
-\label{fig:flow_sesor}
+\includegraphics[width=0.6\textwidth]{images/flow_cable.JPG}
+\caption{Sensor connected to cable assembly.}
 \end{figure}
 
 \item
@@ -467,7 +469,7 @@ Use electrical tape to secure any loose connections
 \centering
 \includegraphics[width=0.8\textwidth]{images/adapters_1.JPG} \\
 \includegraphics[width=0.6\textwidth]{images/adapters_2.JPG} \\
-\caption{Adapters assembled inline with sensor.} 
+\caption{Adapters assembled inline with sensor.}
 \label{fig:adapters}
 \end{figure}
 
@@ -495,8 +497,8 @@ Be very careful not to get glue on the sensor and make sure that the hose is sec
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.4\textwidth]{images/bme_standoffs.JPG}
-\includegraphics[width=0.6\textwidth, angle =90 ]{images/hotglue.JPG} 
-\caption{Standoffs installed on pressure sensor assembly and oxygen hose prepared for gluing.} 
+\includegraphics[width=0.6\textwidth, angle =90 ]{images/hotglue.JPG}
+\caption{Standoffs installed on pressure sensor assembly and oxygen hose prepared for gluing.}
 \label{fig:bme_glue}
 \end{figure}
 
@@ -514,8 +516,8 @@ Attach the standoffs into the enclosure from the outside using two machine screw
 \end{enumerate}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{images/bmeinbox.JPG} 
-\caption{Pressure sensor assembly installed in enclosure.} 
+\includegraphics[width=0.8\textwidth]{images/bmeinbox.JPG}
+\caption{Pressure sensor assembly installed in enclosure.}
 \label{fig:bmeinbox}
 \end{figure}
 \item
@@ -530,8 +532,8 @@ Zip tie the cable to the side of the enclosure making sure that the jacket of th
 \end{enumerate}
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.8\textwidth]{images/ziptie.JPG} 
-\caption{Flow sensor cable with strain relief.} 
+\includegraphics[width=0.8\textwidth]{images/ziptie.JPG}
+\caption{Flow sensor cable with strain relief.}
 \label{fig:ziptie}
 \end{figure}
 
@@ -555,8 +557,8 @@ Wrap a piece of electrical tape around the flow sensor covering the exposed pads
 Add identification card on the next page card to enclosure.
 \begin{figure}[H]
 \centering
-\includegraphics[width=\textwidth]{images/final_assembly_with_tape.JPG} 
-\caption{Final assembly.} 
+\includegraphics[width=\textwidth]{images/final_assembly_with_tape.JPG}
+\caption{Final assembly.}
 \label{fig:final}
 \end{figure}
 %\begin{enumerate}[label=5.4.\arabic*]
@@ -645,6 +647,34 @@ Final Assembly
 \item Highlight potential safety hazards.
 \end{itemize}}
 
+\subsection{VentMon T0.3}
+
+{\em The VentMon T0.3 is not meant to be used on human patients. } The basic usage is to plug the VentMon 22mm airway in between
+a respriation assistance device being tested (such as a pandemic ventilator or CPAP machine) and a simply physical test lung which
+models compliance and resistance of the human lung.
+
+There are four ways to get data from the VentMon of varying quality and convenience with the firmware at the time of this writing.
+\begin{enumerate}
+\item After startup, the VentMon will begin displaying a real-time pressure graph on its small OLED screen, with a scale of 40 cmH2O. This display is too small for testing performance, but is a nice check that the breathing circuit is in place and functioning. You can ``smoke test'' this by breathing into the VentMon and plugging one end with your hand.
+\item The VentMon spews a LOT of data out on the serial port in the PIRDS format. Using the serial monitor build into the Arudino IDE, you can visually inspect this data. The volume of the data makes this a cumbersome. You are free to write a serial-port reader of your own for programmatic interpretation.
+\item At startup, by default configuration (it can be enabled or disabled), the VentMon tries to see if their is a cable connected to the Ethernet RJ45 jack.
+  Plug the other end of the cable into your router. If found and enabled, the VentMon will begin sending PIRDS data to the logger at \url{ventmon.coslabs.com}.
+  Your data can be viewed in real time by pointing a browser at the URL. Your IP address will appear near the top of the list; by clicking on ``Breath Plot'' you will be able to see a complete clinical display.
+\item Similarly at startup, the VentMon will attempt to establish a WiFi connection. Using the WiFi connection will transmit exactly the same PIRDS data the logger
+  at \url{ventmon.coslabs.com} and can be used in precisely  the same way. However, the VentMon has to know a valid SSID and password to make the WiFi connection.
+  This is configured via the Arduino serial monitor by sending a ``c'' character (for configure) to the VentMon. It will then pause operation for 10 seconds and give
+  instructions for enterring the SSID and password. In this same configuration you can enable or disable the WiFi and the Ethernet connection if you choosed.
+  These settings are stored in the EEPROM, and survive a loss of power.
+\end{enumerate}
+
+Pressing the ``C'' button on the VentMon send a special signal to the PIRDS logger to ``rotate the log'' from this IP address. At the public data lake the current file will be copied to a file which a date and timestamp.
+
+\subsection{VentMon COTS Version}
+
+A practitioner who makes their own version of the VentMon from commercial off-the-shelf parts without ordering a PCB will likely understand how to install
+and modify the firmware. The usage will likely be the same, though at the time of this writing some features
+may not be available in the software they are using, such as WiFi configuration.
+
 \section{Validation and characterization}
 
 
@@ -684,11 +714,12 @@ The Mozilla Open Source Software foundation gave Public Invention a grant that a
 provide 20 VentMons to open source teams around the world free-of-charge, including paying shipping costs.
 Protocol Labs provided Public Invention a grant that has been used web communication and conference costs.
 
-We would like to thank early adopters of the VentMon on pandemic ventilator teams such as the ARMEE\cite{} and
-DIY-Beatmungsgerät.de\cite{}
+We would like to thank early adopters of the VentMon on pandemic ventilator teams such as the ARMEE\cite{ARMEE} and
+DIY-Beatmungsgerät.de\cite{beatmung}
 who gave us valuable bug reports and feedback.
 
-Student volunteers on the COVID19-vent-list project\cite{} helped to make the need for the VentMon clear by assessing over 100
+Student volunteers on the COVID19-vent-list project\cite{COVID19VENTLIST}
+helped to make the need for the VentMon clear by assessing over 100
 pandemic ventilator teams.
 
 \section{Declaration of interest}
@@ -702,7 +733,7 @@ None.
 % This work touched no humans or animals, I belive this section can be ommmited entirely.
 % \section{Human and animal rights}
 
-\iffalse
+
 
 \section*{References}
 %> Include at least one reference, to the original publication of the hardware you customized.
@@ -714,7 +745,9 @@ None.
 \end{itemize}}
 
 
-\fi
+
+
+\printbibliography
 
 \end{document}
 
@@ -769,3 +802,10 @@ None.
 @misc{beatmnug,
   url = {https://www.xn--diy-beatmungsgert-5qb.de/}
   }
+
+% TODOS:
+% * I need to go back and create a separate branch for the T0.2 code and test it
+% * This needs to be documented
+% * Operating instructions need to be added
+% * We need to decide what to do about V.0.3 in terms of this paper; should we add instructions
+% * References section sould be done with bibtex
