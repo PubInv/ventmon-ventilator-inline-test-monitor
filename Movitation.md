@@ -23,7 +23,7 @@ The spreadsheet is licenced under CC0, so you can make a copy of it and use it f
 
 ## Physical Test Lungs
 
-I believe that a test lung is meant to provide a resistance to inflation which models a human lung.  An example of a purchasble device is:
+I believe that a test lung is meant to provide a resistance to inflation which models a human lung.  An example of a purchasable device is:
 
 [Allied Healthcare AHP300 Mechanical Test Lung](https://mfimedical.com/products/allied-healthcare-ahp300-mechanical-test-lung?variant=1189831180302&gclid=Cj0KCQjwjcfzBRCHARIsAO-1_Or1bEKy4YffCthJD3sTJYzZy1JlM-ttMZ_1h6WHfgKte8mN4AA_c_AaAkGCEALw_wcB)
 
