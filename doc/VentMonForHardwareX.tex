@@ -165,8 +165,6 @@ Although the reliance on the internet is a strength for a distributed engineerin
 \section{Design files}
 % The  complete  design  files  must  be  either  uploaded  to  an  approved  online  repository,  uploaded  at the  time  of  submission  on  the  online  Editorial  Manager  submission  interface  as  supplementary materials [CAD files, videos,. . . ], or included in the body of the manuscript [e.g.  figures].  The three approved  online  repositories  are  Mendeley  Data,  the  Open  Science  Framework,  and  Zenodo. See repository instructions: https://doi.org/10.5281/zenodo.3346799
 
-TODO Need to make hyperlinks colored in \textit{Location of File} column
-
 \subsection{Design Files Summary}
 % Please include a summary of all design files for your hardware by filling rows of the table below
 
@@ -175,16 +173,36 @@ TODO Need to make hyperlinks colored in \textit{Location of File} column
 \hline
 \textbf{Design filename} & \textbf{File type} & \textbf{Open source license} & \textbf{Location of the file} \\\hline
 %Insert design files
-Embedded Firmware & C++ Source Code & MIT License &  \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/VentMonFirmware}{VentMon Firmware}\\\hline
-PIRDS Data Viewer & HTML Source Code &  MIT License &  \href{https://github.com/PubInv/vent-display}{Vent Display} \\\hline
-PIRDS Data Logger & C Source Files & MIT License & \href{https://github.com/PubInv/PIRDS-logger}{PIRDS Logger} \\\hline
-VentMon T0.3 PCB & PCB Design Files & MIT License & \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/pcb}{VentMon PCB} \\\hline
-Pressure Sensor and Airway Adaptor & STL File & MIT License &  \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/3dparts}{VentMon Adaptors}\\\hline
-PIRDS Data Standard & \\\hline
+(1) Embedded Firmware & C++ Source Code & MIT License &  \href{ttps://github.com/PubInv/ventmon-ventilator-inline-test-monitor/releases/tag/v0.2}{ttps://github.com/PubInv/ventmon-ventilator-inline-test-monitor/releases/tag/v0.2}\\\hline
+(2) Embedded Firmware (v0.2 COTS version) & C++ Source Code & MIT License &  \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/VentMonFirmware}{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/VentMonFirmware}\\\hline
+(3) PIRDS Data Viewer (Vent Display) & HTML Source Code &  MIT License &  \href{https://github.com/PubInv/vent-display}{https://github.com/PubInv/vent-display} \\\hline
+(4) PIRDS Data Logger & C Source Files & MIT License & \href{https://github.com/PubInv/PIRDS-logger}{https://github.com/PubInv/PIRDS-logger} \\\hline
+(5) PIRDS Data Standard & Documented standard, and C-language binding & Creative Commons Zero (Universal) for documents, GPL 3.0 for code binding &
+\href{https://github.com/PubInv/PIRDS-respiration-data-standard}{https://github.com/PubInv/PIRDS-respiration-data-standard} \\\hline
+(6) VentMon T0.3 PCB & PCB Design Files & MIT License & \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/pcb}{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/pcb} \\\hline
+(7) Pressure Sensor and Airway Adaptor & STL File & MIT License &  \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/3dparts}{VentMon Adaptorhttps://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/3dparts}\\\hline
 
 % Design file 3 & File type & License & Link \\\hline
 
 \end{tabu}
+
+We promote an open, modular, and composable respiration ecosystem. Therefore, we have more separate repositories and modules than would strictly be needed if we were only making the VentMon project,
+in hopes that smaller modules may be reusable even by those who have not use for the VentMon specifically.
+
+\begin{enumerate}
+\item The main firmware is written in the Arudino environment, and though targeting and ESP32 could easily apply to other boards. This core firmware manages reading the various senosrs, and
+outputs its data both on built in OLED (for function testing), and, more importantly, via the PIRDS standard to a public data lake where a separate module renders it with a display appropriate
+for a clinician.
+\item Although our current focus is on a printed circuit board version of the VentMon, we report here a system that can be made by an amateur using only commercial off-the-shelf (COTS) parts.
+  This is verison T0.2 of the tester, and software that matches it (slightly incompatible with the current version) is tagged.
+\item Although the VentMon has a tiny OLED screen and graphs pressure, it is too small for more than smoke testing. For serious performance testing and eventual clinical use, we
+  use VentDisplay, a browser-delivered JavaScript code that presents a full clinical display.
+\item The VentDisplay software can be pointed at a logger that serves up data in the PIRDS format. This logger takes data from UDP packages and writes them to a file, which can then be
+  served up by a webserver to any requester.
+  \item Integral the VentDisplay and PIRDS Data Logger is the Public Invention Respiration Data Standard (PIRDS). This is a documented standard.
+\end{enumerate}
+
+
 
 % For each design file listed in the summary above, include a short description of the file below (one or two sentences)
 \textit{For each design file listed above, include a short description of the file here (one or two sentences)}
@@ -212,9 +230,21 @@ PIRDS Data Standard & \\\hline
 % > Clearly reference design files and component parts described in the Design File Summary and Bill of Materials.
 % >Highlight potential safety concerns that may arise
 
-Two versions of VentMon can be assembled depending on availability of parts and time. The most physically robust and complete version of VentMon requires the purchase and manufacture of a PCB as well as a number of 3D printed plastic parts. The designs of the PCB and 3D printed parts are fully open; in practice, due to the fact that PCBs have a high set up cost, it makes most sense to use the PCB if you are bulding 10 or more VentMons. This version of the device requires the least amount of time to assemble and contains fewest discrete components. Due to the high cost of PCB manufacture and assembly, VentMon can also be created using off the shelf components readily available from DIY electronics suppliers. This version requires significantly more assembly time. We believe this has been done twice by third parties with little interaction with us. Both assembly procedures are outlined below.
+Two versions of VentMon can be assembled depending on availability of parts and time.
+The most physically robust and complete version of VentMon requires the purchase and manufacture of a PCB as well as
+a number of 3D printed plastic parts. The designs of the PCB and 3D printed parts are fully open;
+in practice, due to the fact that PCBs have a high set up cost, it makes most sense to use the PCB if you are bulding 10 or more VentMons.
+This version of the device requires the least amount of time to assemble and contains fewest discrete components.
+Due to the high cost of PCB manufacture and assembly, VentMon can also be created using off the shelf components
+readily available from DIY electronics suppliers. This version requires significantly more assembly time.
+We believe this has been done twice by third parties with little interaction with us. Both assembly procedures are outlined below.
 
-\subsection{COTS Based VentMon}
+\subsection{COTS Based VentMon (T0.2)}
+
+{\em The VentMon T0.3 is not meant to be used on human patients. } The COTS version uses firmware v0.2 tagged as such\cite{VentMon02}. This version is somewhat incompatible
+with v0.3 (described below), which uses a PCB, and which is
+the focus of our main developement.
+
 \begin{enumerate}
 
 %-----------------------------------------------------------
@@ -568,7 +598,7 @@ Add identification card on the next page card to enclosure.
 
 %-----------------------------------------------------------
 
-\subsection{PCB Based VentMon}
+\subsection{PCB Based VentMon (T0.3}
 
 This version of VentMon requires two 3D printed parts  -- one encapsulated an on-board pressure sensor and one is an airway adaptor -- as well as a PCB assembly. Before beginning the assembly process make sure that you have manufactured those three parts.
 
@@ -768,44 +798,3 @@ None.
 
 % Notes:
 % Potential reviewers: Michelle Mellenthin, Eric Schulz
-
-% Here is our BibTex entry to the DOI for this version:
-@software{robert_l_read_2020_4079170,
-  author       = {Robert L. Read and
-                  Lauria Clarke and
-                  Darío Hereñú and
-                  Geoff Mulligan},
-  title        = {{PubInv/ventmon-ventilator-inline-test-monitor:
-                   v0.3T - Ventmon Tester 0.3}},
-  month        = oct,
-  year         = 2020,
-  publisher    = {Zenodo},
-  version      = {v0.3T},
-  doi          = {10.5281/zenodo.4079170},
-  url          = {https://doi.org/10.5281/zenodo.4079170}
-}
-
-@misc{
-  author = {Robert L. Read and
-    Avinash Baskaran and
-    Enrique Villacres and
-    Keeshan Patel},
-  title = {COVID-19 Vent List},
-  month        = oct,
-  year         = 2020,
-  url = {https://docs.google.com/spreadsheets/d/1inYw5H4RiL0AC_J9vPWzJxXCdlkMLPBRdPgEVKF8DZw/edit#gid=0}
-  }
-
-@mics{ARMEE,
-  url = {https://armeevent.com/}
-}
-@misc{beatmnug,
-  url = {https://www.xn--diy-beatmungsgert-5qb.de/}
-  }
-
-% TODOS:
-% * I need to go back and create a separate branch for the T0.2 code and test it
-% * This needs to be documented
-% * Operating instructions need to be added
-% * We need to decide what to do about V.0.3 in terms of this paper; should we add instructions
-% * References section sould be done with bibtex
