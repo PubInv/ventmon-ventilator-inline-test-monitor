@@ -58,7 +58,7 @@
 \textbf{Abstract:}
 
 Humanitarian engineers responded to the pandemic ventilator shortage of March,
-2020, by beginning over 100 open source ventilator projecta\cite{COVID19VENTLIST}.
+2020, by beginning over 100 open source ventilator projecta\cite{COVID19VENTLIST,pearce2020review}.
 Inexpensive ventilator test equipment facilitates projects forced
 to be geographically distributed by lockdowns.
 The VentMon is a modular, open source, IoT-enabled
@@ -137,7 +137,7 @@ Electrical engineering and computer science
 
 \section{Hardware in context}
 % Include a short description of the hardware, putting into context of similar open hardware and proprietary equipment in the field.
-The Coronavirus pandemic has created a potential global shortage of ventilators.
+The Coronavirus pandemic has created a potential global shortage of ventilators\cite{pearce2020review}.
 Ventilators are expensive to manufacture and during uncertain times supply chains can be disrupted,
 increasing the cost and scarcity of these devices.
 Since the beginning of the pandemic in March, there has been a large movement to develop cheaper, more supply chain-resilient, ventilators.
@@ -177,7 +177,10 @@ The VentMon thus offer benefits to teams developing ventilation devices:
 
 Moreover, being completely open, it supports modifcation, extension, and importantly but only potentially at present, integration into a complete ventilator. A ventilator that chose to offer a graphical trace of pressure and flow, which are generally demanded by clinicians for all but emergency transport situations, could incorporate the open source VentMon into its complete design.
 
-Although the reliance on the internet is a strength for a distributed engineering team, it would be a disadvantage it a field hospital. Although aiming to eventually be safe enough and reliable to be used as a monitor on human patients, it requires much improvement before it is ready for that intended use.
+Although the reliance on the internet is a strength for a distributed engineering team,
+it would be a disadvantage it a field hospital.
+Although aiming to eventually be safe enough and reliable to be used as a monitor on human patients,
+it requires much improvement before it is ready for that intended use.
 
 \section{Design files}
 % The  complete  design  files  must  be  either  uploaded  to  an  approved  online  repository,  uploaded  at the  time  of  submission  on  the  online  Editorial  Manager  submission  interface  as  supplementary materials [CAD files, videos,. . . ], or included in the body of the manuscript [e.g.  figures].  The three approved  online  repositories  are  Mendeley  Data,  the  Open  Science  Framework,  and  Zenodo. See repository instructions: https://doi.org/10.5281/zenodo.3346799
@@ -237,12 +240,11 @@ for a clinician.
 
 % > For material type, select from: Metal, semi-conductor, ceramic, polymer, biomaterial, organic, inorganic, composite, nanomaterial, semiconductor, non-specific, or other
 
-{\bf Current Link:} \href{https://docs.google.com/spreadsheets/d/1EaXni1Mxnvv0jaeDQ9I1xbvPcNkRtYN8TABCBzB3cpw/edit#gid=1846296871}{VentMon HardwareX BOM}
+The Bill of Materials specifies the parts needed to build the VentMon in a simple enclosure with drilled-out ports for cables.
+The parts are typical of hobby electronics. The BOM includes sections for both versions described below.
 
-\begin{itemize}
-\item BOM needs to be converted to PDF and uploaded per instructions: \\
-\textit{For a complex Bill of Materials, the complete Bill of Materials (editable spreadsheet file e.g., ODS file type or PDF file) can be uploaded in an open access online location such as the Open Science Frameworks repository. Include the link here. Alternatively, the Bill of Materials can be uploaded at the time of submission on the online Elsevier submission interface as supplementary material.}
-\end{itemize}
+{\bf Current Link:} \href{https://doi.org/10.5281/zenodo.4289426}{VentMon  BOM}
+
 
 
 \section{Build instructions}
@@ -722,9 +724,13 @@ Plug the other end into the audio connector on the PCB
 
 \subsection{VentMon T0.3}
 
-{\em The VentMon T0.3 is not meant to be used on human patients. } The basic usage is to plug the VentMon 22mm airway in between
+{\em The VentMon T0.3 is not meant to be used on human patients. }
+The purpose of the VentMon is to measure, log, validate and verify the performance of rapdily manufactured ventilators,
+PAPRs, BPAP, and CPAP machines.
+The basic usage is to plug the VentMon 22mm airway in between
 a respriation assistance device being tested (such as a pandemic ventilator or CPAP machine) and a simple physical test lung which
-models compliance and resistance of the human lung (see Figure \ref{fig:vtestusage}).
+models compliance and resistance of the human lung (see Figure \ref{fig:vtestusage}). The VentMon then provides approximately
+the functionality of a {\em breating simulator}, without being able to model the patient triggering a breath spontaneously.
 
 There are four ways to get data from the VentMon of varying quality and convenience with the firmware at the time of this writing.
 \begin{enumerate}
@@ -777,7 +783,7 @@ under-appreciated performance characteristic of rapidly manufactured emergency v
 This software has been shown to be valuable, although it is dependent on accurate software decisions about
 the beginning and the ending of a breath, which can be subtle in some situations.
 
-The VentMon published data in the Public Invention Repsiration Data Standard format \cite{}, which we created to provide a standard for multiple teams
+The VentMon published data in the Public Invention Repsiration Data Standard format \cite{PIRDS}, which we created to provide a standard for multiple teams
 to cooperate. A consequence of using this standard and IoT cloud-based software is the ability to support a distibuted engineering team,
 which has been almost required by the COVID-19 social distancing measures. We aspire to someday support telemedicine as suggested by others\cite{rehm2018development}.
 
