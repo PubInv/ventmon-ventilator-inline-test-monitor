@@ -129,7 +129,9 @@ Electrical engineering and computer science
   % Link to the source file repository
       % insert a DOI URL to an approved source file repository:  Mendeley Data, theOSF, or Zenodo (instructions).  For example: "https://doi.org/10.5281/zenodo.3346799"
       % If there is no external repository write “Available in the article”
-  \textit{DOI URL to an approved source file repository:  \href{https://data.mendeley.com/}{Mendeley Data}, the \href{http://osf.io}{OSF}, or \href{https://zenodo.org/}{Zenodo} \href{https://doi.org/10.5281/zenodo.3346799}{(instructions)}. For example:} \textit{https://doi.org/10.5281/zenodo.3346799} \linebreak \linebreak
+  %% \textit{DOI URL to an approved source file repository:  \href{https://data.mendeley.com/}{Mendeley Data}, the \href{http://osf.io}{OSF}, or \href{https://zenodo.org/}{Zenodo} \href{https://doi.org/10.5281/zenodo.3346799}{(instructions)}. For example:} \textit{https://doi.org/10.5281/zenodo.3346799}
+%  \linebreak
+%  \linebreak
 \\\hline
 \end{tabu}
 \end{flushleft}
@@ -189,18 +191,18 @@ it requires much improvement before it is ready for that intended use.
 % Please include a summary of all design files for your hardware by filling rows of the table below
 
 \tabulinesep=1ex
-\begin{tabu} to \linewidth {|X|X|X[1.5,1]|X[1.5,1]|}
+\begin{tabu} to \linewidth {|X[1.5]|X|X[1.5,1]|X[3]|}
 \hline
 \textbf{Design filename} & \textbf{File type} & \textbf{Open source license [check these]} & \textbf{Location of the file} \\\hline
 %Insert design files
-(1) Embedded Firmware & C++ Source Code & MIT License &  \href{ttps://github.com/PubInv/ventmon-ventilator-inline-test-monitor/releases/tag/v0.2}{ttps://github.com/PubInv/ventmon-ventilator-inline-test-monitor/releases/tag/v0.2}\\\hline
-(2) Embedded Firmware (v0.2 COTS version) & C++ Source Code & MIT License &  \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/VentMonFirmware}{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/VentMonFirmware}\\\hline
-(3) PIRDS Data Viewer (Vent Display) & HTML Source Code &  MIT License &  \href{https://github.com/PubInv/vent-display}{https://github.com/PubInv/vent-display} \\\hline
-(4) PIRDS Data Logger & C Source Files & MIT License & \href{https://github.com/PubInv/PIRDS-logger}{https://github.com/PubInv/PIRDS-logger} \\\hline
+(1) Embedded Firmware (v0.3 PCB version) & C++ Source Code & MIT License &  \href{https://doi.org/10.5281/zenodo.4079170}{10.5281/zenodo.4079170}\\\hline
+(2) Embedded Firmware (v0.2 COTS version) & C++ Source Code & MIT License &  \href{https://doi.org/10.5281/zenodo.4291147}{10.5281/zenodo.4291147}\\\hline
+(3) VentDisplay PIRDS Data Viewer  & HTML Source Code &  MIT License &  \href{http://doi.org/10.5281/zenodo.4079355}{10.5281/zenodo.4079374} \\\hline
+(4) PIRDS Data Logger & C Source Files & MIT License & \href{https://doi.org/10.5281/zenodo.4079382}{10.5281/zenodo.4079382} \\\hline
 (5) PIRDS Data Standard & Documented standard, and C-language binding & Creative Commons Zero (Universal) for documents, GPL 3.0 for code binding &
-\href{https://github.com/PubInv/PIRDS-respiration-data-standard}{https://github.com/PubInv/PIRDS-respiration-data-standard} \\\hline
-(6) VentMon T0.3 PCB & PCB Design Files & MIT License & \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/pcb}{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/pcb} \\\hline
-(7) Pressure Sensor and Airway Adaptor & STL File & MIT License &  \href{https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/3dparts}{VentMon Adaptorhttps://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/3dparts}\\\hline
+\href{http://doi.org/10.5281/zenodo.4079355}{10.5281/zenodo.4079355} \\\hline
+(6) VentMon T0.3 PCB & PCB Design Files & MIT License &  \href{https://doi.org/10.5281/zenodo.4079170}{10.5281/zenodo.4079170} (see {\em design/pcb}) \\\hline
+(7) Pressure Sensor and Airway Adaptor & STL File & MIT License &  \href{https://doi.org/10.5281/zenodo.4079170}{10.5281/zenodo.4079170} (see {\em design/3dparts}) \\\hline
 
 % Design file 3 & File type & License & Link \\\hline
 
@@ -241,11 +243,50 @@ for a clinician.
 % > For material type, select from: Metal, semi-conductor, ceramic, polymer, biomaterial, organic, inorganic, composite, nanomaterial, semiconductor, non-specific, or other
 
 The Bill of Materials specifies the parts needed to build the VentMon in a simple enclosure with drilled-out ports for cables.
-The parts are typical of hobby electronics. The BOM includes sections for both versions described below.
+The parts are typical of hobby electronics.
+
+
+\tabulinesep=1ex
+\begin{tabu} to \linewidth {|X[0.5]|X[3]|X[0.5]|X|X|X|X[3]|}
+  \hline
+\textbf{ Designator} &	\textbf{Component} & \textbf{Number} & \textbf{Cost/Unit} & \textbf{Total Cost}& \textbf{Source} & \textbf{Material Type} \\\hline
+U1 &	PARTICLE ETHERNET FEATHERWING &	1 &	\$20.11 &	\$20.11  &	Adafruit &	Semiconductor/Other \\\hline
+U2 &	HUZZAH32 ESP32 FEATHER MALE HDR	& 1 &	\$21.95	& \$21.95 &	Adafruit&	Semiconductor/Other \\\hline
+U3 &	SPARKFUN QWIIC SHIELD FOR THING	& 1 &	\$3.50	& \$3.50 &	Digikey	& Semiconductor/Other \\\hline
+U4 &	ADS1115 16 Bit ADC &	1&	\$14.95	& \$14.95 &	Adafruit	& Semiconductor/Other \\\hline
+U5 &	OLED Feather Wing &	1&	\$14.95	& \$14.95 &	Adafruit &	Semiconductor/Other \\\hline
+C1, C2 &	QWIIC CABLE - 200MM &	2 &	\$1.56 &	\$3.12 &	Digikey	& Metal/Plastic \\\hline
+C3 &	USB Cable &	1 &	\$1.80 &	\$1.80	& Digikey &	Metal/Plastic \\\hline
+C4 &	Oxygen Sensor Cable &	1 &	\$4.00 &	\$4.00 &	Oxycheq &	Metal/Plastic \\\hline
+H1 &	M2.5 Screws &	12 &	\$0.38	& \$4.56 &	Digikey	& Metal \\\hline
+H2 &	M2.5 Standoffs - Female, Female	& 6 &	\$0.45 &	\$2.70	& Digikey &	Metal \\\hline
+OS1 &	R-17S Oxygen Sensor &	1 &	\$80.00 &	\$80.00	 & Oxycheq &	Metal/Plastic \\\hline
+FS1 &	\textbf{Flow Sensor} &	1 & \textbf{see note below}	&	\$0.00	& &	Metal/Plastic \\\hline
+PS1, PS2 &	BME680 SENSOR EVAL BOARD &	2 &	\$22.50 &	\$45.00	& Adafruit &	Semiconductor/Other \\\hline
+P1 &	Processor Enclosure &	1 &	\$9.95 &	\$9.95 &	Digikey	 & Plastic \\\hline
+P2 &	Bleed Adapter	& 1 &	\$5.50 &	\$5.50 &	Oxygen Supply	& Plastic \\\hline
+P3 &	Oxygen Sensor T	& 1 &	\$9.00 &	\$9.00	& Oxycheq &	Plastic \\\hline
+P4 &	15 mm OD to 22 mm OD adaptor &	1 &	\$0.54 & 	\$0.54	& &	Plastic \\\hline
+P5 &	15 mm ID to 22 mm OD adaptor &	1 &	\$0.35 & 	\$0.35	& &	Plastic \\\hline
+T1 &	Oxygen Tubing &	1 &	\$2.25	& \$2.25 &	Oxygen Supply	& Plastic \\\hline
+\end{tabu}
+
+Note: The flow sensor is one of the most expensive and critical parts. Throughout mid-2020 there was a global shortage of flow sensors,
+including the three electrically compatible with the VentMon as currently designed.
+The SFM3400-33-D (disposable version \$40USD), Sensirion SFM3200-250 (\$145USD),  and Sensirion SFM3200-AW (\$180USD autoclavable version).
+We shipped VentMons with all three depending on availability. The VentMon is not designed for use with humans, but if it were,
+the autoclavable version would have the advantage of sanitizability of a complete sanitization procedure were designed.
+This is important, as we hope the VentMon will be modified and integrated into a rapidly manufactured ventilator, for which
+sanitization is critical.
+
+
+The link below is to a spreadsheet which is includes the PCB-version as well, which is very similar accept
+for the PCB itself. By following the link below, you can reach browsable URLs to most of the non-commodity parts. The specific
+BOM for the SMD parts needed to assemble the PCB (which would probably be done as a service, rather than by a reader
+of this article by hand) can be found in our GitHub repo in the directory named {\em design/pcb}  along with the Eagle files:
+\cite{ventmon}.
 
 {\bf Current Link:} \href{https://doi.org/10.5281/zenodo.4289426}{VentMon  BOM}
-
-
 
 \section{Build instructions}
 %Provide detailed, step by step instructions for the construction of the reported hardware include all necessary information for reproducing the submitted hardware.
@@ -265,7 +306,8 @@ We believe this has been done twice by third parties with little interaction wit
 
 \subsection{COTS Based VentMon (T0.2)}
 
-{\em The VentMon T0.2 is not meant to be used on human patients. } The COTS version uses firmware v0.2 tagged as such\cite{VentMon02}. This version is somewhat incompatible
+{\em The VentMon T0.2 is not meant to be used on human patients. }
+The COTS version uses firmware v0.2 tagged as such\cite{VentMon02}. This version is somewhat incompatible
 with v0.3 (described below), which uses a PCB, and which is
 the focus of our main developement.
 
@@ -707,13 +749,6 @@ Plug the other end into the audio connector on the PCB
 %> Use visual instructions as necessary.
 %> Highlight potential safety hazards.
 
-\textit{Provide detailed instructions for the safe and proper operation of the hardware.
-\begin{itemize}
-\item Step-by-step operational instructions for operating the hardware.
-\item Use visual instructions as necessary.
-\item Highlight potential safety hazards.
-\end{itemize}}
-
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{images/VentMonOverallArchitecture.png}
@@ -737,7 +772,7 @@ There are four ways to get data from the VentMon of varying quality and convenie
 \item After startup, the VentMon will begin displaying a real-time pressure graph on its small OLED screen, with a scale of 40 cmH2O. This display is too small for testing performance, but is a nice check that the breathing circuit is in place and functioning. You can ``smoke test'' this by breathing into the VentMon and plugging one end with your hand.
 \item The VentMon spews a LOT of data out on the serial port in the PIRDS format. Using the serial monitor build into the Arudino IDE, you can visually inspect this data. The volume of the data makes this a cumbersome. You are free to write a serial-port reader of your own for programmatic interpretation.
 \item At startup, by default configuration (it can be enabled or disabled), the VentMon tries to see if their is a cable connected to the Ethernet RJ45 jack.
-  Plug the other end of the cable into your router. If found and enabled, the VentMon will begin sending PIRDS data to the logger at \url{ventmon.coslabs.com}.
+  Plug the other end of the cable into your router. If found and enabled, the VentMon will begin sending PIRDS\cite{PIRDS} data to the logger at \url{ventmon.coslabs.com}\cite{PIRDSlogger}.
   Your data can be viewed in real time by pointing a browser at the URL. Your IP address will appear near the top of the list with other recent or current users;
   by clicking on ``Breath Plot'' you will be able to see a complete clinical display.
 \item Similarly at startup, the VentMon will attempt to establish a WiFi connection. Using the WiFi connection will transmit exactly the same PIRDS data the logger
@@ -772,20 +807,40 @@ by simply breathing through it into a plastic test lung. One can easily see that
 match the breath or changes in the mechanical ventilation, or even changes induces by changes in the resistance of
 compliance of the test lung.
 
-The flow and differential pressure sensors used in the VentMon require no calibration. The oxygen sensor is self-calibrated and
-good enough for accurately measing FiO2 mixing in mechanical ventilation. Flow was checked with a graduated syringe and
-found to be quite accurate.
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/VentDisplayExample.png}
+\caption{VentDisplay Data Display}
+\label{fig:ventdisplay}
+\end{figure}
 
-Other aspects of ventilation such as respiration rate, peak inspiratory pressure, Inhalation to Exhalation (I:E) ratio,
-work of breathing, etc. are dependenent on the VentDisplay software which are a module not technically part of the VentMon
-hardware. In particular, our software measures pressure rise time which we have argued is an
+Figure \ref{fig:ventdisplay} is a screenshot of VentDisplay rendering data from the VentMon with a human (RLR) breathing normally
+into a plastic test lung for 10 seconds.
+Although the VentDisplay and VentMon can be used independently, VentDisplay demonstrates what VentMon collects.
+The top trace is a pressure trace. The next shows flow. These curves are generated from samples published into the public data lake.
+The third trace is the ``event'' curve which shows a number of computed values and events published from the VentMon, such
+as the humidity, FiO2, and temperature. Additionally, the beginning and ending of each breath is detected, and total volume
+of the breath computed by integrating the flow.
+
+Such calculations allows us to present the numbers on the right, which a typical of a commecial ventilator display, but
+are completely independent of knowledge of the ventilator. This allows a would-be ventilator's performance to be tested
+as part of a validation and verification regime. In particular, features such as rise and fall time (at the bottom on the right)
+are particularly important. However, the most basic function is to dynamically report the respiration rate, peak pressure,
+minimum pressure, tidal volume and minute volume, and I:E ratio.
+
+In particular, our software measures pressure rise time which we have argued is an
 under-appreciated performance characteristic of rapidly manufactured emergency ventilators\cite{schulz2020importance}.
 This software has been shown to be valuable, although it is dependent on accurate software decisions about
 the beginning and the ending of a breath, which can be subtle in some situations.
 
+The flow and differential pressure sensors used in the VentMon require no calibration. The oxygen sensor is self-calibrated and
+good enough for accurately measing FiO2 mixing in mechanical ventilation. Flow was checked with a graduated syringe and
+found to be quite accurate.
+
 The VentMon published data in the Public Invention Repsiration Data Standard format \cite{PIRDS}, which we created to provide a standard for multiple teams
 to cooperate. A consequence of using this standard and IoT cloud-based software is the ability to support a distibuted engineering team,
-which has been almost required by the COVID-19 social distancing measures. We aspire to someday support telemedicine as suggested by others\cite{rehm2018development}.
+which has been almost required by the COVID-19 social distancing measures. We aspire to someday support telemedicine
+as suggested by others\cite{rehm2018development}. The VentDisplay software allows export of the JSON binding of the PIRDS data to allow other programs to process if it if desired.
 
 In fact we hope the VentMon will evolve into an open-source component that can be freely
 integrated into a pandemic ventilator or simply ``bolted on'' to be used
@@ -813,7 +868,7 @@ long periods of time.
 Robert L. Read conceived of and wrote most of the firmware for the VentMon. Geoff Mulligan created the initial cloud-based
 IoT appoach which became the PIRDS-logger.
 Lauria Clarke did most of the hardware design, including the assembly instructions and the printed circuit board based on an
-open source design from Adafruit\cite[],
+MIT-licensed Ethernet Feather Wing design from Particle IoT\cite{particleefw},
 and the SFM3X00 software repo
 for encapsulating Sensirion flow sensors in the Arduino environment. This paper was written by Robert L. Read and Lauria Clarke.
 
@@ -845,14 +900,9 @@ None.
 
 
 
-\section*{References}
+% \section*{References}
 %> Include at least one reference, to the original publication of the hardware you customized.
 %> Include other references as required. Include references to put your device in context in the literature. For more information on the reference format in HardwareX please see the Guide for Authors at: https://www.elsevier.com/journals/hardwarex/2468-0672/guide-for-authors
-
-\textit{\begin{itemize}
-\item Include at least one reference, to the original publication of the hardware you customized.
-\item Include other references as required. Include references to put your device in context in the literature. For more information on the reference format in HardwareX please see the Guide for Authors at: https://www.elsevier.com/journals/hardwarex/2468-0672/guide-for-authors
-\end{itemize}}
 
 
 
