@@ -58,21 +58,23 @@
 \textbf{Abstract:}
 
 Humanitarian engineers responded to the pandemic ventilator shortage of March,
-2020, by beginning over 100 open source ventilator projecta\cite{COVID19VENTLIST,pearce2020review}.
+2020, by beginning over 100 open source ventilator projects\cite{COVID19VENTLIST,pearce2020review}.
 Inexpensive ventilator test equipment facilitates projects forced
 to be geographically distributed by lockdowns.
+By {\em ventilator}, we mean both an invasive ventilator (requiring intubation of the patient)
+and non-invasive ventilator (generally supporting spontaneously breathing).
 The VentMon is a modular, open source, IoT-enabled
 tester that plugs into a standard 22mm airway
 between a ventilator and a physical test lung to test any ventilator
 by graphing flow, pressure, oxygen fraction, humidity and temperature
-at a data lake accessible to all team members. This is the data
-needed by a test team, but also the data desired by a clinician in
-actual treatment of patients. The open source design of the VentMon
+at a data lake accessible to all team members.
+This data is needed by both development engineers and, eventually, clinicians.
+The open source design of the VentMon
 and its firmware and cloud-based software may
 allow it to be used as a component of modular ventilators to provide
 a clinical readout. This software system has been designed to be as
-modular and composeable as possible, for example by defining
-new open published standards, just as the hardware is composeable
+modular and composable as possible, for example by defining
+new open published standards, just as the hardware is composable
 and modifiable, forming an open system or eco-system of ventilation data.
 Thanks to grants, 20 VentMons have been given away
 free of charge to pandemic response teams building open source ventilators,
@@ -139,35 +141,52 @@ Electrical engineering and computer science
 
 \section{Hardware in context}
 % Include a short description of the hardware, putting into context of similar open hardware and proprietary equipment in the field.
-The Coronavirus pandemic has created a potential global shortage of ventilators\cite{pearce2020review}.
+The Coronavirus pandemic has created a potential global shortage of ventilators\cite{pearce2020review},
+which has abated in the wealthy nations.
 Ventilators are expensive to manufacture and during uncertain times supply chains can be disrupted,
 increasing the cost and scarcity of these devices.
-Since the beginning of the pandemic in March, there has been a large movement to develop cheaper, more supply chain-resilient, ventilators.
-The urgency and goals of this movement have shifted as the global understanding of the virus has evolved.
-Regardless of the current state of this movement, however, the use of open source medical devices in resources limited
-emergency situations---common during a global pandemic---is a topic that has come to the forefront of may conversations about preparedness and treatment.
+Since the beginning of the pandemic in March,
+there has been a large movement to develop cheaper, more supply chain-resilient, ventilators.
+The urgency and goals of this movement have shifted as the global understanding
+of the virus has evolved.
+Regardless of the current state of this movement, however, the use of open source
+medical devices in resource-limited
+emergency situations---common during a global pandemic---is a topic that has come
+to the forefront of may conversations about preparedness and treatment.
 Medical devices require rigorous testing before they can be used on the general public.
-Open source medical devices require the same level, if not more scrutiny. If an open source movement is to succeed in this field,
-the tools to test and validate medical devices should also be community based.
-The goal of VentMon is to provide an equally open source, community based verification solution to increase the efficiency and
-accuracy of the development process for socially distanced, potentially international teams making open source ventilator, BPAP, and PAPR devices.
+Open source medical devices require the same level, if not more, scrutiny and documentation.
+If an open source movement is to succeed in this field,
+the tools to test and validate medical devices must be accessible.
+The goal of VentMon is to provide an equally open source, community based verification solution
+to increase the efficiency and
+accuracy of the development process for socially distanced,
+potentially international teams making open source ventilator, BPAP, and PAPR devices.
 
 \section{Hardware description}
 % Describe the hardware, highlighting the customization rather than the steps of the procedure. Highlight how it differs/which advantage it offers over pre-existing methods. For example, how could this hardware: be compared to other hardware in terms of cost or ease of use, be used in the development of further designs in a particular area, and so on.
 
 % > Add 3-5 bulleted points to broadly explain to other researchers how the hardware could be potentially useful to them, for either standard or novel laboratory tasks, inside or outside of the original user community.
 
-The VentMon plugs directly into a standard 22mm adult airway. As air or medicaly gases pass through the VentMon,
-it records flow and pressure about 40 times a second, and occasionally records temperature, humdity, and O2 fraction.
-The result is that when placed in the airway between an invasive or non-invasive ventilator under test and physcial test lung,
-it sends this data to a public data lake \cite{VentDisplay} using a clearly defined respiration standard.
-This data can be graphically rendered either live or statically to provide a display that is typical of the clinical display of advance ventilators.
+The VentMon plugs directly into a standard 22mm adult airway.
+As air or medically gases pass through the VentMon,
+it records flow and pressure about 25 times a second, and occasionally records temperature,
+humidity, and O$_2$ fraction.
+The result is that when placed in the airway between an invasive or non-invasive ventilator
+under test and physical test lung,
+it sends this data to a public data lake \cite{VentDisplay} using a clearly defined
+respiration standard\cite{PIRDS}.
+This data can be graphically rendered either live or statically to provide a display
+that is typical of the clinical display of advanced ventilators.
 In this way it allows sophisticated testing of ventilators.
-This device is therefore similar in function to commerical Test Lung devices, which tend to start at USD\$10,000.
+This device is therefore similar in function to commercial test lung devices,
+which tend to start at USD\$10,000.
 
-A special challenge of teams building open source pandemic ventilators is that they tend to be poorly funded,
-but also geographically distributed. The VentMon is an IoT-enbabled device which sends its data to a public data lake,
-where a team member on a different continent can view a waveform live in real time as a collleagure makes adjustments
+A special challenge of teams building open source pandemic ventilators is that
+they tend to be poorly funded
+and geographically distributed. The VentMon is an IoT-enabled device which sends
+its data to a public data lake,
+where a team member on a different continent can view a waveform live in real
+time as a colleague makes adjustments
 to the ventilator.
 
 The VentMon thus offer benefits to teams developing ventilation devices:
@@ -177,10 +196,14 @@ The VentMon thus offer benefits to teams developing ventilation devices:
 \item It is allows remote collaboration.
 \end{itemize}
 
-Moreover, being completely open, it supports modifcation, extension, and importantly but only potentially at present, integration into a complete ventilator. A ventilator that chose to offer a graphical trace of pressure and flow, which are generally demanded by clinicians for all but emergency transport situations, could incorporate the open source VentMon into its complete design.
+Moreover, being completely open, it supports modification, extension, and importantly but
+only potentially at present, integration into a complete ventilator.
+A ventilator that chose to offer a graphical trace of pressure and flow, which are generally
+demanded by clinicians for all but emergency transport situations, could incorporate
+the open source VentMon into its complete design.
 
 Although the reliance on the internet is a strength for a distributed engineering team,
-it would be a disadvantage it a field hospital.
+it would be an addressable disadvantage in a field hospital.
 Although aiming to eventually be safe enough and reliable to be used as a monitor on human patients,
 it requires much improvement before it is ready for that intended use.
 
@@ -201,7 +224,7 @@ it requires much improvement before it is ready for that intended use.
 (4) PIRDS Data Logger & C Source Files & MIT License & \href{https://doi.org/10.5281/zenodo.4079382}{10.5281/zenodo.4079382} \\\hline
 (5) PIRDS Data Standard & Documented standard, and C-language binding & Creative Commons Zero (Universal) for documents, GPL 3.0 for code binding &
 \href{http://doi.org/10.5281/zenodo.4079355}{10.5281/zenodo.4079355} \\\hline
-(6) VentMon T0.3 PCB & PCB Design Files & MIT License &  \href{https://doi.org/10.5281/zenodo.4079170}{10.5281/zenodo.4079170} (see {\em design/pcb}) \\\hline
+(6) VentMon v0.3T PCB & PCB Design Files & MIT License &  \href{https://doi.org/10.5281/zenodo.4079170}{10.5281/zenodo.4079170} (see {\em design/pcb}) \\\hline
 (7) Pressure Sensor and Airway Adaptor & STL File & MIT License &  \href{https://doi.org/10.5281/zenodo.4079170}{10.5281/zenodo.4079170} (see {\em design/3dparts}) \\\hline
 
 % Design file 3 & File type & License & Link \\\hline
@@ -212,27 +235,26 @@ We promote an open, modular, and composable respiration ecosystem. Therefore, we
 in hopes that smaller modules may be reusable even by those who have no use for the VentMon specifically.
 
 \begin{enumerate}
-\item The main firmware is written in the Arudino environment, and though targeting an ESP32 could easily apply to other boards.
-This core firmware manages reading the various senosrs, and
+\item The main firmware is written in the Arduino environment, and though targeting an ESP32 could easily apply to other boards.
+This core firmware manages reading the various sensors, and
 outputs its data both on its small built-in OLED (for function testing), and,
 more importantly, via the PIRDS standard to a public data lake where a separate module renders it with a display appropriate
 for a clinician.
 \item Although our current focus is on a printed circuit board version of the VentMon\cite{ventmonpcb},
   we report here a system that can be made by an amateur using only commercial off-the-shelf (COTS) parts.
-  This is verison T0.2 of the tester, and software that matches it (slightly incompatible with the current version) is tagged.
+  This is version T0.2 of the tester, and software that matches it (slightly incompatible with the current version) is tagged.
 \item Although the VentMon has a tiny OLED screen and graphs pressure, it is too small for more than ``smoke'' testing. For serious performance testing and eventual clinical use, we
   use VentDisplay, a browser-delivered JavaScript code that presents a full clinical display.
 \item The VentDisplay software can be pointed at a logger that serves up data in the PIRDS format. This logger takes data from UDP packages and writes them to a file, which can then be
   served up by a webserver to any requester.
 \item Integral the VentDisplay and PIRDS Data Logger is the Public Invention Respiration Data Standard (PIRDS). This is a documented standard.
-\item The VentMon T0.3 printed circuit board is designed with EAGLE CAD.
-  \item A small 3D printed housing expoxied over the our ambient air quality sensor with a tiny pressure port allows us to share the air with the main pressure hose.
+\item The VentMon v0.3T printed circuit board is designed with EAGLE CAD.
+  \item A small 3D printed housing epoxied over the our ambient air quality sensor with a tiny pressure port allows us to share the air with the main pressure hose.
 \end{enumerate}
 
 
 
 % For each design file listed in the summary above, include a short description of the file below (one or two sentences)
-\textit{For each design file listed above, include a short description of the file here (one or two sentences)}
 
 \section{Bill of materials}
 
@@ -264,29 +286,37 @@ OS1 &	R-17S Oxygen Sensor &	1 &	\$80.00 &	\$80.00	 & Oxycheq &	Metal/Plastic \\\
 FS1 &	\textbf{Flow Sensor} &	1 & \textbf{see note below}	&	\$0.00	& &	Metal/Plastic \\\hline
 PS1, PS2 &	BME680 SENSOR EVAL BOARD &	2 &	\$22.50 &	\$45.00	& Adafruit &	Semiconductor/Other \\\hline
 P1 &	Processor Enclosure &	1 &	\$9.95 &	\$9.95 &	Digikey	 & Plastic \\\hline
-P2 &	Bleed Adapter	& 1 &	\$5.50 &	\$5.50 &	Oxygen Supply	& Plastic \\\hline
+P2 &	Bleed Adaptor	& 1 &	\$5.50 &	\$5.50 &	Oxygen Supply	& Plastic \\\hline
 P3 &	Oxygen Sensor T	& 1 &	\$9.00 &	\$9.00	& Oxycheq &	Plastic \\\hline
 P4 &	15 mm OD to 22 mm OD adaptor &	1 &	\$0.54 & 	\$0.54	& &	Plastic \\\hline
 P5 &	15 mm ID to 22 mm OD adaptor &	1 &	\$0.35 & 	\$0.35	& &	Plastic \\\hline
 T1 &	Oxygen Tubing &	1 &	\$2.25	& \$2.25 &	Oxygen Supply	& Plastic \\\hline
 \end{tabu}
 
-Note: The flow sensor is one of the most expensive and critical parts. Throughout mid-2020 there was a global shortage of flow sensors,
-including the three electrically compatible with the VentMon as currently designed.
-The SFM3400-33-D (disposable version \$40USD), Sensirion SFM3200-250 (\$145USD),  and Sensirion SFM3200-AW (\$180USD autoclavable version).
-We shipped VentMons with all three depending on availability. The VentMon is not designed for use with humans, but if it were,
-the autoclavable version would have the advantage of sanitizability of a complete sanitization procedure were designed.
-This is important, as we hope the VentMon will be modified and integrated into a rapidly manufactured ventilator, for which
+Note: The flow sensor is one of the most expensive and critical parts. Throughout mid-2020 there
+was a global shortage of flow sensors,
+including the four electrically compatible with the VentMon as currently designed.
+The Sensirion SFM3400-AW (\$180US) (a neonatal version with limited maximum flow sensing),
+SFM3200-33-D (disposable version \$40USD), Sensirion SFM3200-250 (\$145USD),
+and Sensirion SFM3200-AW (\$180USD autoclavable version).
+We shipped VentMons with all of these depending on availability.
+The VentMon is not currently designed for use with humans, but if it were,
+the autoclavable version would have the advantage
+of sanitizability of a complete sanitization procedure were designed.
+This is important, as we hope the VentMon will be modified and integrated
+into a rapidly manufactured ventilator, for which
 sanitization is critical.
 
 
-The link below is to a spreadsheet which is includes the PCB-version as well, which is very similar accept
-for the PCB itself. By following the link below, you can reach browsable URLs to most of the non-commodity parts. The specific
+The link below is to a spreadsheet which is includes the PCB-version as well,
+which is very similar accept
+for the PCB itself.
+By following this link: \href{https://doi.org/10.5281/zenodo.4289426}{VentMon  BOM},
+you can reach browsable URLs to most of the non-commodity parts. The specific
 BOM for the SMD parts needed to assemble the PCB (which would probably be done as a service, rather than by a reader
 of this article by hand) can be found in our GitHub repo in the directory named {\em design/pcb}  along with the Eagle files:
 \cite{ventmon}.
 
-{\bf Current Link:} \href{https://doi.org/10.5281/zenodo.4289426}{VentMon  BOM}
 
 \section{Build instructions}
 %Provide detailed, step by step instructions for the construction of the reported hardware include all necessary information for reproducing the submitted hardware.
@@ -298,18 +328,18 @@ of this article by hand) can be found in our GitHub repo in the directory named 
 Two versions of VentMon can be assembled depending on availability of parts and time.
 The most physically robust and complete version of VentMon requires the purchase and manufacture of a PCB as well as
 a number of 3D printed plastic parts. The designs of the PCB and 3D printed parts are fully open;
-in practice, due to the fact that PCBs have a high set up cost, it makes most sense to use the PCB if you are bulding 10 or more VentMons.
+in practice, due to the fact that PCBs have a high set up cost, it makes most sense to use the PCB if you are building 10 or more VentMons.
 This version of the device requires the least amount of time to assemble and contains fewest discrete components.
-Due to the relatively high cost of PCB manufacture and assembly, VentMon can also be created using off the shelf components
+Due to the relatively high single-unit cost of PCB manufacture and assembly, VentMon can also be created using off the shelf components
 readily available from DIY electronics suppliers. This version requires significantly more assembly time.
 We believe this has been done twice by third parties with little interaction with us. Both assembly procedures are outlined below.
 
-\subsection{COTS Based VentMon (T0.2)}
+\subsection{COTS Based VentMon (v0.2T)}
 
-{\em The VentMon T0.2 is not meant to be used on human patients. }
+{\em The VentMon v0.2T is not meant to be used on human patients. }
 The COTS version uses firmware v0.2 tagged as such\cite{VentMon02}. This version is somewhat incompatible
 with v0.3 (described below), which uses a PCB, and which is
-the focus of our main developement.
+the focus of our main development.
 
 \begin{enumerate}
 
@@ -324,20 +354,20 @@ See Figure \ref{fig:qwiic} on page \pageref{fig:qwiic} for final assembly of Qwi
 \item
 Trim two pieces of male header pins that are two positions long and one piece that is four positions long.
 \item
-With the connector side of the board facing up, solder one of the two position headers into the two holes labelled SDA and SCL.
+With the connector side of the board facing up, solder one of the two position headers into the two holes labeled SDA and SCL.
 \item
 Solder the other two position header into the last two holes on the row along the opposite side.
 \item
 Solder the four position header into the last four holes along the right side. This should provide connections to the GND and 3V3 through holes.
 \item
-Connect both sides of the solder bridge to engage the pullup resistors for the I\textsuperscript{2}C bus.
+Connect both sides of the solder bridge to engage the pull-up resistors for the I\textsuperscript{2}C bus.
 \end{enumerate}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.45\textwidth]{images/qwiic_top.JPG}
 \includegraphics[width=0.44\textwidth]{images/qwiic_bottom.JPG}
-\caption{SparkFun Qwiic Shield with male headers and I\textsuperscript{2}C pullups connected}
+\caption{SparkFun Qwiic Shield with male headers and I\textsuperscript{2}C pull-ups connected}
 \label{fig:qwiic}
 \end{figure}
 
@@ -545,7 +575,10 @@ Refer to the SFM3400 datasheet to be sure you are connecting them in the proper 
 \end{figure}
 
 \item
-Assemble sensor adapters. Refer to figure \ref{fig:adapters} on page \pageref{fig:adapters}.
+  Assemble sensor adaptors. Refer to figure \ref{fig:adaptors} on page \pageref{fig:adaptors}.
+  {\em NOTE: These photos and the 15mm adaptor show and refer to the neonatal version of the Sensirion flow sensor (SFM3400),
+    which we used only because the adult-sized versions were impossible to find (temporarily). However, they physical
+    assembly is exactly the same for all versions. You will not need the 15mm to 22mm adaptor with an adult-sized flow sensor.}
 
 \begin{enumerate}[label=4.3.\arabic*]
 \item
@@ -553,11 +586,11 @@ Cut a 1 $1/2$'' section of petex tubing
 \item
 Insert the tubing into the wide end of the flow sensor
 \item
-Insert the frosted 15 mm to 22 mm adapter over the petex
+Insert the frosted 15 mm to 22 mm adaptor over the petex
 \item
-Add the clear 15 mm to 22 mm adapter over the small end of the flow sensor
+Add the clear 15 mm to 22 mm adaptor over the small end of the flow sensor
 \item
-Place the bleed adapter over the clear adapter
+Place the bleed adaptor over the clear adaptor
 \item
 Use electrical tape to secure any loose connections
 \end{enumerate}
@@ -565,8 +598,8 @@ Use electrical tape to secure any loose connections
 \centering
 \includegraphics[width=0.8\textwidth]{images/adapters_1.JPG} \\
 \includegraphics[width=0.6\textwidth]{images/adapters_2.JPG} \\
-\caption{Adapters assembled inline with sensor.}
-\label{fig:adapters}
+\caption{Adaptors assembled inline with sensor.}
+\label{fig:adaptors}
 \end{figure}
 
 \end{enumerate}
@@ -664,7 +697,7 @@ Add identification card on the next page card to enclosure.
 
 %-----------------------------------------------------------
 
-\subsection{PCB Based VentMon (T0.3)}
+\subsection{PCB Based VentMon (v0.3T)}
 
 
 \begin{figure}[H]
@@ -674,7 +707,7 @@ Add identification card on the next page card to enclosure.
 \label{fig:finalPCB}
 \end{figure}
 
-This PCB-based T0.3 version of VentMon (see Figure \ref{fig:finalPCB}) requires two 3D printed parts  -- one encapsulated an on-board pressure sensor and one is an airway adaptor -- as well as a PCB assembly. Before beginning the assembly process make sure that you have manufactured those parts.
+This PCB-based v0.3T version of VentMon (see Figure \ref{fig:finalPCB}) requires two 3D printed parts  -- one encapsulated an on-board pressure sensor and one is an airway adaptor -- as well as a PCB assembly. Before beginning the assembly process make sure that you have manufactured those parts.
 
 \begin{enumerate}
 \item
@@ -689,7 +722,7 @@ PCB Assembly
 \item Mount sensor enclosure for BME280 pressure sensor
 \begin{enumerate}[label=1.2.\arabic*]
 \item Insert plastic part into mounting holes on PCB to check fit and alignment. The barb should face toward the outer edge of the PCB.
-\item Apply expoxy glue to bottom edge and mounting pegs of plastic.
+\item Apply epoxy glue to bottom edge and mounting pegs of plastic.
 \item Insert plastic back into holes being careful not to get any glue on the sensor.
 \item Allow 24 hours for epoxy glue to cure before attaching a hose to the barb.
 \end{enumerate}
@@ -757,20 +790,20 @@ Plug the other end into the audio connector on the PCB
 \end{figure}
 
 
-\subsection{VentMon T0.3}
+\subsection{VentMon v0.3T}
 
-{\em The VentMon T0.3 is not meant to be used on human patients. }
-The purpose of the VentMon is to measure, log, validate and verify the performance of rapdily manufactured ventilators,
+{\em The VentMon v0.3T is not meant to be used on human patients. }
+The purpose of the VentMon is to measure, log, validate and verify the performance of rapidly manufactured ventilators,
 PAPRs, BPAP, and CPAP machines.
 The basic usage is to plug the VentMon 22mm airway in between
-a respriation assistance device being tested (such as a pandemic ventilator or CPAP machine) and a simple physical test lung which
+a respiration assistance device being tested (such as a pandemic ventilator or CPAP machine) and a simple physical test lung which
 models compliance and resistance of the human lung (see Figure \ref{fig:vtestusage}). The VentMon then provides approximately
-the functionality of a {\em breating simulator}, without being able to model the patient triggering a breath spontaneously.
+the functionality of a {\em breathing simulator}, without being able to model the patient triggering a breath spontaneously.
 
 There are four ways to get data from the VentMon of varying quality and convenience with the firmware at the time of this writing.
 \begin{enumerate}
-\item After startup, the VentMon will begin displaying a real-time pressure graph on its small OLED screen, with a scale of 40 cmH2O. This display is too small for testing performance, but is a nice check that the breathing circuit is in place and functioning. You can ``smoke test'' this by breathing into the VentMon and plugging one end with your hand.
-\item The VentMon spews a LOT of data out on the serial port in the PIRDS format. Using the serial monitor build into the Arudino IDE, you can visually inspect this data. The volume of the data makes this a cumbersome. You are free to write a serial-port reader of your own for programmatic interpretation.
+\item After startup, the VentMon will begin displaying a real-time pressure graph on its small OLED screen, with a scale of 40 cmH$_2$O. This display is too small for testing performance, but is a nice check that the breathing circuit is in place and functioning. You can ``smoke test'' this by breathing into the VentMon and plugging one end with your hand.
+\item The VentMon spews a LOT of data out on the serial port in the PIRDS format. Using the serial monitor build into the Arduino IDE, you can visually inspect this data. The volume of the data makes this a cumbersome. You are free to write a serial-port reader of your own for programmatic interpretation.
 \item At startup, by default configuration (it can be enabled or disabled), the VentMon tries to see if their is a cable connected to the Ethernet RJ45 jack.
   Plug the other end of the cable into your router. If found and enabled, the VentMon will begin sending PIRDS\cite{PIRDS} data to the logger at \url{ventmon.coslabs.com}\cite{PIRDSlogger}.
   Your data can be viewed in real time by pointing a browser at the URL. Your IP address will appear near the top of the list with other recent or current users;
@@ -778,7 +811,7 @@ There are four ways to get data from the VentMon of varying quality and convenie
 \item Similarly at startup, the VentMon will attempt to establish a WiFi connection. Using the WiFi connection will transmit exactly the same PIRDS data the logger
   at \url{ventmon.coslabs.com} and can be used in precisely  the same way. However, the VentMon has to know a valid SSID and password to make the WiFi connection.
   This is configured via the Arduino serial monitor by sending a ``c'' character (for configure) to the VentMon. It will then pause operation for 10 seconds and give
-  instructions for enterring the SSID and password. In this same configuration you can enable or disable the WiFi and the Ethernet connection if you choosed.
+  instructions for entering the SSID and password. In this same configuration you can enable or disable the WiFi and the Ethernet connection if you choose.
   These settings are stored in the EEPROM, and survive a loss of power.
 \end{enumerate}
 
@@ -819,10 +852,10 @@ into a plastic test lung for 10 seconds.
 Although the VentDisplay and VentMon can be used independently, VentDisplay demonstrates what VentMon collects.
 The top trace is a pressure trace. The next shows flow. These curves are generated from samples published into the public data lake.
 The third trace is the ``event'' curve which shows a number of computed values and events published from the VentMon, such
-as the humidity, FiO2, and temperature. Additionally, the beginning and ending of each breath is detected, and total volume
+as the humidity, FiO$_2$, and temperature. Additionally, the beginning and ending of each breath is detected, and total volume
 of the breath computed by integrating the flow.
 
-Such calculations allows us to present the numbers on the right, which a typical of a commecial ventilator display, but
+Such calculations allows us to present the numbers on the right, which a typical of a commercial ventilator display, but
 are completely independent of knowledge of the ventilator. This allows a would-be ventilator's performance to be tested
 as part of a validation and verification regime. In particular, features such as rise and fall time (at the bottom on the right)
 are particularly important. However, the most basic function is to dynamically report the respiration rate, peak pressure,
@@ -834,11 +867,11 @@ This software has been shown to be valuable, although it is dependent on accurat
 the beginning and the ending of a breath, which can be subtle in some situations.
 
 The flow and differential pressure sensors used in the VentMon require no calibration. The oxygen sensor is self-calibrated and
-good enough for accurately measing FiO2 mixing in mechanical ventilation. Flow was checked with a graduated syringe and
+good enough for accurately measuring FiO$_2$ mixing in mechanical ventilation. Flow was checked with a graduated syringe and
 found to be quite accurate.
 
-The VentMon published data in the Public Invention Repsiration Data Standard format \cite{PIRDS}, which we created to provide a standard for multiple teams
-to cooperate. A consequence of using this standard and IoT cloud-based software is the ability to support a distibuted engineering team,
+The VentMon published data in the Public Invention Respiration Data Standard format \cite{PIRDS}, which we created to provide a standard for multiple teams
+to cooperate. A consequence of using this standard and IoT cloud-based software is the ability to support a distributed engineering team,
 which has been almost required by the COVID-19 social distancing measures. We aspire to someday support telemedicine
 as suggested by others\cite{rehm2018development}. The VentDisplay software allows export of the JSON binding of the PIRDS data to allow other programs to process if it if desired.
 
@@ -849,7 +882,7 @@ on patients, it will require regulatory approval, such as FDA approval. Before t
 \begin{enumerate}
 \item The current device is not autoclavable or easy to sanitize.
   Use on a human patient would therefore require it to be disposed of immediately.
-\item Our software has not be subject to rigourous Quality Assurance (QA) and Risk Analysis (RA)
+\item Our software has not be subject to rigorous Quality Assurance (QA) and Risk Analysis (RA)
   as the FDA would request. We have argued\cite{ecosystem}
   for an ecosystem in which design teams such as Public Invention produce extensive documentation including  QA/RA documentation to be reused by
   firms that become medical device manufactures incorporating open-source designs.
@@ -866,7 +899,7 @@ long periods of time.
 % [List here those individuals who provided help during the research (e.g., providing language help, writing assistance or proof reading the article, etc.).] Please also identify who provided financial support for the conduct of the research and/or preparation of the article and to briefly describe the role of the sponsor(s), if any, in study design; in the collection, analysis and interpretation of data; in the writing of the report; and in the decision to submit the article for publication. If the funding source(s) had no such involvement then this should be stated.}
 
 Robert L. Read conceived of and wrote most of the firmware for the VentMon. Geoff Mulligan created the initial cloud-based
-IoT appoach which became the PIRDS-logger.
+IoT approach which became the PIRDS-logger.
 Lauria Clarke did most of the hardware design, including the assembly instructions and the printed circuit board based on an
 MIT-licensed Ethernet Feather Wing design from Particle IoT\cite{particleefw},
 and the SFM3X00 software repo
@@ -876,7 +909,7 @@ The Mozilla Open Source Software foundation gave Public Invention a grant that a
 provide 20 VentMons to open source teams around the world free-of-charge, including paying shipping costs.
 Protocol Labs provided Public Invention a grant that has been used for web communication and conference costs.
 
-We would like to thank early adopters of the VentMon on pandemic ventilator teams such as the ARMEE\cite{ARMEE} and
+We would like to thank early adopters of the VentMon on pandemic ventilator teams such as the ARMEE\cite{ARMEE}, PolyVent\cite{polyvent} and
 DIY-Beatmungsgerät.de\cite{beatmung}
 who gave us valuable bug reports and feedback.
 
