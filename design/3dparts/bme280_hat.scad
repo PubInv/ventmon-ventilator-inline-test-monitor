@@ -166,9 +166,4 @@ box();
 translate([-19,0,-10])
 hat_with_barb();
 
-
-
-
-
-
 echo(version=version());
