@@ -19,8 +19,8 @@
   <sodipodi:namedview
      units="in"
      inkscape:window-maximized="0"
-     inkscape:window-y="94"
-     inkscape:window-x="1044"
+     inkscape:window-y="45"
+     inkscape:window-x="546"
      inkscape:window-height="1248"
      inkscape:window-width="2024"
      inkscape:snap-grids="true"
@@ -118,7 +118,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
