@@ -141,14 +141,14 @@ Medical devices require rigorous testing before they can be used on the general 
 Open source medical devices require the same level, if not more, scrutiny and documentation. If an open source movement is to succeed in this field, the tools to test and validate medical
 devices must be accessible.
 The goal of VentMon is to provide an equally open source, community based verification solution to increase the efficiency and accuracy of the development process for socially distanced,
-potentially international teams making open source ventilator, BPAP, and PAPR devices.
+potentially international teams making open source ventilator, Bilevel Positive Airway Pressure (BPAP), and Powered Air-Purifying Respirator (PAPR) devices.
 
 \section{Hardware description}
 % Describe the hardware, highlighting the customization rather than the steps of the procedure. Highlight how it differs/which advantage it offers over pre-existing methods. For example, how could this hardware: be compared to other hardware in terms of cost or ease of use, be used in the development of further designs in a particular area, and so on.
 
 % > Add 3-5 bulleted points to broadly explain to other researchers how the hardware could be potentially useful to them, for either standard or novel laboratory tasks, inside or outside of the original user community.
 
-The VentMon plugs directly into a standard 22mm adult airway. As air or medical gases pass through the VentMon, it records flow and pressure, temperature, humidity, and fractional O$_2$ at rates of 25 Hz to once per minute depending on the measurement. When placed in the airway between a ventilator under test and physical test lung, this data is sent to a public data lake \cite{VentDisplay} using a clearly defined respiration standard \cite{PIRDS}. This data can be graphically rendered either live or statically to provide a display that is typical of the clinical display of advanced ventilators. This functionality is similar to that of commercially available test lung devices, which tend to start at USD\$10,000.
+The VentMon plugs directly into a standard 22mm adult airway. As air or medical gases pass through the VentMon, it records flow and pressure, temperature, humidity, and fractional O$_2$ at rates of 25 Hz to once per minute depending on the measurement. When placed in the breathing circuit between a ventilator under test and physical test lung, this data is sent to a public data lake \cite{VentDisplay} using a clearly defined respiration standard \cite{PIRDS}. This data can be graphically rendered either live or statically to provide a display that is typical of the clinical display of advanced ventilators. This functionality is similar to that of commercially available test lung devices, which tend to start at USD\$10,000.
 
 Teams building open pandemic ventilators tend to be poorly funded and geographically distributed. VentMon's connectivity and overall cost address these two challenges by enabling team members on different continents to view waveforms in real time and communicate the necessary adjustments to the ventilator device under test. While reliance on the internet is a strength for a distributed and virtually connected engineering team, it would be an addressable disadvantage in a field hospital.
 
@@ -172,7 +172,7 @@ The VentMon thus offers the following benefits to teams developing ventilation d
 \tabulinesep=1ex
 \begin{tabu} to \linewidth {|X[1.5]|X|X[1.5,1]|X[3]|}
 \hline
-\textbf{Design filename} & \textbf{File type} & \textbf{Open source license [check these]} & \textbf{Location of the file} \\\hline
+\textbf{Design filename} & \textbf{File type} & \textbf{Open source license} & \textbf{Location of the file} \\\hline
 %Insert design files
 (1) Embedded Firmware (v0.3 PCB version) & C++ Source Code & MIT License &  \href{https://doi.org/10.5281/zenodo.4079170}{10.5281/zenodo.4079170}\\\hline
 (2) Embedded Firmware (v0.2 COTS version) & C++ Source Code & MIT License &  \href{https://doi.org/10.5281/zenodo.4291147}{10.5281/zenodo.4291147}\\\hline
@@ -326,7 +326,7 @@ Cut trace from SDO through hole to sensor. Refer to figure \ref{fig:bme_1} on pa
 \item
 Carefully cut the trace coming from the SDO hole on the back side of one board
 \item
-This board will be used to measure the airway pressure
+This board will be used to measure the pressure in the breathing circuit
 \end{enumerate}
 \begin{figure}[H]
 \label{fig:bme_1}
@@ -355,7 +355,7 @@ Connect Sensors to Cable. Refer to figure \ref{fig:bme_and_qwiic_cable} on page 
 \item
 Stack the two sensors on the breadboard and use two paper clips to anchor them
 \item
-Be sure the airway board with the cut trace is facing down
+Be sure the board with the cut trace is facing down
 \item
 Starting with Vin or GND insert the tinned lead through the appropriate hole and apply solder
 \item
@@ -539,7 +539,7 @@ Cut a section of oxygen hose approximately the same length as the flow sensor ca
 \item
 Make sure your cut is flat on the end
 \item
-Place one end of the hose over the airway pressure sensor and apply glue around the edges
+Place one end of the hose over the internal, breathing circuit pressure sensor and apply glue around the edges
 \item
 Be very careful not to get glue on the sensor and make sure that the hose is securely attached to the pcb
 \end{enumerate}
@@ -650,13 +650,10 @@ PCB Assembly
 
 \end{enumerate}
 
-
-
 \item
 Enclosure
 
 Follow assembly instructions in section \ref{itm:enclosure}.
-
 
 \item
 Flow Sensor Assembly
@@ -676,13 +673,6 @@ Plug one end of mono audio cable into bottom of oxygen sensor
 \item
 Plug the other end into the audio connector on the PCB
 \end{enumerate}
-
-
-
-
-
-
-
 
 \item
   Final Assembly
@@ -755,7 +745,8 @@ The bottom trace on the display is the ``event'' curve which shows a number of c
 These calculations allows us to present the numbers on the right side of the display, which are typical metric found on a commercial ventilator. Computation of these values allows a would-be ventilator's performance to be verified and characterized against a repeatable and relevant standard. Features such as rise and fall time (at the bottom on the right) are particularly important. However, the most basic function is to dynamically report the respiration rate, peak pressure, minimum pressure, tidal volume and minute volume, and I:E ratio. In addition to the standard metrics, our software also measures pressure rise time which we have argued is an under-appreciated performance characteristic of rapidly manufactured emergency ventilators\cite{schulz2020importance}.
 
 This software has been shown to be valuable, although it is dependent on accurate software decisions about
-the beginning and the ending of a breath, which can be subtle in some situations. The reliability of the data is inherently tied to the accuracy and precision of the device producing data for VentDisplay. VentMon is unique in this regard as the flow, differential pressure, and oxygen sensors used in the design require no calibration. After independent testing each component the VentMon team found that the flow and oxygen measurements are suitable for accurately measuring FiO$_2$ mixing in mechanical ventilation.
+the beginning and the ending of a breath, which can be subtle in some situations. The reliability of the data is inherently tied to the accuracy and precision of the device producing data for VentDisplay. VentMon is unique in this regard as the flow, differential pressure, and oxygen sensors used in the design require no calibration. After independent testing of each component, the VentMon team found that oxygen sensing and flow measurements using ther device were accurate within 10\% and X\% respectively.		
+%flow and oxygen measurements are suitable for accurately measuring FiO$_2$ mixing in mechanical ventilation. 
 
 The Public Invention Respiration Data Standard format \cite{PIRDS}, is the underlying method by which data is communicated from the VentMon device to VentDisplay. The standard was created to provide a repeatable way for multiple teams to cooperate. Using this standard and cloud-based software enables VentMon to support a distributed engineering team---often required by the COVID-19 social distancing measures. The VentDisplay software allows export of the JSON binding of the PIRDS data to allow other programs to process if it if desired. We believe these tools could someday allow us to support telemedicine as suggested by others \cite{rehm2018development}.
 
