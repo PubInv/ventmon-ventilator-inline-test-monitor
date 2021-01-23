@@ -160,7 +160,7 @@ const unsigned char logo_bmp [] PROGMEM = {
 // You will need to change the ESP32 partition scheme to fit the Bluetooth Libraries!
 // Tools > Partition Scheme > Minimal SPIFFS (Large APPS with OTA)
 // This gives you more program space - choose No OTA for even more space but this removes Over The Air updates feature.
-#define BLE
+//#define BLE
 #ifdef BLE
   #include <BLEDevice.h>
   #include <BLEServer.h>
@@ -908,7 +908,11 @@ long long_display_ms = 0;
 // This is implementing a rotating graph
 #define GRAPH_X_PIXELS 128
 #define LEFT_PREFIX_AREA_X 28
+#ifdef V4
+#define GRAPH_Y_PIXELS 64
+#else
 #define GRAPH_Y_PIXELS 32
+#endif
 #define SAMPLE_PIXELS (GRAPH_X_PIXELS-LEFT_PREFIX_AREA_X)
 uint8_t graph_samples[SAMPLE_PIXELS]; 
 
@@ -929,8 +933,8 @@ void displayFromMS(long ms) {
   current_display_mode = (ms / 5000) % 2;
   displayFromMode(current_display_mode);
   #else
-  displayFromMode(DISPLAY_GRAPH);
   displayFromMode(DISPLAY_STAT);
+  displayFromMode(DISPLAY_GRAPH);
   #endif
 }
 
