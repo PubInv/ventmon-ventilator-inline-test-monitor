@@ -1,7 +1,26 @@
 
 [![DOI](https://zenodo.org/badge/248134220.svg)](https://zenodo.org/badge/latestdoi/248134220)
 
-# VentMon 0.3 - Inline Ventilator Test Fixture and Monitor
+# VentMon T0.4 - Inline Ventilator Test Fixture and Monitor
+
+March 9th, 2019
+
+![20210309_173230 (1)](https://user-images.githubusercontent.com/5296671/110490948-68778a80-80b6-11eb-8cbc-c9815958531f.jpg)
+
+The photo above shows the current version of the VentMon, the T0.4 tester/monitor, designed and manufactured by Ben Coombs. We are giving these away free of charge to worthy open source teams.
+
+The VentMon T0.4 improves on the T0.3 mostly in that the case is self-contained (removing cables) and is quite compact. We have also improved the OLED display, although additional firmware changes will be coming.
+
+The software infrastructure that supports the VentMon, such as [VentDisplay](https://github.com/PubInv/vent-display) and [PIRDS](https://github.com/PubInv/PIRDS-respiration-data-standard), have been improving as well.
+
+The VentMon is basically a cloud-enable spirometer with an FiO2 sensor. It can simply be plugged into a standard 22mm airway and provides
+a rich stream of pressure, flow, and Oxygen sensor, with humidity and temperature sensing as well. The primary use of the VentMon is by 
+engineering teams developing pandemic response ventilators and other respiration tools. Secondairly, it is completely and transparently 
+open source, so any team can adopt the design and incorporate it into their own devices to provide the same data in an integrated way.
+
+The parts in a VentMon cost about USD$500. 
+
+# VentMon 0.3
 
 Note: The important file "breath_plot.html" which reneders respiration traces and calculated values from PIRDS 
 data was moved to its own [repo](https://github.com/PubInv/vent-display) on Thursday, June 18, 2020.
