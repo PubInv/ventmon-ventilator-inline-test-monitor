@@ -18,7 +18,30 @@ a rich stream of pressure, flow, and Oxygen sensor, with humidity and temperatur
 engineering teams developing pandemic response ventilators and other respiration tools. Secondairly, it is completely and transparently 
 open source, so any team can adopt the design and incorporate it into their own devices to provide the same data in an integrated way.
 
-The parts in a VentMon cost about USD$500. 
+The parts in a VentMon cost about USD$600. 
+
+# The Serial Port
+
+VentMon pumps data in the [PIRDS data format](https://github.com/PubInv/PIRDS-respiration-data-standard) out on the Serial Port. This is partially human readable, and a good way to tell if the VentMon is working. It is not a good way to analyze data, but you can tell a lot by reviewing this data stream.  However, the preferred way to look at moving interactive waveforms and clinical paramters is with [VentDisplay](https://github.com/PubInv/vent-display), which requires some configuration.
+
+# Configuration
+
+Because we are developing a modular, composable, respiration ecosystem, configuring a VentMon T0.4 is a little complicated. The diagrams below try to capture three distince approahces: using our public data lake (easiest), using Apache (requires understanding httpd.conf and fully understanding all pieces), and a Docker Image (we have not actually created this, but we plan to.)
+
+Public Data Lake:
+
+![VentMon Cloud Ecosystem](https://user-images.githubusercontent.com/5296671/111052623-0c986300-8422-11eb-9d41-081f517026cd.png)
+
+Using Apache:
+
+![VentMon Apache Ecosystem](https://user-images.githubusercontent.com/5296671/111052629-1a4de880-8422-11eb-9466-349d80afdfa5.png)
+
+Using Docker (aspirational):
+
+![VentMon Docker Ecosystem](https://user-images.githubusercontent.com/5296671/111052632-25087d80-8422-11eb-8d85-7e72af57ff4f.png)
+
+
+
 
 # VentMon 0.3
 
