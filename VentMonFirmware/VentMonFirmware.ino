@@ -231,9 +231,9 @@ Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 
 unsigned long buttonCpress_ms = 0;
 
-//#define BUTTON_A 15
-#define BUTTON_B 32
-#define BUTTON_C 14
+#define BUTTON_A 13
+#define BUTTON_B 12
+//#define BUTTON_C 14
 
 /* HSC *************************************************/
 // This is for the HSCDRRT001PD2A3, if you change the Honeywell differential
@@ -817,9 +817,9 @@ void setupOLED() {
 
   //Serial.println("IO test");
 
-  //pinMode(BUTTON_A, INPUT_PULLUP);
-  pinMode(BUTTON_B, INPUT_PULLUP);
-  pinMode(BUTTON_C, INPUT_PULLUP);
+  pinMode(BUTTON_A, INPUT);
+  pinMode(BUTTON_B, INPUT);
+  //pinMode(BUTTON_C, INPUT_PULLUP);
 
   // text display tests
   display.setTextSize(1);
@@ -1544,15 +1544,27 @@ void loop() {
   
   unsigned long ms = millis();  
 
+  if (digitalRead(BUTTON_A)) {
+      Serial.println("A BUTTON");
+      //buttonA();
+  }
+  
+  if (digitalRead(BUTTON_B)) {
+    Serial.println("B BUTTON");
+    //buttonB();
+    //Serial.println("B BUTTON PROCESS DONE");
+  }
+    
   if (found_display) {
     // experimental OLED test code
-    /*if (!digitalRead(BUTTON_A)) {
-      buttonA();
+    /*if (digitalRead(BUTTON_A)) {
+      Serial.println("A BUTTON");
+      //buttonA();
     }
-    // ButtonB is causing my machine to hang with no explanation
-    else*/ if (!digitalRead(BUTTON_B)) {
+    
+    if (digitalRead(BUTTON_B)) {
       Serial.println("B BUTTON");
-      buttonB();
+      //buttonB();
       //Serial.println("B BUTTON PROCESS DONE");
     }
     else if (!digitalRead(BUTTON_C)) {
@@ -1562,11 +1574,11 @@ void loop() {
         //Serial.println("B BUTTON");
         buttonC();
       }
-    } else {
+    } else {*/
       display.clearDisplay();
       display.setCursor(0, 0);
       displayFromMS(ms);
-    }
+    //}
 
     display.display();
   }
@@ -1757,7 +1769,7 @@ void setup() {
   } else {
     Serial.println("NO");
   }
-  Serial.print("Inpsiratory Pressure Sensor : ");
+  Serial.print("Inspiratory Pressure Sensor : ");
   if (found_bme280[INSPIRATORY_PRESSURE_SENSOR]) {
     Serial.println("BME280");
   } else if (found_bme680[INSPIRATORY_PRESSURE_SENSOR]) {
@@ -1778,7 +1790,7 @@ void setup() {
   Serial.println(found_flow ? "YES" : "NO");
 
   // Differential Pressure Sensor
-  Serial.print("Differential Pressure Sensor: ");
+  Serial.print("Found Differential Pressure Sensor: ");
   // Differential Pressure Sensor: err diagnostic fault 11
   found_diff_press = (readHSCPressure() != LONG_MIN);
   Serial.println(found_diff_press ? "YES" : "NO");
