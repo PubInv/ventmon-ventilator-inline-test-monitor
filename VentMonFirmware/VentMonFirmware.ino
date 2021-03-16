@@ -28,8 +28,6 @@
 
 #define BAUD_RATE 500000
 
-
-
 #define LOGO_HEIGHT   64
 #define LOGO_WIDTH    128
 // 'logo-tight', 92x64px
@@ -152,10 +150,6 @@ const unsigned char logo_bmp [] PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
-
-
-
-
 
 // You will need to change the ESP32 partition scheme to fit the Bluetooth Libraries!
 // Tools > Partition Scheme > Minimal SPIFFS (Large APPS with OTA)
@@ -307,7 +301,6 @@ signed long display_min_pressure = 0;
 signed long display_pressure_val;
 signed long display_fiO2_val;
 signed long display_flow_val;
-
 
 // Only need to sample the ambient air occasinally
 // (say once a minute) for PEEP analysis
@@ -1049,12 +1042,16 @@ bool connectToWiFi(const char * ssid, const char * pwd)
   printLine();
   Serial.println("Connecting to WiFi network: " + String(ssid));
   displayPrintScroll("Connecting...");
+  //displayPrintScroll("Hold button to skip");
   WiFi.begin(ssid, pwd);
 
   int NUM_RETRIES = 50;
   int n = 0;
   while (n < NUM_RETRIES && WiFi.status() != WL_CONNECTED) 
   {
+    /*if (digitalRead(BUTTON_A) || digitalRead(BUTTON_B)) {
+      break;
+    }*/
     delay(500);
     Serial.print(".");
     n++;
@@ -1432,7 +1429,7 @@ void printCurrentCredentials() {
   getSSIDFromEEPROM(ssid);
   getPasswordFromEEPROM(password);
   Serial.println("Current wifi credentials:");
-  Serial.print("SSSID: ");
+  Serial.print("SSID: ");
   Serial.println(ssid);
   Serial.print("Password: ");
   Serial.println(password);
@@ -1441,11 +1438,8 @@ void printCurrentCredentials() {
 bool need_to_configure = true;
 #define WAIT_TIME_S 10
 void configure() {
-  //display.clearDisplay();
-  //display.setCursor(0, 0);
-  //display.print("Configuring...");
-  //display.display();
-  displayPrintScroll("Configuring...");
+  displayPrintScroll("Config via serial...");
+  
   Serial.println("Enter 'c' to re-enter this configuration while running.");
   int wifiEnabled = getWiFiEnabledFromEEPROM();
   Serial.println(wifiEnabled ? "WiFi ENABLED" : "WiFi DISABLED");
@@ -1461,9 +1455,10 @@ void configure() {
 //  if (Serial.available() > 0) {
   Serial.setTimeout(WAIT_TIME_S*1000);
     // read the incoming byte:
-    
+  
   String str = Serial.readStringUntil('\n');
   char c = str.charAt(0);
+  
   switch (c) {
     case 'r':
     {
@@ -1546,12 +1541,12 @@ void loop() {
 
   if (digitalRead(BUTTON_A)) {
       Serial.println("A BUTTON");
-      //buttonA();
+      buttonC();
   }
   
   if (digitalRead(BUTTON_B)) {
     Serial.println("B BUTTON");
-    //buttonB();
+    buttonB();
     //Serial.println("B BUTTON PROCESS DONE");
   }
     
