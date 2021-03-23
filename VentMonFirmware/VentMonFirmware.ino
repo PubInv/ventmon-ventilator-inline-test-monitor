@@ -1,6 +1,6 @@
 
 /***************************************************************************
- Copyrigh Robert L. Read, 2020
+  Copyright Robert L. Read, 2020
   Networking code by Geoff Mulligan 2020
   Additional work by Lauria Clarke 2020
   designed to support ethernet using esp wifi chip
@@ -26,11 +26,157 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+#define BAUD_RATE 500000
+
+#define LOGO_HEIGHT   64
+#define LOGO_WIDTH    128
+// 'logo-tight', 92x64px
+/*const unsigned char logo_bmp [] PROGMEM = {
+  // 'logo-tight, 92x64px
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0xff, 0xe1, 0xff, 0xc3, 0xff, 0x7f, 
+  0xff, 0x00, 0x40, 0x00, 0x00, 0x27, 0xff, 0xf9, 0xff, 0xc3, 0xff, 0x7f, 0xff, 0xc3, 0xc0, 0x00, 
+  0x00, 0x37, 0xff, 0xff, 0xff, 0xc3, 0xff, 0x7f, 0xff, 0xff, 0xc0, 0x00, 0x00, 0x1f, 0xff, 0xff, 
+  0xff, 0xc3, 0xff, 0x7f, 0xff, 0xff, 0xc0, 0x00, 0x00, 0x01, 0xe0, 0x3f, 0x1c, 0x00, 0x3c, 0x0f, 
+  0x01, 0xff, 0xc0, 0x00, 0x00, 0x01, 0xe0, 0x0f, 0x9c, 0x00, 0x3c, 0x0f, 0x00, 0x7f, 0xc0, 0x00, 
+  0x00, 0x01, 0xec, 0x07, 0x9c, 0x80, 0x3c, 0x0f, 0x00, 0x7f, 0x80, 0x00, 0x00, 0x01, 0xfc, 0x07, 
+  0xdd, 0xc0, 0x3c, 0x0f, 0x00, 0x7f, 0x80, 0x00, 0x00, 0x61, 0xfc, 0x03, 0xdf, 0xc0, 0x3c, 0x0f, 
+  0x00, 0x7f, 0x80, 0x00, 0x00, 0x71, 0xfc, 0x03, 0xdf, 0xc0, 0x3c, 0x0f, 0x00, 0xff, 0x00, 0x00, 
+  0x00, 0xf9, 0xfc, 0x03, 0xdf, 0x80, 0x3c, 0x0f, 0xff, 0xff, 0x00, 0x00, 0x00, 0xfd, 0xfc, 0x03, 
+  0xdf, 0x00, 0x3c, 0x0f, 0xff, 0xfd, 0xf0, 0x00, 0x00, 0xff, 0xfc, 0x07, 0xdc, 0x00, 0x3c, 0x0f, 
+  0xff, 0xfb, 0xe0, 0x00, 0x00, 0x7f, 0xf8, 0x07, 0x9c, 0x00, 0x3c, 0x0f, 0xff, 0xff, 0xe0, 0x00, 
+  0x00, 0x7f, 0xf8, 0x0f, 0x9c, 0x00, 0x3c, 0x0f, 0x00, 0xff, 0xc0, 0x00, 0x00, 0x1f, 0xf0, 0x3f, 
+  0x1c, 0x00, 0x3f, 0xcf, 0x00, 0x1f, 0x80, 0x00, 0x00, 0x0f, 0xff, 0xfe, 0x1c, 0x00, 0x3f, 0xaf, 
+  0x00, 0x1f, 0x00, 0x00, 0x00, 0x01, 0xff, 0xfc, 0x1c, 0x00, 0x3c, 0x5f, 0x00, 0x0f, 0x00, 0x00, 
+  0x00, 0x01, 0xff, 0xf8, 0x1c, 0x00, 0x3c, 0x3f, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x01, 0xff, 0xc0, 
+  0x1f, 0xff, 0xf8, 0x1f, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x01, 0xe0, 0x00, 0x1e, 0x00, 0x78, 0x0f, 
+  0x00, 0x1f, 0x00, 0x00, 0x00, 0x01, 0xe0, 0x00, 0x1f, 0x00, 0xf8, 0x0f, 0x00, 0x1e, 0x00, 0x00, 
+  0x00, 0x01, 0xe0, 0x00, 0x1f, 0x81, 0xf0, 0x0f, 0x00, 0x3e, 0x00, 0x00, 0x00, 0x1f, 0xf8, 0x00, 
+  0x0f, 0xff, 0xf3, 0xff, 0xff, 0xfc, 0x00, 0x00, 0x00, 0x37, 0xfc, 0x00, 0x07, 0xff, 0xe6, 0xff, 
+  0xff, 0xfc, 0x00, 0x00, 0x00, 0x37, 0xfc, 0x00, 0x03, 0xff, 0xc6, 0x7f, 0xff, 0xfe, 0x00, 0x00, 
+  0x00, 0x1f, 0xfc, 0x00, 0x00, 0xff, 0x07, 0xff, 0xff, 0xc7, 0x00, 0x00, 0x00, 0x0c, 0x80, 0x00, 
+  0x18, 0x38, 0x01, 0x80, 0x70, 0x03, 0x80, 0x00, 0x00, 0x18, 0x83, 0x1c, 0x3c, 0x38, 0x00, 0x00, 
+  0x70, 0x01, 0xe0, 0x00, 0x00, 0x3f, 0xff, 0xbf, 0xfc, 0x3f, 0xfc, 0x3f, 0xf8, 0xff, 0xf0, 0x00, 
+  0x00, 0x27, 0xfc, 0xf7, 0xfe, 0x27, 0xfc, 0x3f, 0xc8, 0xff, 0x90, 0x00, 0x00, 0x3f, 0xff, 0xbf, 
+  0xfe, 0x77, 0xfc, 0x3f, 0xf8, 0xff, 0xb0, 0x00, 0x00, 0x1f, 0xff, 0x9f, 0xff, 0xff, 0xfc, 0x3f, 
+  0xf0, 0xff, 0xe0, 0x00, 0x00, 0x00, 0xf9, 0x08, 0xff, 0xc1, 0xe4, 0x0f, 0x20, 0x1e, 0x20, 0x00, 
+  0x00, 0x00, 0xf9, 0x08, 0xff, 0xc1, 0xe4, 0x0f, 0xa0, 0x1e, 0x20, 0x00, 0x00, 0x00, 0xf9, 0x08, 
+  0xff, 0x81, 0xe4, 0x7f, 0xbf, 0xfe, 0x20, 0x00, 0x00, 0x00, 0xf9, 0x08, 0xff, 0x01, 0xe4, 0x7f, 
+  0x80, 0x3c, 0x20, 0x00, 0x00, 0x00, 0xf9, 0x08, 0xff, 0x81, 0xe4, 0x3f, 0xc0, 0x3c, 0x20, 0x00, 
+  0x00, 0x00, 0xf9, 0x08, 0xf7, 0xc1, 0xe4, 0x3f, 0xc0, 0x7c, 0x20, 0x00, 0x00, 0x02, 0xf9, 0x08, 
+  0xf7, 0xc1, 0xe4, 0x1f, 0xc0, 0x78, 0x20, 0x00, 0x00, 0x07, 0xff, 0xff, 0xf3, 0xe1, 0xe4, 0x0f, 
+  0xe0, 0x78, 0x20, 0x00, 0x00, 0x07, 0xf0, 0x00, 0xf1, 0xe1, 0xe4, 0x01, 0xe0, 0xf8, 0x20, 0x00, 
+  0x00, 0x03, 0xf0, 0x00, 0xf1, 0xf1, 0xe4, 0x01, 0xf0, 0xf0, 0x20, 0x00, 0x00, 0x00, 0xf0, 0x00, 
+  0xf3, 0xf9, 0xe4, 0x00, 0xf0, 0xf0, 0x20, 0x00, 0x00, 0x00, 0xf0, 0x00, 0xf6, 0x79, 0xe4, 0x00, 
+  0xf1, 0xe0, 0x20, 0x00, 0x00, 0x00, 0xf0, 0x00, 0xf4, 0x7d, 0xe4, 0x00, 0xf9, 0xe0, 0x20, 0x00, 
+  0x00, 0x00, 0xf0, 0x00, 0xf4, 0x3f, 0xe4, 0x00, 0x7b, 0xe0, 0x20, 0x00, 0x00, 0x00, 0xf0, 0x00, 
+  0xf4, 0x3f, 0xe4, 0x00, 0x7b, 0xc0, 0x20, 0x00, 0x00, 0x00, 0xff, 0xff, 0xf4, 0x1f, 0xe7, 0xff, 
+  0xff, 0xc0, 0x20, 0x00, 0x00, 0x00, 0xf0, 0x00, 0xf4, 0x0f, 0xe0, 0x00, 0x3f, 0xc0, 0x20, 0x00, 
+  0x00, 0x00, 0xf7, 0xfe, 0xf4, 0x0f, 0xe0, 0x00, 0x3f, 0x80, 0x20, 0x00, 0x00, 0x00, 0xf4, 0x02, 
+  0xf4, 0x07, 0xe0, 0x00, 0x3f, 0x80, 0x20, 0x00, 0x00, 0x03, 0xfe, 0x02, 0xf4, 0x03, 0xff, 0xff, 
+  0xff, 0x80, 0x20, 0x00, 0x00, 0x07, 0xfe, 0x07, 0xfe, 0x03, 0xe0, 0x00, 0x1f, 0x00, 0x20, 0x00, 
+  0x00, 0x07, 0xfe, 0x07, 0xfe, 0x01, 0xe0, 0x00, 0x1f, 0xff, 0xe0, 0x00, 0x00, 0x07, 0xfe, 0x07, 
+  0xfe, 0x01, 0xe0, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0xfe, 0x00, 0x60, 0x00, 
+  0x0e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};*/
+
+const unsigned char logo_bmp [] PROGMEM = {
+  // 'ventmon 8bit logo, 128x64px
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x04, 0xff, 0xf0, 0x3f, 0xf0, 0xff, 0xdf, 0xff, 0x80, 0x7c, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x04, 0xff, 0xfe, 0x3f, 0xf0, 0xff, 0xdf, 0xff, 0xe0, 0xfc, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x03, 0xff, 0xff, 0x3f, 0xf0, 0xff, 0xdf, 0xff, 0xf8, 0xdc, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x38, 0x1f, 0x87, 0x00, 0x0e, 0x03, 0x80, 0x7d, 0xbc, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x38, 0x03, 0xc7, 0x00, 0x0e, 0x03, 0x80, 0x1d, 0xb8, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x38, 0x01, 0xc7, 0x00, 0x0e, 0x03, 0x80, 0x1e, 0x78, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0xe7, 0x00, 0x0e, 0x03, 0x80, 0x0e, 0xf0, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x38, 0x40, 0xe7, 0x10, 0x0e, 0x03, 0x80, 0x0f, 0xf0, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x39, 0xc0, 0xf7, 0x30, 0x0e, 0x03, 0x80, 0x0f, 0xc0, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x08, 0x3b, 0x40, 0xf7, 0x50, 0x0e, 0x03, 0x80, 0x1e, 0x08, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x0e, 0x3a, 0xc0, 0xf7, 0xb0, 0x0e, 0x03, 0x80, 0x3c, 0x18, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x0b, 0x3e, 0xc0, 0xe7, 0xf0, 0x0e, 0x03, 0xff, 0xfe, 0x78, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x0d, 0xbd, 0xc0, 0xe7, 0xe0, 0x0e, 0x03, 0xff, 0xff, 0x50, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x0d, 0xbf, 0x81, 0xe7, 0x80, 0x0e, 0x03, 0xff, 0xff, 0xb0, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x06, 0xbf, 0x01, 0xc7, 0x00, 0x0e, 0x03, 0x80, 0x0f, 0xe0, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x07, 0xfc, 0x07, 0x87, 0x00, 0x0f, 0xf3, 0x80, 0x07, 0x80, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x03, 0xff, 0xff, 0x07, 0x00, 0x0e, 0x0b, 0x80, 0x03, 0x80, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x7f, 0xfe, 0x07, 0x00, 0x0f, 0xe7, 0x80, 0x03, 0x80, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x3f, 0xf8, 0x07, 0x00, 0x0e, 0x13, 0x80, 0x03, 0x80, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0x07, 0xff, 0xfe, 0x0b, 0x80, 0x03, 0x80, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0x07, 0x00, 0x0e, 0x07, 0x80, 0x03, 0x80, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0x03, 0x80, 0x1c, 0x03, 0x80, 0x07, 0x80, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x38, 0x00, 0x03, 0xc0, 0x3c, 0x03, 0x80, 0x0f, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x03, 0x38, 0x00, 0x01, 0xf0, 0xf8, 0x33, 0x80, 0x3e, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x04, 0xff, 0x00, 0x00, 0xff, 0xf0, 0x4f, 0xff, 0xfe, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x04, 0xff, 0x00, 0x00, 0x7f, 0xe0, 0x4f, 0xff, 0xfb, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x07, 0xff, 0x00, 0x00, 0x0f, 0x00, 0x3f, 0xff, 0xc1, 0x80, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00, 0xc4, 0x00, 0x00, 0x08, 0x00, 0xc0, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x20, 0x00, 0x01, 0x44, 0x00, 0x00, 0x08, 0x00, 0x60, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x03, 0xff, 0xe3, 0xfe, 0xcf, 0xff, 0x0f, 0xfc, 0x3f, 0xf8, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x04, 0xff, 0xe4, 0xfd, 0xd3, 0xff, 0x0f, 0xe4, 0x3f, 0xe4, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x04, 0xff, 0xe4, 0xff, 0xd3, 0xff, 0x0f, 0xe4, 0x3f, 0xe4, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x03, 0x1d, 0x43, 0x1f, 0x8c, 0x39, 0x03, 0xdc, 0x07, 0x98, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1d, 0x42, 0x1f, 0x00, 0x39, 0x01, 0xc8, 0x07, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1d, 0x42, 0x1f, 0x80, 0x39, 0x01, 0xc8, 0x07, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1d, 0x42, 0x1f, 0x80, 0x39, 0x19, 0xef, 0xff, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x01, 0x1d, 0x42, 0x1f, 0xc0, 0x39, 0x14, 0xe0, 0x0f, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x01, 0xdd, 0x42, 0x1d, 0xe0, 0x39, 0x1b, 0xe0, 0x0e, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x01, 0x7d, 0x7e, 0x1c, 0xe0, 0x39, 0x1d, 0xf0, 0x0e, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x01, 0xbd, 0x00, 0x1c, 0xf0, 0x39, 0x0f, 0xf0, 0x1c, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xfd, 0xff, 0xfc, 0x70, 0x39, 0x0f, 0xf0, 0x1c, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xfc, 0x00, 0x1c, 0x78, 0x39, 0x03, 0xf8, 0x1c, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x7c, 0x00, 0x1c, 0x3c, 0x39, 0x00, 0x78, 0x38, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1d, 0xfc, 0x39, 0x00, 0x38, 0x38, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1d, 0x1e, 0x39, 0x00, 0x3c, 0x38, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1d, 0x0e, 0x39, 0x00, 0x1c, 0x70, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1d, 0x0f, 0x39, 0x00, 0x1c, 0x70, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1d, 0x07, 0xb9, 0x00, 0x1e, 0x70, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1f, 0xff, 0xfd, 0x03, 0xf9, 0xff, 0xfe, 0xe0, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1d, 0x03, 0xf8, 0x00, 0x0f, 0xe0, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1d, 0xff, 0xdd, 0x01, 0xf8, 0x00, 0x07, 0xc0, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1d, 0x00, 0x5d, 0x00, 0xf8, 0x00, 0x07, 0xc0, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x1d, 0x00, 0x5d, 0x00, 0xff, 0xff, 0xff, 0xc0, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xff, 0x80, 0xff, 0x80, 0x78, 0x00, 0x07, 0x80, 0x10, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xff, 0x80, 0xff, 0x80, 0x38, 0x00, 0x03, 0xff, 0xf0, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xff, 0x80, 0xff, 0x80, 0x38, 0x00, 0x03, 0x80, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+// You will need to change the ESP32 partition scheme to fit the Bluetooth Libraries!
+// Tools > Partition Scheme > Minimal SPIFFS (Large APPS with OTA)
+// This gives you more program space - choose No OTA for even more space but this removes Over The Air updates feature.
+//#define BLE
+#ifdef BLE
+  #include <BLEDevice.h>
+  #include <BLEServer.h>
+  #include <BLEUtils.h>
+  #include <BLE2902.h>
+  
+  BLECharacteristic *characteristicTX;
+  bool deviceConnected = false;
+  // See the following for generating UUIDs:
+  // https://www.uuidgenerator.net/
+  #define SERVICE_UUID           "ab0828b1-198e-4351-b779-901fa0e0371e" // UART service UUID
+  #define CHARACTERISTIC_UUID_RX "4ac8a682-9736-4e5d-932b-e9b31405049c"
+  #define CHARACTERISTIC_UUID_TX "0972EF8C-7613-4075-AD52-756F33D4DA91"
+#endif
+
+#define V4 // V0.4 VentMon with the new 128x64 OLED Screen
+//#define DEBUG_1
 
 /* In theory, some of these components are optional, so we track what we find... */
 bool found_display = false;
 
-/* These are all the supported sensor. Each sensor has a "period".
+/*  These are all the supported sensor. Each sensor has a "period".
  *  The Period is the number of milliseconds to wait before the next event for that sensor.
  *  This is complicated somewhat by multi-sensor boards.
  */
@@ -69,13 +215,19 @@ unsigned PERIOD_B_H2O_ms = 0;
 unsigned PERIOD_B_GAS_ms = 0; 
 
 /* DISPLAY ********************************************/
+#ifdef V4
+Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
+#define DISPLAY_I2C 0x3D
+#else
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
+#define DISPLAY_I2C 0x3C
+#endif
 
 unsigned long buttonCpress_ms = 0;
 
-#define BUTTON_A 15
-#define BUTTON_B 32
-#define BUTTON_C 14
+#define BUTTON_A 13
+#define BUTTON_B 12
+//#define BUTTON_C 14
 
 /* HSC *************************************************/
 // This is for the HSCDRRT001PD2A3, if you change the Honeywell differential
@@ -100,7 +252,7 @@ char macs[18];
 #define PARAMPORT 6111
 #define LOCALPORT 6111
 
-#define DEFALUT_HOST_ADDR "13.58.243.230"
+#define DEFAULT_HOST_ADDR "13.58.243.230"
 
 char *Loghost = strdup(PARAMHOST);
 uint16_t Logport = PARAMPORT;
@@ -142,18 +294,21 @@ Adafruit_BME680 bme680[2]; // I2C
 
 uint8_t addr[2] = {INSPIRATORY_SENSOR_ADDRESS, AMBIENT_SENSOR_ADDRESS};
 
-// we will ust this as a pressure to display to make the OLED useful...
+// We will just this as a pressure to display to make the OLED useful...
 // Eventually we will put this into running window
 signed long display_max_pressure = 0;
 signed long display_min_pressure = 0;
+signed long display_pressure_val;
+signed long display_fiO2_val;
+signed long display_flow_val;
 
-// only need to sample the ambient air occasinally
+// Only need to sample the ambient air occasinally
 // (say once a minute) for PEEP analysis
 int ambient_counter = 0;
 
 // unsigned long sample_millis = 0;
 
-// We could send out only raw data, and let more powerful computers process thing.
+// We could send out only raw data, and let more powerful computers process things.
 // But we have a powerful micro controller here, so we will try to be useful!
 // Instead of outputting only the absolute pressure, we will output the differential
 // pressure in the inspiratory limb. We will compute a differential pressure against the
@@ -183,7 +338,7 @@ bool SENSOR_INSTALLED_BACKWARD = false;
 
 /* FiO2 ***********************************************/
 
-// oxygen sensor is connecte to channel 3 of ADS115
+// Oxygen sensor is connected to channel 3 of ADS115
 #define O2CHANNEL        3
 #define UNPLUGGED_MAX    400
 #define FIO2_SAMPLE_RATE 4000
@@ -193,7 +348,6 @@ Adafruit_ADS1115 ads;
 int initialO2 = 0;
 // bool oxygenSensing = true;
 unsigned long lastFiO2Sample = 0;
-
 
 /* ERROR MESSAGE STRINGS ******************************/
 
@@ -241,16 +395,17 @@ float get_HSC_temperature(const struct hsc_data raw) {
     return (raw.temperature_data * 0.0977) - 50;                
 }
 
+#ifdef DEBUG_1
 void report_bme280_not_found(uint16_t id) {
    Serial.println("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
    Serial.print("SensorID was: 0x"); 
    Serial.println(id,16);
-   Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
-   Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
-   Serial.print("        ID of 0x60 represents a BME 280.\n");
-   Serial.print("        ID of 0x61 represents a BME 680.\n");
+   Serial.print(F("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n"));
+   Serial.print(F("   ID of 0x56-0x58 represents a BMP 280,\n"));
+   Serial.print(F("        ID of 0x60 represents a BME 280.\n"));
+   Serial.print(F("        ID of 0x61 represents a BME 680.\n"));
 }
-
+#endif
 
 long readHSCPressure()
 {
@@ -264,13 +419,14 @@ long readHSCPressure()
     return LONG_MIN;
   } else {
     if ( status == 3 ) {
-       Serial.print("err diagnostic fault ");
+       Serial.print(F("err diagnostic fault "));
        Serial.println(ps.status, BIN);
+       return LONG_MIN;
      }
      if ( status == 2 ) {
        // if data has already been feched since the last
        // measurement cycle
-       Serial.print("warn stale data ");
+       Serial.print(F("warn stale data "));
        Serial.println(ps.status, BIN);
      }
      if ( status == 1 ) {
@@ -305,11 +461,10 @@ void output_on_serial_print_PIRDS(char e, char t, char loc, unsigned short int n
 }
 
 void outputMeasurement(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
-
   output_on_serial_print_PIRDS(e, t, loc, n, ms, val);
   Serial.println();
   send_data(e, t, loc, n, ms, val);
-
+  display_print_pirds(e, t, loc, n, ms, val);
 }
 
 void outputMetaEvent(char *msg, unsigned long ms) {
@@ -333,14 +488,14 @@ void perform_read(int idx) {
   } else if (found_bme280[idx]) {
 // The 280 does not requre a call to .performReading();
   } else {
-    Serial.println("INTERNAL ERROR! (report full)");
+    Serial.println(F("INTERNAL ERROR! (report full)"));
   }
 }
 
 void debugPrintBuffer(uint8_t* m, int n) {
   for (int i = 0; i < n; i++) {
     Serial.print(m[i], HEX);
-    Serial.print(' ');
+    Serial.print(F(' '));
   }
   Serial.println();
 }
@@ -388,13 +543,17 @@ bool send_data_measurement(Measurement ma) {
 //      Serial.println("Packet begun");
     }
     if (udpclient->write(m, 14) != 14) {
+      #ifdef DEBUG_1
       Serial.println("Packet Write failed");
+      #endif
     } else {
  //     Serial.println("Packet Write succeeded");
     }
     if (udpclient->endPacket() != 1) {
-      Serial.println("wudpclient");
-      Serial.println("send_data_measurement end failed!");
+      #ifdef DEBUG_1
+      Serial.println(F("wudpclient"));
+      Serial.println(F("send_data_measurement end failed!"));
+      #endif
       return false;
     } else {
  //     Serial.println("Packet done");
@@ -421,12 +580,16 @@ bool send_data_message(Message ma) {
       return false;
     }
     if (udpclient->write(m, 264) != 264) {
-      Serial.println("Packet Write failed");
+      #ifdef DEBUG_1
+      Serial.println(F("Packet Write failed"));
+      #endif
     } else {
  //     Serial.println("Packet Write succeeded");
     }
     if (udpclient->endPacket() != 1) {
-      Serial.println("send_data_message end failed!");
+      #ifdef DEBUG_1
+      Serial.println(F("send_data_message end failed!"));
+      #endif
       return false;
     }
   } 
@@ -519,16 +682,18 @@ signed long readPressureOnly(int idx)
     } else if (found_bme680[idx]) {
       return readPressureOnly680(idx);
     } else {
+      #ifdef DEBUG_1
       // Can't really do give an anwer, this is an internal error!
-      Serial.println("NO SENSOR ERROR");
-      Serial.print("IDX: ");
+      Serial.println(F("NO SENSOR ERROR"));
+      Serial.print(F("IDX: "));
       Serial.println(idx);
+      #endif
       return LONG_MIN;
     }
   }
   else {
     // internal error! Ideally would publish and internal error event
-   Serial.println("INTERNAL ERROR! BAD IDX");
+   Serial.println(F("INTERNAL ERROR! BAD IDX"));
     return LONG_MIN;
   }
   
@@ -543,15 +708,18 @@ signed long readPressureOnly280(int idx)
   }
   else {
     // internal error! Ideally would publish and internal error event
-    Serial.println("INTERNAL ERROR! (readPressureOnly280)");
+    #ifdef DEBUG_1
+    Serial.println(F("INTERNAL ERROR! (readPressureOnly280)"));
+    #endif
     return LONG_MIN;
   }
 }
+
 signed long readPressureOnly680(int idx)
 {
   if (idx < 2) {
-        if (! bme680[idx].performReading()) {
-      Serial.println("Failed to perform reading :( for:");
+    if (! bme680[idx].performReading()) {
+      Serial.println(F("Failed to perform reading :( for:"));
       Serial.println(addr[idx], HEX);
       found_bme680[idx] = false;
       return LONG_MIN;
@@ -563,11 +731,12 @@ signed long readPressureOnly680(int idx)
     }
   } else {
     // internal error! Ideally would publish and internal error event
-     Serial.println("INTERNAL ERROR! (readPressureOnly680)");
+    #ifdef DEBUG_1
+    Serial.println("INTERNAL ERROR! (readPressureOnly680)");
+    #endif
     return LONG_MIN;
   }
 }
-
 
 
 
@@ -575,16 +744,54 @@ signed long readPressureOnly680(int idx)
 
 /* DISPLAY ********************************************/
 
+#define ROW_HEIGHT 10
+#define ROW_LENGTH 128
+#ifdef V4
+  #define ROW_NUM 6
+#else
+  #define ROW_NUM 3
+#endif
+#define SCROLL_DELAY 500
+String display_rows[ROW_NUM];
+int row_index = 0;
+void displayPrintScroll(String s){
+  //Serial.print(s);
+  
+  display.clearDisplay();
+
+  int a = row_index+1;
+  if (a > ROW_NUM) {
+    row_index = ROW_NUM;
+    for (int i = 0; i < ROW_NUM-1; i++){
+      display_rows[i] = display_rows[i+1];
+    }
+    display_rows[ROW_NUM-1] = s;
+    
+  } else {
+    display_rows[row_index] = s;
+  }
+  
+  row_index++;
+  
+  for (int i = 0; i < ROW_NUM; i++){
+    display.setCursor(0, i*ROW_HEIGHT);
+    display.print(display_rows[i]);
+  }
+  
+  display.display();
+  delay(SCROLL_DELAY);
+}
+
 void setupOLED() {
   // Here we initialize the OLED...
-  Serial.println("OLED FeatherWing test");
+  //Serial.println("OLED FeatherWing test");
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  int ret_oled = display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  Serial.println("Return value for OLED");
-  Serial.println(ret_oled);
+  int ret_oled = display.begin(SSD1306_SWITCHCAPVCC, DISPLAY_I2C);
+  //Serial.println("Return value for OLED");
+  //Serial.println(ret_oled);
   if (ret_oled != 1) { // Address 0x3C for 128x32
     // hopefully this just means you don't have the board; we should send this as a message in the stream
-    Serial.println("returing from OLED setup!");
+    // Serial.println("returning from OLED setup!");
     return;
   }
   found_display = true;
@@ -601,28 +808,61 @@ void setupOLED() {
   display.clearDisplay();
   display.display();
 
-  Serial.println("IO test");
+  //Serial.println("IO test");
 
-  pinMode(BUTTON_A, INPUT_PULLUP);
-  pinMode(BUTTON_B, INPUT_PULLUP);
-  pinMode(BUTTON_C, INPUT_PULLUP);
+  pinMode(BUTTON_A, INPUT);
+  pinMode(BUTTON_B, INPUT);
+  //pinMode(BUTTON_C, INPUT_PULLUP);
 
   // text display tests
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
-  display.setCursor(0, 0);
-  display.print("Starting up...");
-  display.setCursor(0, 0);
-  display.display(); // actually display all of the above
+  //display.setCursor(0, 0);
+  //display.print("Starting up...");
+  //display.setCursor(0, 0);
+  //display.display(); // actually display all of the above
+
+  // VentMon splash screen
+  testdrawbitmap();
+  delay(3000);
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(25, 20);
+  display.println(F("VentMon"));
+  display.setCursor(54, 40);
+  display.setTextSize(1);
+  display.println(F("v0.4"));
+  display.display();
+
+  delay(2000);
+  display.clearDisplay();
+
+  delay(1000);
+  
+  //displayPrintScroll("Starting VentMon...");
 }
 
-void buttonA() {
+
+
+void testdrawbitmap(void) {
+  display.clearDisplay();
+
+  display.drawBitmap(
+    (display.width()  - LOGO_WIDTH ) / 2,
+    (display.height() - LOGO_HEIGHT) / 2,
+    logo_bmp, LOGO_WIDTH, LOGO_HEIGHT, 1);
+  display.display();
+  //delay(1000);
+}
+
+/*void buttonA() {
   Serial.println("A BUTTON");
   display.clearDisplay();
   display.setCursor(0, 0);
   display.print("A");
 }
-
+*/
 void buttonB() {
   Serial.println("B BUTTON");
   display.clearDisplay();
@@ -630,7 +870,8 @@ void buttonB() {
   display.print("B");
 }
 
-// This is an experimental used of this event!!!
+// This is an experimental use of this event!!!
+// Save Log to file
 void buttonC() {
   display.clearDisplay();
   display.setCursor(0, 10);
@@ -643,12 +884,14 @@ void buttonC() {
   strcpy(buffer + n, "test_file_name");
   outputMetaEvent(buffer, ms);
 }
+
 /* DISPLAY FOR OUR OLED (128 x 32) */
 // Trying to make simple, I will define 3 lines..
 void displayLine(int n, char* s) {
   display.setCursor(0, 10);
   display.print(s);
 }
+
 #define DISPLAY_STAT 0
 #define DISPLAY_GRAPH 1
 #define DISPLAY_ROTATION_MS = 5000;
@@ -658,7 +901,11 @@ long long_display_ms = 0;
 // This is implementing a rotating graph
 #define GRAPH_X_PIXELS 128
 #define LEFT_PREFIX_AREA_X 28
+#ifdef V4
+#define GRAPH_Y_PIXELS 64
+#else
 #define GRAPH_Y_PIXELS 32
+#endif
 #define SAMPLE_PIXELS (GRAPH_X_PIXELS-LEFT_PREFIX_AREA_X)
 uint8_t graph_samples[SAMPLE_PIXELS]; 
 
@@ -671,40 +918,84 @@ void push_sample(uint8_t s) {
   graph_samples[SAMPLE_PIXELS-1] = s;
 }
 
+
+// Alternate between 2 screens every 5 seconds
 void displayFromMS(long ms) {
+
+  #ifndef V4
   current_display_mode = (ms / 5000) % 2;
- // displayFromMode(current_display_mode);
+  displayFromMode(current_display_mode);
+  #else
+  displayFromMode(DISPLAY_STAT);
   displayFromMode(DISPLAY_GRAPH);
+  #endif
 }
+
 void displayFromMode(int mode) {
   switch (mode) {
     case DISPLAY_STAT:
-      displayPressure(true);
+      //displayPressure(true);
+      display_stat();
       break;
     case DISPLAY_GRAPH:
       displayGraph();
       break;
   }
 }
-// #define WHITE    0xFFFF
+
+
+void display_stat(){
+  display_pressure(display_pressure_val);
+  display_flow(display_flow_val, true);
+  display_oxygen(display_fiO2_val);
+}
+
+void display_pressure(long display_airway_pressure) {
+  // 1 Pa =  0.010197442889221 cmH20
+  display.print("cmH20: ");
+  display.println(display_airway_pressure * 0.01);
+}
+
+void display_oxygen(signed long fiO2) {
+  if (fiO2 > 0 && fiO2 <= 100){
+    char buffer[18];
+    sprintf (buffer, "FiO2: %2d", fiO2);
+    display.println(buffer);
+  } else {
+    display.println("error");
+  }
+}
+
+void display_flow(signed long flow, bool isLPM){
+  char buffer[18];
+  if (isLPM){
+    sprintf(buffer, "LPM: %2d", flow/1000);
+  } else {
+    sprintf(buffer, "mm/min: %2d", flow);
+  }
+  
+  display.println(buffer);
+}
+
+// #define WHITE 0xFFFF
 void displayGraph() {
+  #ifndef V4
   display.clearDisplay();
+  #endif
   char buffer[32];
   sprintf(buffer, "%.1f", MAX_PRESSURE_SCALE);
-  display.println(buffer);
+  display.print(buffer);
+  
   display.println("cm ");
   display.println("H2O:");
-  display.println("0.0");
- 
+  display.println("0.0"); 
 
   for(int i = 0; i < SAMPLE_PIXELS; i++) {
     display.drawPixel(i+LEFT_PREFIX_AREA_X,(GRAPH_Y_PIXELS -1) - graph_samples[i],1);
   }
   display.display();
-
-
-  
 }
+
 void displayPressure(bool max_not_min) {
   // display.print(max_not_min ? "Max" : "Min" );
   display.print(" cm H2O: ");
@@ -715,6 +1006,20 @@ void displayPressure(bool max_not_min) {
   sprintf(buffer, "%d.1", display_pressure / 10);
   display.println(buffer);
 }
+
+void display_print_pirds(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
+  switch (t) {
+    case 'D': //pressure
+      display_pressure_val = val;
+      break;
+    case 'O': //oxygen
+      display_fiO2_val = val;
+    case 'F': //flow
+      display_flow_val = val;
+      break;
+  }
+}
+
 
 /******************************************************/
 
@@ -736,25 +1041,33 @@ bool connectToWiFi(const char * ssid, const char * pwd)
   wudpclient_good = false;
   printLine();
   Serial.println("Connecting to WiFi network: " + String(ssid));
-
+  displayPrintScroll("Connecting...");
+  //displayPrintScroll("Hold button to skip");
   WiFi.begin(ssid, pwd);
 
   int NUM_RETRIES = 50;
   int n = 0;
   while (n < NUM_RETRIES && WiFi.status() != WL_CONNECTED) 
   {
+    /*if (digitalRead(BUTTON_A) || digitalRead(BUTTON_B)) {
+      break;
+    }*/
     delay(500);
     Serial.print(".");
     n++;
   }
   if (WiFi.status() != WL_CONNECTED) {
      Serial.println("WiFi connection failed!");
+     displayPrintScroll("WiFi failed!");
   } else {
-    Serial.println();
+    //Serial.println();
     Serial.println("WiFi connected!");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
+    displayPrintScroll("WiFi connected!");
+    displayPrintScroll((String)WiFi.localIP());
+    
     wudpclient_good = (wudpclient.begin(LOCALPORT) == 1);
 
     Serial.print("WIFI UDP Connection:");
@@ -801,7 +1114,7 @@ void requestURL(const char * host, uint8_t port)
     Serial.print(line);
   }
 
-  Serial.println();
+  //Serial.println();
   Serial.println("closing connection");
   client.stop();
 }
@@ -820,38 +1133,73 @@ bool ethernet_setup() {
   WiFi.macAddress(mac); // Get MAC address of wifi chip for ethernet address
   snprintf(macs, sizeof macs, "%02X:%02X:%02X:%02X:%02X:%02X",
            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  #ifdef DEBUG_1
   Serial.print(F("Mac: "));
   Serial.print(macs);
   Serial.println();
+  #endif
+  
+  displayPrintScroll(macs);
   
   eudpclient_good = false;
   int n = 0;
   const int ETHERNET_TRIES = 1;
   while (n < ETHERNET_TRIES) {
     // start the Ethernet connection:
+    displayPrintScroll("Ethernet initializing");
     Serial.println(F("Initialize Ethernet with DHCP:"));
-    if (Ethernet.begin(mac) == 0) {
-      Serial.println(F("Failed to configure Ethernet using DHCP"));
-      // Check for Ethernet hardware present
-      if (Ethernet.hardwareStatus() == EthernetNoHardware) {
-        Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
-      }
-      if (Ethernet.linkStatus() == LinkOFF) {
+
+    // Check for Ethernet hardware present
+    /*if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+      Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
+      displayPrintScroll("Ethernet shield not found!");
+      return false;
+    }*/
+        
+    if (Ethernet.linkStatus() == LinkOFF) {
+        #ifdef DEBUG_1
         Serial.println(F("Ethernet cable is not connected."));
-        delay(3000);
-      }
+        #endif
+        displayPrintScroll("Cable not connected!");
+        delay(1000);
+        return false;
+    }
+    
+    if (Ethernet.begin(mac) == 0) {
+        #ifdef DEBUG_1
+        Serial.println(F("Failed to configure Ethernet using DHCP"));
+        #endif
+        // Check for Ethernet hardware present
+        if (Ethernet.hardwareStatus() == EthernetNoHardware) {
+          #ifdef DEBUG_1
+          Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
+          #endif
+          displayPrintScroll("No ethernet shield!");
+        }
+        /*if (Ethernet.linkStatus() == LinkOFF) {
+          Serial.println(F("Ethernet cable is not connected."));
+          displayPrintScroll("Cable not connected!");
+          delay(3000);
+        }*/
     } else {
+      #ifdef DEBUG_1
       Serial.print(F("  DHCP assigned IP "));
       Serial.println(Ethernet.localIP());
-      delay(5000);
+      #endif
+      displayPrintScroll((String)Ethernet.localIP());
+      delay(5000); // does this delay need to be this long?
       break;
     }
+    
     Serial.print("FAILED TO FIND, TRY #"); 
     Serial.println(n);
     n++;
   }
   if (n==ETHERNET_TRIES) {
+    #ifdef DEBUG_1
     Serial.println("FAILED TO FIND ETHERNET, GIVING UP!");
+    #endif
+    displayPrintScroll("Connection FAILED!");
   } else {
 
     // give the Ethernet shield a second to initialize:
@@ -862,8 +1210,12 @@ bool ethernet_setup() {
       DNSClient dns;
       dns.begin(Ethernet.dnsServerIP());
       if (dns.getHostByName(Loghost, LoghostAddr) == 1) {
+        #ifdef DEBUG_1
         Serial.print("host is ");
         Serial.println(LoghostAddr);
+        #endif
+        displayPrintScroll("Ethernet host:");
+        displayPrintScroll((String)LoghostAddr);
       }
     }
   }
@@ -871,6 +1223,48 @@ bool ethernet_setup() {
 }
 
 
+/******************************************************/
+
+/* BLUETOOTH ******************************************/
+#ifdef BLE
+//callback
+class ServerCallbacks: public BLEServerCallbacks {
+    void onConnect(BLEServer* pServer) {
+      deviceConnected = true;
+    };
+
+    void onDisconnect(BLEServer* pServer) {
+      deviceConnected = false;
+    }
+};
+
+//callback
+class CharacteristicCallbacks: public BLECharacteristicCallbacks {
+    void onWrite(BLECharacteristic *characteristic) {
+      //retorna ponteiro para o registrador contendo o valor atual da caracteristica
+      std::string rxValue = characteristic->getValue(); 
+      //verifica se existe dados (tamanho maior que zero)
+      if (rxValue.length() > 0) {
+        Serial.print("BLE Value: ");
+        for (int i = 0; i < rxValue.length(); i++) {
+          Serial.print(rxValue[i]);
+        }
+
+        Serial.println();
+
+        // Do stuff based on the command received
+        if (rxValue.find("L1") != -1) { 
+          Serial.print("Turning LED ON!");
+          //digitalWrite(LED, HIGH);
+        }
+        else if (rxValue.find("L0") != -1) {
+          Serial.print("Turning LED OFF!");
+          //digitalWrite(LED, LOW);
+        }
+      }
+    }
+};
+#endif
 /******************************************************/
 
 void output_flow() {
@@ -888,12 +1282,14 @@ void output_flow() {
       outputMeasurement('M', 'F', 'I', 0, ms, flow_milliliters_per_minute);
     }
 }
+
 void output_O2() {
    unsigned long fiO2Timer = millis(); 
    float fiO2 = (avgADC(O2CHANNEL) / initialO2) * 20.9;
    unsigned long ms = millis();
    outputMeasurement('M', 'O', 'I', 0, ms, fiO2);
 }
+
 void output_I_DPRES() {
     unsigned long ms = millis();
           // really this should be a running max, for now it is instantaneous
@@ -903,6 +1299,7 @@ void output_I_DPRES() {
     uint8_t s = (GRAPH_Y_PIXELS * display_max_pressure) / MAX_PRESSURE_SCALE * 10;
     push_sample(s);
 }
+
 void output_I_ADPRES() {
     unsigned long ms = millis();
     signed long internal_pressure = readPressureOnly(INSPIRATORY_PRESSURE_SENSOR);
@@ -916,12 +1313,15 @@ void output_I_ADPRES() {
      outputMetaEvent(INSPIRATORY_PRESSURE_SENSOR_ERROR, ms);
     }
 }
+
 void output_I_PRES() {
     output_PRES(0);
 }
+
 void output_B_PRES() {
   output_PRES(1);
 }
+
 void output_PRES(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
     int sensor = (idx == 0) ? INSPIRATORY_PRESSURE_SENSOR : AMBIENT_PRESSURE_SENSOR;
@@ -947,12 +1347,14 @@ void output_temp(int idx) {
     outputMeasurement('M', 'T', loc, 0, ms, (signed long) (0.5 + 
       (found_bme280[idx] ? bme280[idx].readTemperature() : bme680[idx].readTemperature()) * 100));
 }
+
 void output_h2o(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
     unsigned long ms = millis();
     outputMeasurement('M', 'H', loc, 0, ms, (signed long) (0.5 + 
       (found_bme280[idx] ? bme280[idx].readHumidity() : bme680[idx].readHumidity()) * 100));
 }
+
 void output_alt(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
     unsigned long ms = millis();
@@ -962,6 +1364,7 @@ void output_alt(int idx) {
         bme680[idx].readAltitude(SEALEVELPRESSURE_HPA) 
       ));
 }
+
 void output_gas(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
     unsigned long ms = millis();
@@ -990,7 +1393,7 @@ void getSSIDFromEEPROM(char *buffer) {
   for(int i = 0; i < 32; i++) {
      buffer[i] = EEPROM.read(i);
   }
-  // A tereminator may occure before this, but his handles the extreme
+  // A terminator may occur before this, but this handles the extreme
   buffer[32] = '\0';
 }
 
@@ -998,7 +1401,7 @@ void getPasswordFromEEPROM(char *buffer) {
    for(int i = 0; i < 120; i++) {
      buffer[i] = EEPROM.read(32 + i);
   }
-    // A tereminator may occure before this, but his handles the extreme
+  // A terminator may occur before this, but this handles the extreme
   buffer[120] = '\0'; 
 }
 
@@ -1020,15 +1423,13 @@ void setWiFiEnabledFromEEPROM(char enabled) {
   EEPROM.commit();
 }
 
-
-void printCurrentCredentials() {
-    
+void printCurrentCredentials() {    
   char ssid[33];
   char password[121];
   getSSIDFromEEPROM(ssid);
   getPasswordFromEEPROM(password);
   Serial.println("Current wifi credentials:");
-  Serial.print("SSSID: ");
+  Serial.print("SSID: ");
   Serial.println(ssid);
   Serial.print("Password: ");
   Serial.println(password);
@@ -1037,10 +1438,8 @@ void printCurrentCredentials() {
 bool need_to_configure = true;
 #define WAIT_TIME_S 10
 void configure() {
-  display.clearDisplay();
-  display.setCursor(0, 0);
-  display.print("Configuring...");
-  display.display();
+  displayPrintScroll("Config via serial...");
+  
   Serial.println("Enter 'c' to re-enter this configuration while running.");
   int wifiEnabled = getWiFiEnabledFromEEPROM();
   Serial.println(wifiEnabled ? "WiFi ENABLED" : "WiFi DISABLED");
@@ -1056,9 +1455,10 @@ void configure() {
 //  if (Serial.available() > 0) {
   Serial.setTimeout(WAIT_TIME_S*1000);
     // read the incoming byte:
-    
+  
   String str = Serial.readStringUntil('\n');
   char c = str.charAt(0);
+  
   switch (c) {
     case 'r':
     {
@@ -1139,29 +1539,41 @@ void loop() {
   
   unsigned long ms = millis();  
 
+  if (digitalRead(BUTTON_A)) {
+      Serial.println("A BUTTON");
+      buttonC();
+  }
+  
+  if (digitalRead(BUTTON_B)) {
+    Serial.println("B BUTTON");
+    buttonB();
+    //Serial.println("B BUTTON PROCESS DONE");
+  }
+    
   if (found_display) {
     // experimental OLED test code
-    if (!digitalRead(BUTTON_A)) {
-      buttonA();
+    /*if (digitalRead(BUTTON_A)) {
+      Serial.println("A BUTTON");
+      //buttonA();
     }
-    // ButtonB is causing my machine to hang with no explanation
-    else if (!digitalRead(BUTTON_B)) {
+    
+    if (digitalRead(BUTTON_B)) {
       Serial.println("B BUTTON");
-      buttonB();
-      Serial.println("B BUTTON PROCESS DONE");
+      //buttonB();
+      //Serial.println("B BUTTON PROCESS DONE");
     }
     else if (!digitalRead(BUTTON_C)) {
       unsigned long m = millis();
       if (m > (buttonCpress_ms + 1000)) {
         buttonCpress_ms = m;
-        Serial.println("B BUTTON");
+        //Serial.println("B BUTTON");
         buttonC();
       }
-    } else {
+    } else {*/
       display.clearDisplay();
       display.setCursor(0, 0);
       displayFromMS(ms);
-    }
+    //}
 
     display.display();
   }
@@ -1216,10 +1628,9 @@ void loop() {
     PERIOD_FLOW_ms = ms;
   }
 
-
   // Measures other than flow and pressure...
   // Some of these require a preparatory call to "peform_read", complicating the logic a bit..
-  // after we perform that, we can out put the ones that are demanded by the period...
+  // after we perform that, we can output the ones that are demanded by the period...
   ms = millis();
   if (found_bme(INSPIRATORY_PRESSURE_SENSOR)) {
     if (((PERIOD_I_TEMP_ms + PERIOD_I_TEMP)  < ms ) ||
@@ -1261,10 +1672,17 @@ void loop() {
         PERIOD_B_GAS_ms = ms; 
     }
   }
+
+  /* BLUETOOTH */
+  #ifdef BLE
+  if (deviceConnected) {
+      characteristicTX->setValue("Hello!\n");   
+      characteristicTX->notify();    
+  }
+  #endif
 }
 
 
-#define BAUD_RATE 500000
 void setup() {
   // 32 for the ssid, 120 for the pasword, 1 for ethernet, 1 for wifi
   EEPROM.begin(32+120+1+1);
@@ -1272,23 +1690,63 @@ void setup() {
   Serial.begin(BAUD_RATE);
   Wire.begin();
 
+    /* BLUETOOTH */
+  #ifdef BLE
+  // Create the BLE Device
+  BLEDevice::init("VentMon");
+  // Create the BLE Server
+  BLEServer *server = BLEDevice::createServer(); 
+  server->setCallbacks(new ServerCallbacks());
+  // Create the BLE Service
+  BLEService *service = server->createService(SERVICE_UUID);
+  // Create a BLE Characteristic
+  characteristicTX = service->createCharacteristic(
+                      CHARACTERISTIC_UUID_TX,
+                      BLECharacteristic::PROPERTY_NOTIFY
+                    );
+                      
+  characteristicTX->addDescriptor(new BLE2902());
+
+  // Create a BLE Characteristic
+  BLECharacteristic *characteristic = service->createCharacteristic(
+                                         CHARACTERISTIC_UUID_RX,
+                                         BLECharacteristic::PROPERTY_WRITE
+                                       );
+
+  characteristic->setCallbacks(new CharacteristicCallbacks());
+  // Start the service
+  service->start();
+  // Start advertising
+  server->getAdvertising()->start();
+
+  //Serial.println("Waiting a client connection to notify...");
+  #endif
+
+  Serial.println("----------------- VENTMON STARTING -----------------");
+  
   flowSensor.begin();
 
   setupOLED();
  
   while (!Serial);
+
+  displayPrintScroll("Checking sensors...");
   
   seekBME680(INSPIRATORY_PRESSURE_SENSOR);
   seekBME680(AMBIENT_PRESSURE_SENSOR);
 
     if (!bme280[0].begin(addr[0], &Wire)) {
+      #ifdef DEBUG_1
       report_bme280_not_found(bme280[0].sensorID());
+      #endif
     } else {
       found_bme280[0] = true;
     }
 
     if (!bme280[1].begin(addr[1], &Wire)) {
-            report_bme280_not_found(bme280[1].sensorID());
+      #ifdef DEBUG_1
+      report_bme280_not_found(bme280[1].sensorID());
+      #endif
     } else {
       found_bme280[1] = true;
     }
@@ -1297,7 +1755,7 @@ void setup() {
   init_ambient(v);
 
   initializeOxygenSensor();
-
+  
   Serial.print("Ambient Pressure Sensor     : ");
   if (found_bme280[AMBIENT_PRESSURE_SENSOR]) {
     Serial.println("BME280");
@@ -1306,7 +1764,7 @@ void setup() {
   } else {
     Serial.println("NO");
   }
-  Serial.print("Inpsiratory Pressure Sensor : ");
+  Serial.print("Inspiratory Pressure Sensor : ");
   if (found_bme280[INSPIRATORY_PRESSURE_SENSOR]) {
     Serial.println("BME280");
   } else if (found_bme680[INSPIRATORY_PRESSURE_SENSOR]) {
@@ -1315,40 +1773,49 @@ void setup() {
     Serial.println("NO");
   }
   
-  Serial.println("Found O2 Sensor:");
+  Serial.print("Found O2 Sensor: ");
   Serial.println(found_O2 ? "YES" : "NO");
 
   float raw_flow = flowSensor.readFlow();
-  // Let's wait and re-red to see if it is present...
+  // Let's wait and re-read to see if it is present...
   delay(50);
   raw_flow = flowSensor.readFlow(); 
-  Serial.print("Found Flow Sensor : ");
+  Serial.print("Found Flow Sensor: ");
   found_flow = !flowSensor.checkRange(raw_flow);
   Serial.println(found_flow ? "YES" : "NO");
 
-// Differential Pressure Sensor
-  Serial.print("Differentintial Pressure Sensor: ");
+  // Differential Pressure Sensor
+  Serial.print("Found Differential Pressure Sensor: ");
+  // Differential Pressure Sensor: err diagnostic fault 11
   found_diff_press = (readHSCPressure() != LONG_MIN);
   Serial.println(found_diff_press ? "YES" : "NO");
-  Serial.println("XXXXXXXXXXXXXXXXXX");
+  Serial.println("----------------- SENSOR TEST COMPLETE -----------------");
+
+  displayPrintScroll("Sensor test complete!");
+  
   // TODO: Comment out for graphics testing...
   int ethernetEnabled = getEthernetEnabledFromEEPROM();
   if (ethernetEnabled) {
     Serial.println("Ethernet currently: ENABLED");
+    displayPrintScroll("Ethernet ENABLED");
     ethernet_setup();
   } else {
     Serial.println("Ethernet currently: DISABLED");
+    displayPrintScroll("Ethernet ENABLED");
   }
   int wifiEnabled = getWiFiEnabledFromEEPROM();
   if (wifiEnabled) {
     Serial.println("WiFi currently: ENABLED");
+    displayPrintScroll("WiFi ENABLED");
     wifi_setup();
   } else {
     Serial.println("WiFi currently DISABLED");
+    displayPrintScroll("WiFi DISABLED");
   }
   udpclient = (UDP *) (eudpclient_good ? (UDP *) &eudpclient : (wudpclient_good ? (UDP *) &wudpclient : NULL));
 
   printCurrentCredentials();
   need_to_configure = true;
+
 
 }
