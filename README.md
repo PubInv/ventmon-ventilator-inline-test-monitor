@@ -36,7 +36,8 @@ Using Apache:
 
 ![VentMon Apache Ecosystem](https://user-images.githubusercontent.com/5296671/111052629-1a4de880-8422-11eb-9466-349d80afdfa5.png)
 
-Using Docker (aspirational):
+Public Invention recently created a repo that builds a Docker file image that makes all of this possible locally without running Apache/CGI.
+Please visit [PIRDS-docker-local](https://github.com/PubInv/PIRDS-docker-local) for more details.
 
 ![VentMon Docker Ecosystem](https://user-images.githubusercontent.com/5296671/111052632-25087d80-8422-11eb-8d85-7e72af57ff4f.png)
 
