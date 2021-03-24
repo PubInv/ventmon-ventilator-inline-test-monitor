@@ -86,6 +86,7 @@ have to install a library of our creation which encpasulates the PIRDS standard.
 Copy the libary [pirds_library](https://github.com/PubInv/PIRDS-respiration-data-standard/tree/master/pirds_library) into your Arduino library location. You may need to install the Adafruit BME680 library
 and other libraries as well.
 
+Additionally, to compile the version of the firmware, you will need to install the [SFM3X00 library](https://github.com/PubInv/SFM3X00). We wrote this library to encapsulate Sensirion flow sensors of various kinds.
 
 ## Design and Dependencies
 
