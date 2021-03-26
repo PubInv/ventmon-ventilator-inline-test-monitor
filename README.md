@@ -20,11 +20,50 @@ open source, so any team can adopt the design and incorporate it into their own 
 
 The parts in a VentMon cost about USD$600. 
 
-# The Serial Port
+# Usage
 
-VentMon pumps data in the [PIRDS data format](https://github.com/PubInv/PIRDS-respiration-data-standard) out on the Serial Port. This is partially human readable, and a good way to tell if the VentMon is working. It is not a good way to analyze data, but you can tell a lot by reviewing this data stream.  However, the preferred way to look at moving interactive waveforms and clinical paramters is with [VentDisplay](https://github.com/PubInv/vent-display), which requires some configuration.
+## Basics
 
-# Configuration
+The VentMon T0.4 can be powered with any micro-USB cable. It has an RJ45 ethernet port, and supports WiFi.  It has a male airway connector and 
+a female airway connector in the international standard 22mm adult airway sizes. It comes with an oxygen sensor, which you may have to install
+by opening the case. It is not pre-installed by the Oxygen sensors have a limited shelf life and some users don't need an oxygen sensor. The case can 
+be opened with a small jeweler's Phillips head screwdriver.
+
+The VentMon has a small OLED display which gives some startup information and then displays the momentary flow and pressure and produces a tiny 
+graph of airway pressure. This is not intended for clinical use, but is useful for letting you know that the device is powered on and working.
+
+## The Serial Port
+
+The main targe for the VentMon is engineers working on ventilators and respiration support devices. Most such engineers will know
+how to use the Arudino IDE to see the serial port. The baudrate is 500000 (500,000).
+A simple human-readable output is printed to the serial port at start up time
+showing some basic start up information.  After searching for the an ethernet connection and a WiFi connection, the VentMon will
+begin printing dynamic data on the serial port. 
+The output is in the [PIRDS data format](https://github.com/PubInv/PIRDS-respiration-data-standard). 
+This is useful for verifying the devices is working physically correctly.
+It is not a good way to analyze data, but you can tell a lot by reviewing this data stream.  However, the preferred way to look at moving interactive waveforms and clinical paramters is with [VentDisplay](https://github.com/PubInv/vent-display), which requires some configuration.
+
+
+## Configuring a UDP conncetion
+
+The easiest way to use VentDisplay is to use our public IoT Data Lake at [http://ventmon.coslabs.com/](http://ventmon.coslabs.com/). 
+We name your log file by your ip address. The webpage there looks like this:
+![Screen Shot 2021-03-25 at 8 38 57 PM](https://user-images.githubusercontent.com/5296671/112564937-22a30d80-8daa-11eb-8bb9-277bd82a6f5a.png)
+These files are sorted by modification timestamp, so if you use one of the methods to place your data there, your data will likely be near the top!
+The "BreathPlot" links take you to the VentDisplay for that log file, whether it is is static or "live" (that is, being dynamically added to from a
+running VentMon.)
+
+By entering a "c" character followed by a newline (probably in the Arduino IDE serial monitor tool), the VentMon will stop sending data 
+to the serial port and write out a small menu of instructions. You can follow these instructions to enable or disable either the ethernet
+connection, the WiFi connection, or both.  This menu allows you to enter your SSID for your WiFi network and your password, which will be
+stored in the EEPROM of the device.
+
+If you choose to use the Ethernet connection, you will probably plug an ethernet CAT5 cable directly into your router and the port on the VentMon.
+
+Both Ethernet and WiFi attempt to send UDP packets to port 6111 at ventmon.coslabs.com.  There our [PIRDS-logger](https://github.com/PubInv/PIRDS-logger)
+connection automatic timestamps and logs your UDP packets, and allows them to rendered for your viewing and analysis pleasure.
+
+## Configuration
 
 Because we are developing a modular, composable, respiration ecosystem, configuring a VentMon T0.4 is a little complicated. The diagrams below try to capture three distince approahces: using our public data lake (easiest), using Apache (requires understanding httpd.conf and fully understanding all pieces), and a Docker Image (we have not actually created this, but we plan to.)
 
@@ -74,8 +113,8 @@ For a hands on demonstration and in-depth explanation of VentMon watch our scree
 
 # User Manual
 
-Although a work in progress, we have a [user manaul](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/UserManaul.md).
-
+Although a work in progress, we have a [user manaul v0.3T](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/UserManaul.md).
+This User Manual is basically for the VentMon.
 
 # Hacking the Firmware
 
@@ -184,4 +223,4 @@ Righ now, we could use:
 
 # Licensing
 
-All code in this repo is licensed under the MIT License. All documents and diagrams and licensed under CC0. All hardware is licensed under the [CERN Open Hardware Licences Version 2 - Strongly Reciprocal](https://ohwr.org/cern_ohl_s_v2.pdf).
+All code in this repo is licensed under the GPL License. All documents and diagrams and licensed under CC0. All hardware is licensed under the [CERN Open Hardware Licences Version 2 - Strongly Reciprocal](https://ohwr.org/cern_ohl_s_v2.pdf).
