@@ -76,10 +76,26 @@ Using Apache:
 ![VentMon Apache Ecosystem](https://user-images.githubusercontent.com/5296671/111052629-1a4de880-8422-11eb-9466-349d80afdfa5.png)
 
 Public Invention recently created a repo that builds a Docker file image that makes all of this possible locally without running Apache/CGI.
-Please visit [PIRDS-docker-local](https://github.com/PubInv/PIRDS-docker-local) for more details.
+Please visit [PIRDS-docker-local](https://github.com/PubInv/PIRDS-docker-local) for more details. A of March 25th, the Docker system is working 
+on one computer (the authors), and another user has reported a problem with it; this is in an early rease stage.
 
 ![VentMon Docker Ecosystem](https://user-images.githubusercontent.com/5296671/111052632-25087d80-8422-11eb-8d85-7e72af57ff4f.png)
 
+
+## Compiling and updating the Firmware
+
+If you have received a VentMon from us,
+it will have VentMonFirmware.ino installed.
+The VentMon firmware is a work in progress, and we are making active improvements.
+Therefore, you may want to update it from time to time. This requires you to build it with the Arduino IDE on your system.
+You are welcome to modify the VentMonFirmware.ino file as needed. To do so, you will
+have to install a library of our creation which encpasulates the PIRDS standard.
+Copy the libary [pirds_library](https://github.com/PubInv/PIRDS-respiration-data-standard/tree/master/pirds_library) into your Arduino library location. You may need to install the Adafruit BME680 library
+and other libraries as well.
+
+Additionally, to compile the version of the firmware, you will need to install the [SFM3X00 library](https://github.com/PubInv/SFM3X00). We wrote this library to encapsulate Sensirion flow sensors of various kinds.
+
+This process is a little clunky; please contact us if you need help with that.
 
 
 
@@ -116,16 +132,7 @@ For a hands on demonstration and in-depth explanation of VentMon watch our scree
 Although a work in progress, we have a [user manaul v0.3T](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/doc/UserManaul.md).
 This User Manual is basically for the VentMon.
 
-# Hacking the Firmware
 
-If you have received a VentMon from us,
-it will have VentMonFirmware.ino installed.
-You are welcome to modify the VentMonFirmware.ino file as needed. To do so, you will
-have to install a library of our creation which encpasulates the PIRDS standard.
-Copy the libary [pirds_library](https://github.com/PubInv/PIRDS-respiration-data-standard/tree/master/pirds_library) into your Arduino library location. You may need to install the Adafruit BME680 library
-and other libraries as well.
-
-Additionally, to compile the version of the firmware, you will need to install the [SFM3X00 library](https://github.com/PubInv/SFM3X00). We wrote this library to encapsulate Sensirion flow sensors of various kinds.
 
 ## Design and Dependencies
 
