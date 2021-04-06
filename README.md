@@ -1,11 +1,13 @@
 
+
+
 [![DOI](https://zenodo.org/badge/248134220.svg)](https://zenodo.org/badge/latestdoi/248134220)
 
 # VentMon T0.4 - Inline Ventilator Test Fixture and Monitor
 
 March 9th, 2021
 
-![20210309_173230 (1)](https://user-images.githubusercontent.com/5296671/110490948-68778a80-80b6-11eb-8cbc-c9815958531f.jpg)
+![VentMonT0 4](https://user-images.githubusercontent.com/5296671/113649478-1e9da800-9654-11eb-934b-7e8a9a5c5bfe.JPG)
 
 The photo above shows the current version of the VentMon, the T0.4 tester/monitor, designed and manufactured by Ben Coombs. We are giving these away free of charge to worthy open source teams.
 
