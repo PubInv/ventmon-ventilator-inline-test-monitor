@@ -1,0 +1,95 @@
+STEPS TO RUN LOCAL VENTMON with RASPBERRY PI
+(v0.0)
+
+comments, questions, concerns: lauria.clarke@gmail.com
+
+
+key:
+>  - paste this in your termianl
+## - comment about the output of prior command
+
+----------------------------------------------------
+SETUP
+
+1. setup necessary VentMon repos
+> mkdir ~/VentMon
+> cd VentMon
+> git clone https://github.com/PubInv/vent-display.git
+> git clone https://github.com/PubInv/PIRDS-docker-local.git
+
+
+2. install docker
+> sudo apt-get update
+> sudo apt-get upgrade
+> curl -fsSL https://get.docker.com -o get-docker.sh
+> sudo sh get-docker.sh
+> sudo dpkg --configure -a
+> sudo usermod -aG docker pi
+## reboot
+> docker info
+## should return without error
+> docker run hello-world
+## should also return without error
+## download and install updated version of libseccomp2 
+## download from here: https://packages.debian.org/sid/libseccomp2
+> cd ~/Downloads/libseccomp2_2.X.X-1+b1_armhf.deb
+## replace path with real path name of downloaded version
+> sudo dpkg -i libseccomp2_2.X.X-1+b1_armhf.deb
+
+
+3. install node.js and packages
+> cd ~
+> curl -sL https://deb.nodesource.com/setup_14.x | sudo bash -
+> sudo apt-get install -y nodejs
+> node --version
+> npm install yargs
+> npm install cors
+> npm install express
+> npm install serialport 
+
+
+4. check that vent-display will run
+> cd ~/VentMon/vent-display
+> rm -r node_modules/@serialport
+> node serialserver.js --uaddress=127.0.0.1 --sport=/dev/cu.usbserial-01D97104 --uport=6111
+## should start and throw this error:  
+## Error: No such file or directory, cannot open /dev/cu.usbserial-01D97104
+
+
+5. plug in VentMon and find serial port
+## plug in VentMon
+> ll /dev/tty*
+## unplug VentMOn
+> ll /dev/tty*
+## missing port is the one you want, likely /dev/ttyUSB0
+
+
+
+----------------------------------------------------
+START
+
+5. start the docker image
+> cd ~/VentMon/PIRDS-docker-local
+> docker build --tag pirds-logger .
+> docker run -d --rm --name logger -p 8081:80 -p 6111:6111/udp -v `pwd`/logger_src/data:/data pirds-logger
+ 
+
+6. start vent-display
+> cd ~/VentMon/vent-display
+> node serialserver.js --uaddress=127.0.0.1 --sport=/dev/ttyUSB0 --uport=6111 &
+
+
+7. go to local breath plot
+## go to localhost:8081
+## click on Breath Plot link for first IP address
+
+
+
+----------------------------------------------------
+STOP
+
+8. stop the whole thing
+> pidof node
+## get the pid of the .js
+> kill -9 <pid>
+> docker stop logger
