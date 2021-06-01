@@ -3,6 +3,8 @@
 
 [![DOI](https://zenodo.org/badge/248134220.svg)](https://zenodo.org/badge/latestdoi/248134220)
 
+Note: The previous version, the VentMon T0.3, has been published in [HardwareX](https://www.sciencedirect.com/science/article/pii/S2468067221000249) with extensive build instructions.
+
 # VentMon T0.4 - Inline Ventilator Test Fixture and Monitor
 
 March 9th, 2021
