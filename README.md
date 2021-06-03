@@ -19,7 +19,7 @@ The software infrastructure that supports the VentMon, such as [VentDisplay](htt
 
 The VentMon is basically a cloud-enable spirometer with an FiO2 sensor. It can simply be plugged into a standard 22mm airway and provides
 a rich stream of pressure, flow, and Oxygen sensor, with humidity and temperature sensing as well. The primary use of the VentMon is by 
-engineering teams developing pandemic response ventilators and other respiration tools. Secondairly, it is completely and transparently 
+engineering teams developing pandemic response ventilators and other respiration tools. Secondarily, it is completely and transparently 
 open source, so any team can adopt the design and incorporate it into their own devices to provide the same data in an integrated way.
 
 The parts in a VentMon cost about USD$600. 
