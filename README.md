@@ -5,6 +5,17 @@
 
 Note: The previous version, the VentMon T0.3, has been published in [HardwareX](https://www.sciencedirect.com/science/article/pii/S2468067221000249) with extensive build instructions.
 
+# VentMon T0.5 - Use without Needing Internet
+
+The VentMon T0.5 is being roughly designed in June 2021. The version will self-contained---that is, it will not require a separate computer and internet access.
+This version is especially motivated by the work of Mr. Joe Leier in Guatemala repairing ventilators. The idea is to have a self-contained unit
+which allows for the tesitng and repair of units in the field.
+It will, however, still be WiFi enabled, and still publish data to a the public data lake.
+
+For now, our ideas and work are published in the directory called [pi](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/pi).
+
+
+
 # VentMon T0.4 - Inline Ventilator Test Fixture and Monitor
 
 March 9th, 2021
