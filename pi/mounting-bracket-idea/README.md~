@@ -1,0 +1,16 @@
+# Mounting Bracket ID
+
+The VentMon T0.4 case is just a little too large to mount behind the Element 14
+Raspberry PI 7" TFT screen. However, that screen, and many others, has a
+VESA-D 75mm mount on the back. I propose that we make a flat bracket that
+mounts to this with the standard M4 screws, with a projection large enough
+for us to zip-tie a VentMon T0.4 to it.
+
+We may change the case for the T0.5; but in any case this system allows
+the VentMon device to be easily separated from the Touch screen.
+
+Our goal is to produce a maximally modular system; if you can use
+a VentMon without the larger screen if you want.  If we were selling
+devices (which we are not), the two components would be "sold separately".
+Instead, they are "designed separately", and a manufacturer may make
+and sell one or both.
