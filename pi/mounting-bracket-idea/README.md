@@ -20,4 +20,23 @@ that might have broken ventilators and to be able to quickly assess,
 test, and repair the ventilators (with the help of a plastic test lung,
 not produced by us.)
 
+Note: The mockup below is a WIP -- there may be better approaches. I'm publishing it here for comment.
+
+## Basic Parts
+
+
 ![Basic Parts](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/pi/mounting-bracket-idea/BasicParts.JPG)
+
+## Bracket as Bezel
+
+![Bracket as Bezel](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/pi/mounting-bracket-idea/BracketAsBezel.JPG)
+
+## Screen Rear (VESA Mis-D 75mm mount)
+
+![Screen Rear VESA MIS-D 75mm Mount](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/pi/mounting-bracket-idea/ScreenRear(VESA-D75mm).JPG)
+
+## Final Configuration Mockup
+
+![Final Configuration Mockup](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/pi/mounting-bracket-idea/FinalConfiguration.JPG)
+
+
