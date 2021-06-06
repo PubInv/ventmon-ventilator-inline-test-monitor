@@ -19,3 +19,5 @@ The motivation of this is in particular to go to a hospital in LMIC
 that might have broken ventilators and to be able to quickly assess,
 test, and repair the ventilators (with the help of a plastic test lung,
 not produced by us.)
+
+![Basic Parts](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/pi/mounting-bracket-idea/BasicParts.JPG)
