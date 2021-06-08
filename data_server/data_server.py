@@ -131,7 +131,7 @@ def read_from_port():
       NUMREAD = 0;
     # performing a try except here really seems to
     # make the coding of characters all messed up,
-    # I don't realy know why, it is like we get off by one character
+    # I don't really know why, it is like we get off by one character
     try:
       thisline = line.decode("utf-8")+"\n"
       # For bizarre reason I'm unable to figure out,
