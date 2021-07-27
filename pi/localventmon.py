@@ -1,11 +1,36 @@
 #!/usr/bin/env python
 
+#
+# Public Invention's Ventmon-Ventilator-Inline-Test-Monitor Project is an attempt
+# to build a "test fixture" capable of running a 48-hour test on any ventilator
+# design and collecting data on many important parameters. We hope to create a
+# "gold standard" test that all DIY teams can work to; but this project will
+# proceed in parallel with that. The idea is to make a standalone inline device
+# plugged into the airway. It serves a dual purpose as a monitor/alarm when used
+# on an actual patient, and a test device for testing prototype ventilators. It
+# also allows for burnin. Copyright (C) 2021 Robert L. Read, Lauria Clarke,
+# Ben Coombs, Darío Hereñú, and Geoff Mulligan.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+#
+
 import os
 import subprocess
 import serial
 import docker
 
-# constants 
+# constants
 serialFd = "/dev/ttyUSB0"
 serialBaudrate = 500000
 
@@ -14,39 +39,39 @@ port_bindings = {'8081/tcp' : 80, '6111/udp' : 6111}
 volume_binding = {'/home/pi/VentMon/PIRDS-docker-local/logger_src/data' : {'bind': '/data', 'mode': 'rw'}}
 
 
-# top menu    
+# top menu
 menuStrings = ["START local VentMon", "STOP local VentMon", "change serial port info", "check for updates", "quit"]
-def print_menu():      
+def print_menu():
     print 30 * "-" , "VENTMON LOCAL" , 30 * "-"
-    print "1. " , menuStrings[0] 
+    print "1. " , menuStrings[0]
     print "2. " , menuStrings[1]
     print "3. " , menuStrings[2]
     print "4. " , menuStrings[3]
-    print 67 * "-" 
+    print 67 * "-"
 
 # loop for menu
 def menu_loop():
-    while True:          
-        print_menu()    
+    while True:
+        print_menu()
         choice = input("please select from the above menu [1-4]: ")
-     
-        if choice==1:     
-            print "\n", 5 * "-", menuStrings[choice - 1], 5 * "-"  
+
+        if choice==1:
+            print "\n", 5 * "-", menuStrings[choice - 1], 5 * "-"
             start_ventmon()
-        
+
         elif choice==2:
-            print "\n", 5 * "-", menuStrings[choice - 1], 5 * "-"  
+            print "\n", 5 * "-", menuStrings[choice - 1], 5 * "-"
             ## You can add your code or functions here
         elif choice==3:
-            print "\n", 5 * "-", menuStrings[choice - 1], 5 * "-"  
+            print "\n", 5 * "-", menuStrings[choice - 1], 5 * "-"
             print "Menu 3 has been selected"
             ## You can add your code or functions here
         elif choice==4:
-            print "\n", 5 * "-", menuStrings[choice - 1], 5 * "-"  
+            print "\n", 5 * "-", menuStrings[choice - 1], 5 * "-"
             print "Menu 3 has been selected"
             ## You can add your code or functions here
         elif choice==5:
-            print "\n", 5 * "-", menuStrings[choice - 1], 5 * "-"  
+            print "\n", 5 * "-", menuStrings[choice - 1], 5 * "-"
             ## You can add your code or functions here
             break;
         else:
@@ -79,7 +104,7 @@ def check_serial():
     return ser.is_open
 
 
-# start docker 
+# start docker
 def start_docker():
     dockerClient = docker.from_env()
 
@@ -87,7 +112,7 @@ def start_docker():
     if len(dockerClient.containers.list()) == 0:
         print "starting docker image..."
         dockerClient.images.build(path="/home/pi/VentMon/PIRDS-docker-local", tag="pirds-logger")
-        dockerClient.containers.run(name='logger', image='pirds-logger', detach='True', remove='True', ports=port_bindings, volumes=volume_binding) 
+        dockerClient.containers.run(name='logger', image='pirds-logger', detach='True', remove='True', ports=port_bindings, volumes=volume_binding)
     else:
         # get the container with the logger image and check whether it's running
         container = dockerClient.containers.get('logger')
@@ -99,7 +124,7 @@ def start_docker():
             print "re-starting docker image..."
             container.stop()
             dockerClient.images.build(path="/home/pi/VentMon/PIRDS-docker-local/", tag="pirds-logger")
-            dockerClient.containers.run(name='logger', image='pirds-logger', detach='True', remove='True', ports=port_bindings, volumes=volume_binding)  
+            dockerClient.containers.run(name='logger', image='pirds-logger', detach='True', remove='True', ports=port_bindings, volumes=volume_binding)
 
    # container = dockerClient.containers.get('logger')
    # print container.attrs['Config']['Image']
@@ -127,10 +152,10 @@ def start_docker():
 def start_javascript():
 
     # FIXME need to check whether node is running
-    # thsi only works with python 3.5....need a better solution 
+    # thsi only works with python 3.5....need a better solution
     pidOutput = subprocess.run(["pidof", "node"], capture_output=True, text=True).stdout
     print(pidOutput)
-    
+
     #print subprocess.check_output(["pidof", "node"], stderr=subprocess.STDOUT)
     os.system("cd ~/VentMon/vent-display")
     os.system("node serialserver.js --uaddress=127.0.0.1 --sport=/dev/ttyUSB0 --uport=6111")
@@ -141,7 +166,7 @@ def start_javascript():
 
 
 
-# open browser 
+# open browser
 def start_browser():
     os.system("chromium-browser http://localhost:8081 &")
 
@@ -179,9 +204,3 @@ def run(*popenargs, **kwargs):
         raise subprocess.CalledProcessError(
             retcode, process.args, output=stdout, stderr=stderr)
     return retcode, stdout, stderr
-
-
-
-
-
-

@@ -15,7 +15,31 @@
  * =====================================================================================
  */
 
- 
+ /*
+ Public Invention's Ventmon-Ventilator-Inline-Test-Monitor Project is an attempt
+ to build a "test fixture" capable of running a 48-hour test on any ventilator
+ design and collecting data on many important parameters. We hope to create a
+ "gold standard" test that all DIY teams can work to; but this project will
+ proceed in parallel with that. The idea is to make a standalone inline device
+ plugged into the airway. It serves a dual purpose as a monitor/alarm when used
+ on an actual patient, and a test device for testing prototype ventilators. It
+ also allows for burnin. Copyright (C) 2021 Robert L. Read, Lauria Clarke,
+ Ben Coombs, Darío Hereñú, and Geoff Mulligan.
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include <VentMon.h>
 
 
@@ -57,26 +81,26 @@ uint8_t cbuf_tail = 0;
 
 
 
-void setup() 
+void setup()
 {
    // use serial port for event communication
   Serial.begin(115200);
   eventChannel = &Serial;
-  
+
   // start I2C
   Wire.begin();
 
   // setup ethernet connection
-  setupEthernet(logHost, &logHostAddr, macAddress, macAddressString, &udpClient); 
+  setupEthernet(logHost, &logHostAddr, macAddress, macAddressString, &udpClient);
 
   // setup flow sensor on I2C bus
   Meta m0;
   events[0] = &m0;
-  // this is unclear do we really need to 
+  // this is unclear do we really need to
   setupFlowSensor(&m0);
-  
+
   delay(1000);
-  
+
   // setup pressure sensors on I2C bus
   Meta m1;
   events[1] = &m1;
@@ -101,10 +125,10 @@ uint32_t LastLog = 0;
 uint32_t LastParam = 0;
 uint32_t LastCheck = 0;
 
-void loop() 
+void loop()
 {
   // count of measurements taken - should always be 3
-  // can be used for error checking...need to revisit  
+  // can be used for error checking...need to revisit
   int eventCount = 0;
 
 
@@ -114,11 +138,11 @@ void loop()
 
 
   //-- GENERATE DATA --------------------------------------------
-  // set timer values equal to the current time 
+  // set timer values equal to the current time
   TP1 = millis();
   TF1 = millis();
 
-  // if the current sample time minus the last sample time is greater than 
+  // if the current sample time minus the last sample time is greater than
   // or equal to the interval, take a sample and increment measurement count
 //  Measurement p0;
 //  Measurement p1;
@@ -129,25 +153,25 @@ void loop()
 //    events[eventCount] = &p0;
 //    samplePressure(&p0, ambient_pressure);
 //    eventCount++;
-//    
+//
 //    events[eventCount] = &p1;
 //    samplePressure(&p1, internal_pressure);
 //    eventCount++;
-//    
+//
 //    TP2 = TP1;
 //  }
 
-  // if the current sample time minus the last sample time is greater than 
+  // if the current sample time minus the last sample time is greater than
   // or equal to the interval, take a sample and increment measurement count
   Measurement f0;
   if(TF1 - TF2 >= flow_sample_interval)
   {
     eventChannel->println("sampling flow...");
-    
+
     events[eventCount] = &f0;
     sampleFlow(&f0);
     eventCount++;
-    
+
     TF2 = TF1;
   }
 

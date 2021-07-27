@@ -1,3 +1,28 @@
+/*
+Public Invention's Ventmon-Ventilator-Inline-Test-Monitor Project is an attempt
+to build a "test fixture" capable of running a 48-hour test on any ventilator
+design and collecting data on many important parameters. We hope to create a
+"gold standard" test that all DIY teams can work to; but this project will
+proceed in parallel with that. The idea is to make a standalone inline device
+plugged into the airway. It serves a dual purpose as a monitor/alarm when used
+on an actual patient, and a test device for testing prototype ventilators. It
+also allows for burnin. Copyright (C) 2021 Robert L. Read, Lauria Clarke,
+Ben Coombs, Darío Hereñú, and Geoff Mulligan.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as
+published by the Free Software Foundation, either version 3 of the
+License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include <Wire.h>
 #include <Adafruit_ADS1015.h>
 
@@ -26,8 +51,8 @@ int initialO2;
 void setup(void)
 {
   Serial.begin(9600);
-  
-  ads.setGain(GAIN_SIXTEEN);      
+
+  ads.setGain(GAIN_SIXTEEN);
 
   ads.begin();
 
@@ -45,7 +70,7 @@ void loop(void)
   double voltage = avgADC(O2CHANNEL);
 
   float voltagemV = voltage * 0.0078125;
-  
+
   float o2 = (voltage / initialO2) * 20.9;
 
   Serial.print("\ninital: ");
@@ -56,7 +81,7 @@ void loop(void)
   Serial.println(voltagemV);
   Serial.print("O2: ");
   Serial.println(o2);
- 
+
   Serial.println("-----");
 
   delay(1000);
@@ -67,9 +92,9 @@ void printRawmV(int adcNumber)
   int16_t adc = 0;
 
   adc = ads.readADC_SingleEnded(adcNumber);
-  Serial.print("ADC"); 
-  Serial.print(adcNumber); 
-  Serial.print(": "); 
+  Serial.print("ADC");
+  Serial.print(adcNumber);
+  Serial.print(": ");
   Serial.print(adc, HEX);
   Serial.print(", ");
   Serial.println(adc);
@@ -81,7 +106,7 @@ double avgADC(int adcNumber)
   double result;
 
   adc = 0;
-  
+
   for (int i = 0; i <= AVG_WINDOW - 1; i++)
   {
     int16_t adsread = ads.readADC_SingleEnded(adcNumber);
@@ -90,7 +115,7 @@ double avgADC(int adcNumber)
   }
 
   result = adc / AVG_WINDOW;
-  
+
   return result;
 }
 
@@ -107,12 +132,12 @@ void checkAllChannels()
   Serial.println(voltage0);
 
   Serial.println("\n1: ");
-  printRawmV(1);  
+  printRawmV(1);
   voltage1 = avgADC(1);
-  Serial.println(voltage1);  
+  Serial.println(voltage1);
 
   Serial.println("\n2: ");
-  printRawmV(2);  
+  printRawmV(2);
   voltage2 = avgADC(2);
   Serial.println(voltage2);
 
