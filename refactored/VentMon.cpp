@@ -3,7 +3,7 @@
  *
  *       Filename:  VentMon.cpp
  *
- *    Description:  
+ *    Description:
  *
  *        Version:  1.0
  *        Created:  04/13/2020 12:55:20
@@ -16,12 +16,37 @@
  * =====================================================================================
  */
 
+ /*
+ Public Invention's Ventmon-Ventilator-Inline-Test-Monitor Project is an attempt
+ to build a "test fixture" capable of running a 48-hour test on any ventilator
+ design and collecting data on many important parameters. We hope to create a
+ "gold standard" test that all DIY teams can work to; but this project will
+ proceed in parallel with that. The idea is to make a standalone inline device
+ plugged into the airway. It serves a dual purpose as a monitor/alarm when used
+ on an actual patient, and a test device for testing prototype ventilators. It
+ also allows for burnin. Copyright (C) 2021 Robert L. Read, Lauria Clarke,
+ Ben Coombs, Darío Hereñú, and Geoff Mulligan.
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 #include "VentMon.h"
 
 bool setupFlowSensor(Meta* meta)
 {
   long serialNo = requestSerialNumber(FLOW_SENSOR_ADDRESS);
- 
+
   uint16_t scale = requestScaleFactor(FLOW_SENSOR_ADDRESS);
 
   uint16_t offset = requestOffset(FLOW_SENSOR_ADDRESS);
@@ -51,9 +76,9 @@ bool setupFlowSensor(Meta* meta)
 
 bool setupPressureSensors(Meta* meta, Adafruit_BME680* airwayPressure, Adafruit_BME680* ambientPressure)
 {
-  
+
   // AIRWAY SENSOR - 0X77
-  if (!airwayPressure->begin(BME680_AIRWAY_ADDRESS, true))     
+  if (!airwayPressure->begin(BME680_AIRWAY_ADDRESS, true))
   {
     meta->setValues('M', "could not find AIRWAY pressure sensor");
     return 1;
@@ -68,7 +93,7 @@ bool setupPressureSensors(Meta* meta, Adafruit_BME680* airwayPressure, Adafruit_
 
 
   // AMBIENT SENSOR - 0X76
-  if (!ambientPressure->begin(BME680_AMBIENT_ADDRESS, true))     
+  if (!ambientPressure->begin(BME680_AMBIENT_ADDRESS, true))
   {
     meta->setValues('M', "could not find AMBIENT pressure sensor");
     return 1;
@@ -80,7 +105,7 @@ bool setupPressureSensors(Meta* meta, Adafruit_BME680* airwayPressure, Adafruit_
   ambientPressure->setPressureOversampling(BME680_OS_4X);
   ambientPressure->setIIRFilterSize(BME680_FILTER_SIZE_3);
   ambientPressure->setGasHeater(320, 150); // 320*C for 150 ms
-  
+
   meta->setValues('M', "pressure sensors initialized");
 
   return 0;
@@ -104,7 +129,7 @@ void samplePressure(Measurement* measurement, bool sensor)
 void sampleFlow(Measurement* measurement)
 {
   uint16_t flow = readFlow(FLOW_SENSOR_ADDRESS);
-  
+
   measurement->setValues('F', 'A', 4, millis(), flow);
 }
 
@@ -115,7 +140,7 @@ bool sendPIRDSEvents(Stream* eventChannel, PIRDSEvent** events, int eventCount)
     events[i]->sendEvent(eventChannel);
   }
 
-  
+
 
   //if(eventChannel is available to write)
   //{
@@ -130,45 +155,45 @@ bool sendPIRDSEvents(Stream* eventChannel, PIRDSEvent** events, int eventCount)
 }
 
 
-void setupEthernet(char* logHost, IPAddress* logHostAddr, byte* macAddress, char* macAddressString, EthernetUDP* udpClient) 
+void setupEthernet(char* logHost, IPAddress* logHostAddr, byte* macAddress, char* macAddressString, EthernetUDP* udpClient)
 {
-  byte ip[] = { 124, 103, 1, 1 }; 
+  byte ip[] = { 124, 103, 1, 1 };
   // ESP32 with Adafruit Featherwing Ethernet
   Ethernet.init(33);
   // Get MAC address of wifi chip for ethernet address
-  WiFi.macAddress(macAddress); 
+  WiFi.macAddress(macAddress);
   snprintf(macAddressString, sizeof macAddressString, "%02X:%02X:%02X:%02X:%02X:%02X",
            macAddress[0], macAddress[1], macAddress[2], macAddress[3], macAddress[4], macAddress[5]);
   Serial.print(F("Mac: "));
   Serial.print(macAddressString);
   Serial.println();
 
-  while (1) 
+  while (1)
   {
     // start the Ethernet connection:
     Serial.println(F("Initialize Ethernet with DHCP:"));
-    if (Ethernet.begin(macAddress) == 0) 
+    if (Ethernet.begin(macAddress) == 0)
     {
       Serial.println(F("Failed to configure Ethernet using DHCP"));
       // Check for Ethernet hardware present
-      if (Ethernet.hardwareStatus() == EthernetNoHardware) 
+      if (Ethernet.hardwareStatus() == EthernetNoHardware)
       {
         // should this throw more of an error
         Serial.println(F("Ethernet shield was not found.  Sorry, can't run without hardware. :("));
-        while (1) 
+        while (1)
         {
           // do nothing, no point running without Ethernet hardware
-          delay(1); 
+          delay(1);
         }
       }
-      if (Ethernet.linkStatus() == LinkOFF) 
+      if (Ethernet.linkStatus() == LinkOFF)
       {
         Serial.println(F("Ethernet cable is not connected."));
         delay(5000);
       }
       delay(5000);
-    } 
-    else 
+    }
+    else
     {
       Serial.print(F("  DHCP assigned IP "));
       Serial.println(Ethernet.localIP());
@@ -185,8 +210,8 @@ void setupEthernet(char* logHost, IPAddress* logHostAddr, byte* macAddress, char
 
   DNSClient dns;
   dns.begin(Ethernet.dnsServerIP());
-  
-  if (dns.getHostByName(logHost, *logHostAddr) == 1) 
+
+  if (dns.getHostByName(logHost, *logHostAddr) == 1)
   {
     Serial.print("host is ");
     Serial.println(*logHostAddr);
@@ -195,11 +220,11 @@ void setupEthernet(char* logHost, IPAddress* logHostAddr, byte* macAddress, char
 }
 
 
-bool sendDataUDP(EthernetUDP* udpClient, Measurement* measurement, IPAddress* logHostAddr) 
+bool sendDataUDP(EthernetUDP* udpClient, Measurement* measurement, IPAddress* logHostAddr)
 {
-  union 
+  union
   {
-    struct 
+    struct
     {
       char first;
       char mtype;
@@ -223,7 +248,7 @@ bool sendDataUDP(EthernetUDP* udpClient, Measurement* measurement, IPAddress* lo
 
   Serial.print("Value: ");
   Serial.println(message.a.value;
-  
+
   //Serial.print(F(" UDP send to "));
   //Serial.println(*logHostAddr);
 
@@ -240,13 +265,13 @@ bool sendDataUDP(EthernetUDP* udpClient, Measurement* measurement, IPAddress* lo
 
 
 
-void pushData(packet_t* packets, uint8_t* cbuf_head, Measurement* measurement) 
+void pushData(packet_t* packets, uint8_t* cbuf_head, Measurement* measurement)
 {
   //Serial.print("pushData - head: ");
   //Serial.println(*cbuf_head);
 
   packets[*cbuf_head].mtype = measurement->measurementType;
-  packets[*cbuf_head].stype = measurement->deviceType;            
+  packets[*cbuf_head].stype = measurement->deviceType;
   packets[*cbuf_head].loc   = measurement->deviceLocation;
   packets[*cbuf_head].ms    = measurement->measurementTime;
   packets[*cbuf_head].value = measurement->measurementValue;
@@ -255,14 +280,14 @@ void pushData(packet_t* packets, uint8_t* cbuf_head, Measurement* measurement)
   if (*cbuf_head > CSIZE) *cbuf_head = 0;
 }
 
-uint8_t popData(uint8_t* cbuf_tail, uint8_t* cbuf_head, EthernetUDP* udpClient, Measurement* measurement, IPAddress* logHostAddr) 
+uint8_t popData(uint8_t* cbuf_tail, uint8_t* cbuf_head, EthernetUDP* udpClient, Measurement* measurement, IPAddress* logHostAddr)
 {
   //Serial.print("popData - head: ");
   //Serial.print(*cbuf_head);
   //Serial.print(" tail: ");
   //Serial.println(*cbuf_tail);
 
-  while (*cbuf_head != *cbuf_tail) 
+  while (*cbuf_head != *cbuf_tail)
   {
     sendDataUDP(udpClient, measurement, logHostAddr);
 
@@ -475,7 +500,7 @@ void report_full(int idx)
 
   outputMeasurment('M', 'H', loc, 0, ms, (signed long) (0.5 + (bme[idx].humidity * 100)));
   Serial.println();
-  //  Serial.print("Gas = "); 
+  //  Serial.print("Gas = ");
   //  Serial.print(bme[idx].gas_resistance / 1000.0);
   //  Serial.println(" KOhms");
   outputMeasurment('M', 'G', loc, 0, ms, (signed long) (0.5 + bme[idx].gas_resistance));
@@ -577,7 +602,7 @@ void initSensirionFM3200Measurement()
   // Trying to explicitly send an instruction byte:
   Wire.beginTransmission(0x40);
   Wire.write(byte(0x10));
-  Wire.write(byte(0x00)); // sends instruction byte   
+  Wire.write(byte(0x00)); // sends instruction byte
   Wire.endTransmission();     // stop transmitting
 
   delay(5);
@@ -585,9 +610,9 @@ void initSensirionFM3200Measurement()
     Wire.requestFrom(0x40, 3); // read 3 bytes from device with address 0x40
     delay(110);
     Serial.println(Wire.available());
-  
+
     // first received byte stored here. The variable "uint16_t" can hold 2 bytes, this will be relevant later
-    uint16_t a = Wire.read();     
+    uint16_t a = Wire.read();
     uint8_t b = Wire.read();
     uint8_t c = Wire.read();
     Serial.println("a,b,c");
@@ -598,5 +623,3 @@ void initSensirionFM3200Measurement()
 }
 
 */
-
-

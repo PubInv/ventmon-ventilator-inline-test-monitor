@@ -3,7 +3,7 @@
  *
  *       Filename:  VentMon.h
  *
- *    Description:  
+ *    Description:
  *
  *        Version:  1.0
  *        Created:  04/13/2020 12:51:35
@@ -14,6 +14,31 @@
  *   Organization:  NSG
  *
  * =====================================================================================
+ */
+
+ /*
+ Public Invention's Ventmon-Ventilator-Inline-Test-Monitor Project is an attempt
+ to build a "test fixture" capable of running a 48-hour test on any ventilator
+ design and collecting data on many important parameters. We hope to create a
+ "gold standard" test that all DIY teams can work to; but this project will
+ proceed in parallel with that. The idea is to make a standalone inline device
+ plugged into the airway. It serves a dual purpose as a monitor/alarm when used
+ on an actual patient, and a test device for testing prototype ventilators. It
+ also allows for burnin. Copyright (C) 2021 Robert L. Read, Lauria Clarke,
+ Ben Coombs, Darío Hereñú, and Geoff Mulligan.
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #ifndef VENTMON_H
@@ -47,20 +72,20 @@
 #endif
 
 // packet struct
-struct packet_t 
+struct packet_t
 {
   char mtype;
   char stype;
   uint8_t loc;
   uint32_t ms;
   int32_t value;
-}; 
+};
 
 
 // default sensor address
-#define BME680_AIRWAY_ADDRESS       (0x77)     
+#define BME680_AIRWAY_ADDRESS       (0x77)
 // the address of the sensor with a jumper between SDO and GND will be 0x76
-#define BME680_AMBIENT_ADDRESS       (0x76)     
+#define BME680_AMBIENT_ADDRESS       (0x76)
 
 
 // maximum number of efents that can be stored at once
@@ -93,7 +118,7 @@ bool sendDataUDP(EthernetUDP* UDPClient, Measurement* measurement, IPAddress* lo
 
 
 // BELOW THIS POINT IS CODE THAT WAS PORTED FROM ROB'S INITIAL SKETCH
-// It needs to be refactored before it is integrated back into the library 
+// It needs to be refactored before it is integrated back into the library
 /*
 
 void seekUnfoundBME();
@@ -125,5 +150,3 @@ void initSensirionFM3200Measurement();
 
 
 #endif
-
-

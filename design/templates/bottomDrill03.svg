@@ -1,3 +1,23 @@
+ <!--
+Public Invention's Ventmon-Ventilator-Inline-Test-Monitor Project is an attempt
+to build a "test fixture" capable of running a 48-hour test on any ventilator
+design and collecting data on many important parameters. We hope to create a
+"gold standard" test that all DIY teams can work to; but this project will
+proceed in parallel with that. The idea is to make a standalone inline device
+plugged into the airway. It serves a dual purpose as a monitor/alarm when used
+on an actual patient, and a test device for testing prototype ventilators.
+It also allows for burnin. Copyright (C) 2021 Robert L. Read, Lauria Clarke,
+Ben Coombs, Darío Hereñú, and Geoff Mulligan.
+
+Their approach is to produce a free-libre open-source design that is good enough
+that some RMV creators will use it to test any/various RMV designs. To that end,
+we will use the AGPL license for all code, and ERN strong reciprocal license for
+hardware designs, as noted in the Public Invention Licensing Guidelines.
+
+ERN Strong reciprocal License: https://ohwr.org/cern_ohl_s_v2.txt
+AGPL License: https://www.gnu.org/licenses/
+-->
+
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
