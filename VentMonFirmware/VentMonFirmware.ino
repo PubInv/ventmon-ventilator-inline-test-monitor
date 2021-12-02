@@ -37,9 +37,9 @@
 #include <Wire.h>
 #include <limits.h>
 #include <SPI.h>
-#include <WiFi.h>
 #include <Ethernet.h>
 #include <EthernetUdp.h>
+#include <WiFi.h>
 #include <WiFiUdp.h>
 #include <Dns.h>
 #include <EEPROM.h>
