@@ -37,8 +37,8 @@
 #include <Wire.h>
 #include <limits.h>
 #include <SPI.h>
-#include <Ethernet.h>
 #include <WiFi.h>
+#include <Ethernet.h>
 #include <EthernetUdp.h>
 #include <WiFiUdp.h>
 #include <Dns.h>
@@ -47,7 +47,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME680.h>
 #include <Adafruit_BME280.h>
-#include <Adafruit_ADS1015.h>
+#include <Adafruit_ADS1X15.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -376,10 +376,10 @@ unsigned long lastFiO2Sample = 0;
 
 /* ERROR MESSAGE STRINGS ******************************/
 
-char* flow_too_high = FLOW_TOO_HIGH;
-char* flow_too_low = FLOW_TOO_LOW;
-#define INSPIRATORY_PRESSURE_SENSOR_ERROR "Inspiratory pressure sensor error"
-#define AMBIENT_PRESSURE_SENSOR_ERROR "Ambient pressure sensor error"
+const char* flow_too_high = FLOW_TOO_HIGH;
+const char* flow_too_low = FLOW_TOO_LOW;
+const char* INSPIRATORY_PRESSURE_SENSOR_ERROR = "Inspiratory pressure sensor error";
+const char* AMBIENT_PRESSURE_SENSOR_ERROR = "Ambient pressure sensor error";
 
 /******************************************************/
 bool ethernet_setup();
@@ -439,7 +439,7 @@ long readHSCPressure()
   uint8_t status = load_hsc_data(HSC_ADDR, &ps);
 
   float p;
-  if ( status == -1 ) {
+  if ( status == (uint8_t) -1 ) {
     Serial.println("err sensor missing");
     return LONG_MIN;
   } else {
@@ -481,7 +481,7 @@ void output_on_serial_print_PIRDS(char e, char t, char loc, unsigned short int n
   Measurement ma = get_measurement(e, t, loc, n, ms, val);
   // I need a proof that this buffer is larger enough, but I think it is...
   char buff[256];
-  int rv = fill_JSON_buffer_measurement(&ma, buff, 256);
+  fill_JSON_buffer_measurement(&ma, buff, 256);
   Serial.print(buff);
 }
 
@@ -492,10 +492,10 @@ void outputMeasurement(char e, char t, char loc, unsigned short int n, unsigned 
   display_print_pirds(e, t, loc, n, ms, val);
 }
 
-void outputMetaEvent(char *msg, unsigned long ms) {
-  Message m = get_message(ms, msg);
+void outputMetaEvent(const char *msg, unsigned long ms) {
+  Message m = get_message(ms, (char *) msg);
   char buff[264];
-  int rv = fill_JSON_buffer_message(&m, buff, 264);
+  fill_JSON_buffer_message(&m, buff, 264);
   Serial.print(buff);
   Serial.println();
   send_data_message(m);
@@ -665,7 +665,7 @@ double avgADC(int adcNumber)
 /* PRESSURE *******************************************/
 
 void seekBME680(int idx) {
-  uint8_t loc_addr = addr[idx];
+//  uint8_t loc_addr = addr[idx];
   // I don't understand why this API does not work, it seemed to work in the previous version....
 //  found_bme[idx] = bme[idx].begin(loc_addr, true);
    found_bme680[idx] = bme680[idx].begin(addr[idx]);
@@ -984,7 +984,7 @@ void display_pressure(long display_airway_pressure) {
 void display_oxygen(signed long fiO2) {
   if (fiO2 > 0 && fiO2 <= 100){
     char buffer[18];
-    sprintf (buffer, "FiO2: %2d", fiO2);
+    sprintf (buffer, "FiO2: %2ld", fiO2);
     display.println(buffer);
   } else {
     display.println("error");
@@ -994,9 +994,9 @@ void display_oxygen(signed long fiO2) {
 void display_flow(signed long flow, bool isLPM){
   char buffer[18];
   if (isLPM){
-    sprintf(buffer, "LPM: %2d", flow/1000);
+    sprintf(buffer, "LPM: %2ld", flow/1000);
   } else {
-    sprintf(buffer, "mm/min: %2d", flow);
+    sprintf(buffer, "mm/min: %2ld", flow);
   }
 
   display.println(buffer);
@@ -1026,9 +1026,9 @@ void displayPressure(bool max_not_min) {
   display.print(" cm H2O: ");
   char buffer[32];
   long display_pressure = max_not_min ? display_max_pressure : display_min_pressure;
-  int pressure_sign = ( display_pressure < 0) ? -1 : 1;
-  int abs_pressure = (pressure_sign == -1) ? - display_pressure : display_pressure;
-  sprintf(buffer, "%d.1", display_pressure / 10);
+//  int pressure_sign = ( display_pressure < 0) ? -1 : 1;
+//  int abs_pressure = (pressure_sign == -1) ? - display_pressure : display_pressure;
+  sprintf(buffer, "%ld.1", display_pressure / 10);
   display.println(buffer);
 }
 
@@ -1060,7 +1060,7 @@ bool wifi_setup() {
   return connectToWiFi(ssid, password);
 }
 
-bool connectToWiFi(const char * ssid, const char * pwd)
+bool connectToWiFi(char * ssid, char * pwd)
 {
  // int ledState = 0;
   wudpclient_good = false;
@@ -1309,7 +1309,7 @@ void output_flow() {
 }
 
 void output_O2() {
-   unsigned long fiO2Timer = millis();
+//   unsigned long fiO2Timer = millis();
    float fiO2 = (avgADC(O2CHANNEL) / initialO2) * 20.9;
    unsigned long ms = millis();
    outputMeasurement('M', 'O', 'I', 0, ms, fiO2);
@@ -1368,7 +1368,8 @@ void output_PRES(int idx) {
 void output_temp(int idx) {
     char loc = (idx == 0) ? 'I' : 'B';
     unsigned long ms = millis();
-    found_bme280[idx] || found_bme680[idx];
+//    found_bme280[idx];
+//    found_bme680[idx];
     outputMeasurement('M', 'T', loc, 0, ms, (signed long) (0.5 +
       (found_bme280[idx] ? bme280[idx].readTemperature() : bme680[idx].readTemperature()) * 100));
 }
