@@ -1,6 +1,6 @@
 
 /***************************************************************************
-  Copyright Robert L. Read, 2020
+  Copyright Robert L. Read, 2021
   Networking code by Geoff Mulligan 2020
   Additional work by Lauria Clarke 2020
   designed to support ethernet using esp wifi chip
@@ -33,6 +33,7 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <Dns.h>
 #include <PIRDS.h>
 #include <Wire.h>
 #include <limits.h>
@@ -41,7 +42,7 @@
 #include <EthernetUdp.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
-#include <Dns.h>
+
 #include <EEPROM.h>
 #include <SFM3X00.h>
 #include <Adafruit_Sensor.h>
