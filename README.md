@@ -9,7 +9,7 @@ Note: The previous version, the VentMon T0.3, has been published in [HardwareX](
 
 The VentMon T0.5 is being roughly designed in June 2021. The version will self-contained---that is, it will not require a separate computer and internet access.
 This version is especially motivated by the work of Mr. Joe Leier in Guatemala repairing ventilators. The idea is to have a self-contained unit
-which allows for the tesitng and repair of units in the field.
+which allows for the testing and repair of units in the field.
 It will, however, still be WiFi enabled, and still publish data to a the public data lake.
 
 For now, our ideas and work are published in the directory called [pi](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/pi).
@@ -50,13 +50,13 @@ graph of airway pressure. This is not intended for clinical use, but is useful f
 ## The Serial Port
 
 The main targe for the VentMon is engineers working on ventilators and respiration support devices. Most such engineers will know
-how to use the Arudino IDE to see the serial port. The baudrate is 500000 (500,000).
+how to use the Arduino IDE to see the serial port. The baudrate is 500000 (500,000).
 A simple human-readable output is printed to the serial port at start up time
-showing some basic start up information.  After searching for the an ethernet connection and a WiFi connection, the VentMon will
+showing some basic start up information.  After searching for an ethernet connection and a WiFi connection, the VentMon will
 begin printing dynamic data on the serial port. 
 The output is in the [PIRDS data format](https://github.com/PubInv/PIRDS-respiration-data-standard). 
 This is useful for verifying the devices is working physically correctly.
-It is not a good way to analyze data, but you can tell a lot by reviewing this data stream.  However, the preferred way to look at moving interactive waveforms and clinical paramters is with [VentDisplay](https://github.com/PubInv/vent-display), which requires some configuration.
+It is not a good way to analyze data, but you can tell a lot by reviewing this data stream.  However, the preferred way to look at moving interactive waveforms and clinical parameters is with [VentDisplay](https://github.com/PubInv/vent-display), which requires some configuration.
 
 
 ## Configuring a UDP conncetion
@@ -80,7 +80,7 @@ connection automatic timestamps and logs your UDP packets, and allows them to re
 
 ## Configuration
 
-Because we are developing a modular, composable, respiration ecosystem, configuring a VentMon T0.4 is a little complicated. The diagrams below try to capture three distince approahces: using our public data lake (easiest), using Apache (requires understanding httpd.conf and fully understanding all pieces), and a Docker Image (we have not actually created this, but we plan to.)
+Because we are developing a modular, composable, respiration ecosystem, configuring a VentMon T0.4 is a little complicated. The diagrams below try to capture three distinct approaches: using our public data lake (easiest), using Apache (requires understanding httpd.conf and fully understanding all pieces), and a Docker Image (we have not actually created this, but we plan to.)
 
 Public Data Lake:
 
@@ -91,7 +91,7 @@ Using Apache:
 ![VentMon Apache Ecosystem](https://user-images.githubusercontent.com/5296671/111052629-1a4de880-8422-11eb-9466-349d80afdfa5.png)
 
 Public Invention recently created a repo that builds a Docker file image that makes all of this possible locally without running Apache/CGI.
-Please visit [PIRDS-docker-local](https://github.com/PubInv/PIRDS-docker-local) for more details. A of March 25th, the Docker system is working 
+Please visit [PIRDS-docker-local](https://github.com/PubInv/PIRDS-docker-local) for more details. On March 25th, the Docker system is working 
 on one computer (the authors), and another user has reported a problem with it; this is in an early rease stage.
 
 ![VentMon Docker Ecosystem](https://user-images.githubusercontent.com/5296671/111052632-25087d80-8422-11eb-8d85-7e72af57ff4f.png)
