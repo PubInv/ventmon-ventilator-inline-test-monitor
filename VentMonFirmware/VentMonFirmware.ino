@@ -1,6 +1,7 @@
 
 /***************************************************************************
-  Copyright Robert L. Read, 2021
+  Copyright Robert L. Read, 2023
+  Ben Coombs, 2023
   Networking code by Geoff Mulligan 2020
   Additional work by Lauria Clarke 2020
   designed to support ethernet using esp wifi chip
@@ -50,7 +51,19 @@
 #include <Adafruit_BME280.h>
 #include <Adafruit_ADS1X15.h>
 #include <Adafruit_GFX.h>
+
+
+#define V5
+//#define V4 // V0.4 VentMon with the new 128x64 OLED Screen
+//#define DEBUG_1
+
+
+#ifdef V5
+#include <Adafruit_SH110X.h>
+#else
 #include <Adafruit_SSD1306.h>
+#endif
+
 
 #define BAUD_RATE 500000
 
@@ -196,7 +209,7 @@ const unsigned char logo_bmp [] PROGMEM = {
   #define CHARACTERISTIC_UUID_TX "0972EF8C-7613-4075-AD52-756F33D4DA91"
 #endif
 
-#define V4 // V0.4 VentMon with the new 128x64 OLED Screen
+// #define V4 // V0.4 VentMon with the new 128x64 OLED Screen
 //#define DEBUG_1
 
 /* In theory, some of these components are optional, so we track what we find... */
@@ -241,13 +254,26 @@ unsigned PERIOD_B_H2O_ms = 0;
 unsigned PERIOD_B_GAS_ms = 0;
 
 /* DISPLAY ********************************************/
-#ifdef V4
+#ifdef V5
+Adafruit_SH1107 display = Adafruit_SH1107(64, 128, &Wire);
+//#define BUTTON_A 15
+//#define BUTTON_B 32
+#define BUTTON_C 14
+
+#define BUTTON_A 13
+#define BUTTON_B 12
+//#define BUTTON_C 14
+
+//Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire); // SH1107 
+#define DISPLAY_I2C 0x3D
+#elif V4
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire);
 #define DISPLAY_I2C 0x3D
 #else
 Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
 #define DISPLAY_I2C 0x3C
 #endif
+
 
 unsigned long buttonCpress_ms = 0;
 
@@ -809,18 +835,27 @@ void displayPrintScroll(String s){
 }
 
 void setupOLED() {
-  // Here we initialize the OLED...
-  //Serial.println("OLED FeatherWing test");
+
+    // Here we initialize the OLED...
+  Serial.println("OLED FeatherWing test");
   // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  int ret_oled = display.begin(SSD1306_SWITCHCAPVCC, DISPLAY_I2C);
+//  int ret_oled = display.begin(SSD1306_SWITCHCAPVCC, DISPLAY_I2C);
   //Serial.println("Return value for OLED");
   //Serial.println(ret_oled);
-  if (ret_oled != 1) { // Address 0x3C for 128x32
-    // hopefully this just means you don't have the board; we should send this as a message in the stream
-    // Serial.println("returning from OLED setup!");
+//  if (ret_oled != 1) { // Address 0x3C for 128x32
+//    // hopefully this just means you don't have the board; we should send this as a message in the stream
+//    // Serial.println("returning from OLED setup!");
+//    return;
+//  }
+  delay(250); // wait for the OLED to power up
+  found_display = display.begin(0x3C, true); // Address 0x3C default
+
+  if (!found_display) {
+    Serial.println("OLED not found.");
     return;
   }
-  found_display = true;
+//  return;
+//  found_display = true;
   Serial.println("OLED begun");
 
   // Show image buffer on the display hardware.
@@ -835,14 +870,23 @@ void setupOLED() {
   display.display();
 
   //Serial.println("IO test");
+  display.setRotation(1);
 
+#ifdef V4
   pinMode(BUTTON_A, INPUT);
   pinMode(BUTTON_B, INPUT);
+#endif
+
+#ifdef V5
+  pinMode(BUTTON_A, INPUT_PULLUP);
+  pinMode(BUTTON_B, INPUT_PULLUP);
+  pinMode(BUTTON_C, INPUT_PULLUP);
+#endif
   //pinMode(BUTTON_C, INPUT_PULLUP);
 
   // text display tests
   display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
+//  display.setTextColor(SSD1306_WHITE);
   //display.setCursor(0, 0);
   //display.print("Starting up...");
   //display.setCursor(0, 0);
@@ -853,12 +897,19 @@ void setupOLED() {
   delay(3000);
   display.clearDisplay();
   display.setTextSize(2);
-  display.setTextColor(SSD1306_WHITE);
+  display.setTextColor(SH110X_WHITE);
   display.setCursor(25, 20);
   display.println(F("VentMon"));
   display.setCursor(54, 40);
   display.setTextSize(1);
+
+#ifdef V4
   display.println(F("v0.4"));
+#endif
+#ifdef V5
+  display.println(F("v0.5"));
+#endif
+
   display.display();
 
   delay(2000);
@@ -866,7 +917,8 @@ void setupOLED() {
 
   delay(1000);
 
-  //displayPrintScroll("Starting VentMon...");
+  displayPrintScroll("Starting VentMon...");
+
 }
 
 
@@ -1566,6 +1618,28 @@ void loop() {
 
   unsigned long ms = millis();
 
+    if (found_display) {
+    if (!digitalRead(BUTTON_A)) {
+      Serial.println("A BUTTON");
+    }
+  
+    if (!digitalRead(BUTTON_B)) {
+      Serial.println("B BUTTON");
+    }
+  
+    if (!digitalRead(BUTTON_C)) {
+      Serial.println("C BUTTON");
+    }
+
+    display.clearDisplay();
+    display.setCursor(0, 0);
+    displayFromMS(ms);
+
+    display.display();
+    }
+  /*
+
+
   if (digitalRead(BUTTON_A)) {
       Serial.println("A BUTTON");
       buttonC();
@@ -1579,7 +1653,7 @@ void loop() {
 
   if (found_display) {
     // experimental OLED test code
-    /*if (digitalRead(BUTTON_A)) {
+    if (digitalRead(BUTTON_A)) {
       Serial.println("A BUTTON");
       //buttonA();
     }
@@ -1596,7 +1670,7 @@ void loop() {
         //Serial.println("B BUTTON");
         buttonC();
       }
-    } else {*/
+    } else {
       display.clearDisplay();
       display.setCursor(0, 0);
       displayFromMS(ms);
@@ -1604,6 +1678,7 @@ void loop() {
 
     display.display();
   }
+  */
 
 
   for (int i = 0; i < AMB_WINDOW_SIZE; i++) {
