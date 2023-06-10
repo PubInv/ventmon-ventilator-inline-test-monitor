@@ -5,6 +5,9 @@
 
 Note: The previous version, the VentMon T0.3, has been published in [HardwareX](https://www.sciencedirect.com/science/article/pii/S2468067221000249) with extensive build instructions.
 
+![IMG_4102 2](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/assets/5296671/b96dfc75-58e7-41bd-a88e-ea28e00b7dd8)
+
+
 # VentMon T0.5 - Use without Needing Internet
 
 The VentMon T0.5 is being roughly designed in June 2021. The version will self-contained---that is, it will not require a separate computer and internet access.
