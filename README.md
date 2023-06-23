@@ -1,5 +1,11 @@
 
-# VentMon T0.5 - Use without Needing Internet
+# VentMon T0.5
+The VentMon is OSHWA certified open source hardware, [US002353](https://certification.oshwa.org/us002353.html)
+
+![OSHWA_VENTMON](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/assets/5296671/9414cd65-6a7e-40bd-8233-f53a84ed3ef5)
+
+
+# VentMon T0.5
 
 [![DOI](https://zenodo.org/badge/248134220.svg)](https://zenodo.org/badge/latestdoi/248134220)
 
