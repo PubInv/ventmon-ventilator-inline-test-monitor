@@ -260,9 +260,6 @@ Adafruit_SH1107 display = Adafruit_SH1107(64, 128, &Wire);
 //#define BUTTON_B 32
 #define BUTTON_C 14
 
-#define BUTTON_A 13
-#define BUTTON_B 12
-//#define BUTTON_C 14
 
 //Adafruit_SSD1306 display = Adafruit_SSD1306(128, 64, &Wire); // SH1107 
 #define DISPLAY_I2C 0x3D
