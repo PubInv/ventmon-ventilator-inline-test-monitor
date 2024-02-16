@@ -89,7 +89,7 @@ connection automatically timestamps and logs your UDP packets, and allows them t
 
 ## Configuration
 
-Because we are developing a modular, composable, respiration ecosystem, configuring a VentMon T0.4 is a little complicated. The diagrams below try to capture three distince approaches: using our public data lake (easiest), using Apache (requires understanding httpd.conf and fully understanding all pieces), and a Docker Image (we have not actually created this, but we plan to).
+Configuring a VentMon T0.4 is a little complicated because we are developing a modular, composable, respiratory ecosystem. The diagrams below try to capture three distinct approaches: using our public data lake (easiest), using Apache (requires understanding httpd.conf and fully understanding all pieces), and a Docker Image (we have not actually created this, but we plan to).
 
 Public Data Lake:
 
@@ -131,12 +131,12 @@ data was moved to its own [repo](https://github.com/PubInv/vent-display) on Thur
 Since March 16th, I've been working full time on this. Along with volunteers at [EndCornaVirus.org](https://www.endcoronavirus.org/) and [Public Invention](https:\\www.pubinv.org), we have been
 [tracking and analyzing](https://github.com/PubInv/covid19-vent-list)
 all [open-source ventilator projects]((https://medium.com/@RobertLeeRead/analysis-of-open-source-covid-19-pandemic-ventilator-projects-27acf9075f7e)) we can find. It has become apparent that the biggest piece
-they are missing, and the place Public Invention can most help, is not in designing a new ventilator. Instead, our priority is to build a test/monitoring fixture to assist other teams.
+they are missing, and the area where Public Invention can most help, is not in designing a new ventilator. Instead, our priority is to build a test/monitoring fixture to assist other teams.
 
-Monitoring and testing are critical to keeping patients alive, and we are attempting to
+Monitoring and testing are critical for keeping patients alive, and thus we are attempting to
 make a combined tester/monitor.
 
-At the moment, this repo is for that work. Our overall strategic plan will give clinicians
+At the moment, this repo is to that end. Our overall strategic plan will give clinicians
 enough confidence to actually deploy an open-source ventilator. Our goal is to certify ventilators in a limited, last-resort
 sense, in case of a shortfall of commercial and professional equipment. That strategy is discussed later in this document.
 
