@@ -28,7 +28,7 @@ ventilator is performing as expected.
 # Measureable Flow is Currently Limited and Restriction Added
 
 Due to a world-wide supply-chain problem, we have had to use a neo-natal flow sensor instead of
-an adult flow sensor. This limits the instantaneous measurement of flow to 33 standard literes per minute.
+an adult flow sensor. This limits the instantaneous measurement of flow to 33 standard liters per minute.
 In many circumstances, this will not matter; but in some test scenarios with highly compliant lungs
 and low resistance, the flow sensor will "clip".
 
