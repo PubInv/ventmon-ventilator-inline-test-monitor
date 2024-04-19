@@ -33,7 +33,7 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <PIRDS.h>
+#include <PIRDS.h> // need to download and specifically will need the PIRDS_library folder zipped for manual install
 #include <Wire.h>
 #include <limits.h>
 #include <SPI.h>
