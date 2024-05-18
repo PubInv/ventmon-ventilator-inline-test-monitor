@@ -301,12 +301,14 @@ char macs[18];
 #define PARAMPORT 6111
 #define LOCALPORT 6111
 
-#define DEFAULT_HOST_ADDR "13.58.243.230"
+// #define DEFAULT_HOST_ADDR "13.58.243.230"
+#define DEFAULT_HOST_ADDR "52.23.196.81"
 
 char *Loghost = strdup(PARAMHOST);
 uint16_t Logport = PARAMPORT;
 IPAddress LoghostAddr;
-IPAddress DefaultLogHostAddr(13,58,243,230);
+// IPAddress DefaultLogHostAddr(13,58,243,230);
+IPAddress DefaultLogHostAddr(52,23,196,81);
 
 UDP* udpclient;
 EthernetUDP eudpclient;

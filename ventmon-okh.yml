@@ -1,0 +1,87 @@
+# recommiting to get past validator
+title: VentMon v0.4T
+description: The VentMon is basically a cloud-enable spirometer with an FiO2 sensor. It can
+  simply be plugged into a standard 22mm airway and provides a rich stream of
+  pressure, flow, and Oxygen sensor, with humidity and temperature sensing as
+  well. The primary use of the VentMon is by engineering teams developing
+  pandemic response ventilators and other respiration tools. Secondarily, it is
+  completely and transparently open source, so any team can adopt the design and
+  incorporate it into their own devices to provide the same data in an
+  integrated way.
+intended-use: The original purpose of the VentMon was to support pandemic response teams
+  creating emergency ventilators. Interposed between a ventilator under test and
+  a plastic test lung, it provides a display similar to the clinical display on
+  modern ventilators, allow engineers to validate all mechanical function of the
+  ventilators. Additionally, it compute rise time as a performance metric. It
+  produces data in the PIRDS standard, which can be logged and is later
+  processed by the VentDisplay software.
+keywords:
+  - ventilation
+  - spirometry
+  - pandemic response
+  - arduino
+  - open source
+  - free software
+project-link: https://github.com/PubInv/ventmon-ventilator-inline-test-monitor
+image: https://user-images.githubusercontent.com/5296671/113649478-1e9da800-9654-11eb-934b-7e8a9a5c5bfe.JPG
+made: true
+made-independently: false
+license:
+  hardware: CERN-OHL-1.2
+  documentation: CC0-1.0
+  software: GPL-3.0-only
+licensor:
+  name: Robert L. Read
+  affiliation: Public Invention (https://www.pubinv.org/)
+  email: read.robert@gmail.com
+okh-manifest-version: 1.0.0
+date-created: 2021-06-01
+date-updated: 2021-06-01
+manifest-author:
+  name: Robert L. Read
+  affiliation: Public Invention (https://www.pubinv.org/)
+  email: read.robert@gmail.com
+manifest-language: en-US
+contact:
+  name: Robert L. Read
+  affiliation: Public Invention (https://www.pubinv.org/)
+  email: read.robert@gmail.com
+contributors:
+  - name: Lauria Clarke
+    affiliation: Public Invention
+  - name: Geoff Mulligan
+    affiliation: Public Invention
+  - name: Ben Coombs
+    affiliation: Public Invention
+version: v0.3T and V0.4T
+development-stage: product
+documentation-home: https://github.com/PubInv/ventmon-ventilator-inline-test-monitor
+archive-download: https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/releases/tag/v0.3.1T
+schematics:
+  - path: https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/design/pcb/ventmon_T0.4/ventmon_t0.42.sch
+    title: T0.4 PCB schmatics (look for complete Eagle files)
+bom: https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/blob/master/design/pcb/ventmon_T0.4/VentMon%20T0.4%20BOM.csv
+making-instructions:
+  - path: https://www.sciencedirect.com/science/article/pii/S2468067221000249
+    title: "VentMon: An open source inline ventilator tester and monitor"
+  - path: https://github.com/PubInv/ventmon-ventilator-inline-test-monitor
+    title: Repo for the VentMon
+manufacturing-files:
+  - path: https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/design/3dparts
+    title: 3d printed files can be found here
+operating-instructions:
+  - path: https://github.com/PubInv/vent-display
+    title: VentDisplay explanations, including useful video
+software:
+  - path: https://github.com/PubInv/vent-display
+    title: VentDisplay
+  - path: https://github.com/PubInv/PIRDS-pubinv-respiration-data-standard
+    title: Public Invention Respiration Data Standard
+  - path: https://github.com/PubInv/PIRDS-logger
+    title: PIRDS logger
+  - path: https://github.com/PubInv/PIRDS-docker-local
+    title: PIRDS docker instance
+health-safety-notice: This is not intended to be used on live patients.
+standards-used:
+  - standard-title: https://github.com/PubInv/PIRDS-pubinv-respiration-data-standard
+    publisher: Public Invention
