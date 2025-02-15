@@ -39,10 +39,10 @@ The VentMon T0.4 improves on the T0.3 because it is self-contained (no cables) a
 
 The software infrastructure that supports the VentMon, such as [VentDisplay](https://github.com/PubInv/vent-display) and [PIRDS](https://github.com/PubInv/PIRDS-respiration-data-standard), have improved as well.
 
-The VentMon is basically a cloud-enabled spirometer with an FiO2 sensor. When plugged into a standard 22mm airway, the device provides
-a rich stream of pressure and flow, with oxygen, humidity, and temperature sensors for continual monitoring.  Engineering teams developing pandemic response ventilators and other respiration tools are the primary users of the VentMon. Additionally, it is completely and transparently open source, so any team can adopt the design and incorporate it into their own devices to provide the same data in an integrated way.
+The VentMon is basically a cloud-enabled [spirometer](https://en.wikipedia.org/wiki/Spirometer) with an FiO2 sensor. When plugged in line to a standard 22mm airway, the device provides
+a rich stream of telemetery for: air pressure, air flow, oxygen concentration, humidity, and temperature into a network database.  Engineering teams developing pandemic response ventilators and other respiration tools are the primary users of the VentMon. Additionally, it is completely and transparently open source, so any team can adopt the design and incorporate it into their own devices to provide the same data in an integrated way.
 
-The parts in a VentMon cost about USD$600. 
+The parts in a VentMon cost about USD$600 in 2023. 
 
 # Usage
 
@@ -59,7 +59,7 @@ graph of airway pressure. This is not intended for clinical use, but it is usefu
 ## The Serial Port
 
 The main target for the VentMon project is to support engineers who are working on ventilators and respiration support devices. Most of these engineers will know
-how to use the Arudino IDE to see the serial port. The baudrate is 500000 (500,000).
+how to use the Arudino IDE to see the serial monitor. The baudrate is 500000 (500,000).
 A simple human-readable output is printed to the serial port at start up time, which
 shows some basic start up information.  After searching for an ethernet connection and WiFi connection, the VentMon will
 begin printing dynamic data on the serial port. 
@@ -100,7 +100,7 @@ Using Apache:
 ![VentMon Apache Ecosystem](https://user-images.githubusercontent.com/5296671/111052629-1a4de880-8422-11eb-9466-349d80afdfa5.png)
 
 Public Invention recently created a repo that builds a Docker file image that makes all of this possible locally without running Apache/CGI.
-Please visit [PIRDS-docker-local](https://github.com/PubInv/PIRDS-docker-local) for more details. As of March 25th, the Docker system is working 
+Please visit [PIRDS-docker-local](https://github.com/PubInv/PIRDS-docker-local) for more details. As of March 25th 2021, the Docker system is working 
 on one computer (the authors), and another user has reported a problem with it; this is in an early release stage.
 
 ![VentMon Docker Ecosystem](https://user-images.githubusercontent.com/5296671/111052632-25087d80-8422-11eb-8d85-7e72af57ff4f.png)
@@ -174,7 +174,7 @@ Initial BOM can be found here: [BOM](https://docs.google.com/document/d/1n-Ja3Ug
 
 ## Status
 
-** October 10th **
+** October 10th ??year???**
 
 We have now shipped 20 units of the VentMons to open source teams all over the world. Some of them are
 using them successfully. We ordered 15 printed circuit boards and 15 3D printed sensor ports, and I built them
