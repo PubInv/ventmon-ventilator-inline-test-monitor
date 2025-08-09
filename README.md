@@ -22,6 +22,14 @@ The inventor team has been especially motivated by the work of Mr. Joe Leier, wh
 For now, our ideas and work are published in the directory called [pi](https://github.com/PubInv/ventmon-ventilator-inline-test-monitor/tree/master/pi).
 
 
+## Configuring the VentMon T0.5 for WiFi
+
+The VentMon is fundamentally a WiFi enabled device which publishes to a public data lake which can be found here:
+
+[\http://ventmon.coslabs.com/rds](http://ventmon.coslabs.com/rds)
+
+In order to configure it, the password and name of the local WiFi networkmust be added via the serial port. To do this, you have to connect to the serial port on the VenMon with a USB cable with a serial monitor. the Arduino IDE has such a serial monitor, but you could use any serial monitor. Then 
+simply type the letter "c" and enter to configure the VentMon. Read and follow the instructions to reset and enable or disable the WiFi network.
 
 
 
