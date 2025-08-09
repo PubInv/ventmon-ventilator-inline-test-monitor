@@ -31,7 +31,18 @@ The VentMon is fundamentally a WiFi enabled device which publishes to a public d
 In order to configure it, the password and name of the local WiFi networkmust be added via the serial port. To do this, you have to connect to the serial port on the VenMon with a USB cable with a serial monitor. the Arduino IDE has such a serial monitor, but you could use any serial monitor. Then 
 simply type the letter "c" and enter to configure the VentMon. Read and follow the instructions to reset and enable or disable the WiFi network.
 
+The Configuration menu may look like this:
+```
+16:00:17.486 -> Enter 'c' to re-enter this configuration while running.
+16:00:17.486 -> WiFi ENABLED
+16:00:17.486 -> Enter 'w' to enable WiFi, 'x' to disable WiFi
+16:00:17.486 -> Ethernet ENABLED
+16:00:17.486 -> Enter 'e' to enable Ethernet, 'f' to disable Ethernet.
+16:00:17.486 -> Type the character 'r' to reset wifi ssid and password.
+16:00:17.486 -> Type the character 'c' to continue or wait 10 seconds to begin/resume operation:
+```
 
+Once you have condifugred it for your local WiFi and verified that you are seeing love traces at the URL above (your trace will likely be near the top, and reflects your loack IP address) then you can power the VentMon which a USB cable which is not monitored by a computer.
 
 
 
