@@ -118,8 +118,8 @@ PubSubClient client(espClient);
 const char* LEB4 = "A0DD6C0EFD28";
 const char* NAGHAM = "ECC9FF7D8EF4";
 
-const char* willTopic ""ECC9FF7D8EF4_ALM" ;
-uint8_t willQos = 2;
+const char* willTopic = "ECC9FF7D8EF4_ALM" ;
+uint8_t willQos = 1;
 boolean willRetain = true ;
 const char* willMessage = "The VentMon has croaked.";
 
@@ -152,7 +152,7 @@ void reconnect() {
     n++;
     Serial.print("Attempting MQTT connection...");
 //    connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
-    if (client.connect(COMPANY_NAME, mqtt_user, mqtt_password)) {
+    if (client.connect(COMPANY_NAME, mqtt_user, mqtt_password, willTopic, willQos, willRetain, willMessage)) {
     // if (client.connect(COMPANY_NAME, mqtt_user, mqtt_password)) {
       Serial.println("success!");
  //     client.subscribe(publish_Alarm_Topic);  // Subscribe to GPAD API alarms
