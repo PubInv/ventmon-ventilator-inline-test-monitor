@@ -121,7 +121,7 @@ const char* NAGHAM = "ECC9FF7D8EF4";
 const char* willTopic = "ECC9FF7D8EF4_ALM" ;
 uint8_t willQos = 1;
 boolean willRetain = true ;
-const char* willMessage = "The VentMon has croaked.";
+const char* willMessage = "a5The VentMon has croaked.";
 
 bool readMacAddress(uint8_t* baseMac) {
   //  uint8_t baseMac[6];
