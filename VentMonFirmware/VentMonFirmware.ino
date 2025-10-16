@@ -34,6 +34,14 @@
  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
+#define COMPANY_NAME "PubInv "  // For the Broker ID for MQTT 
+#define PROG_NAME "VentMonFirmware "   // This program
+#define FIRMWARE_VERSION "V5.0.krake " // Initial Menu implementation 
+
+#define DEBUG 2
+const bool OUTPUT_DATA = false; // set false to stop output for debugging
+
 #include <Dns.h>
 #include <PIRDS.h>
 #include <Wire.h>
@@ -44,6 +52,8 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 
+#include <WiFiManager.h> 
+
 #include <EEPROM.h>
 #include <SFM3X00.h>
 #include <Adafruit_Sensor.h>
@@ -52,6 +62,140 @@
 #include <Adafruit_ADS1X15.h>
 #include <Adafruit_GFX.h>
 
+// Include MQTT
+#include <PubSubClient.h>  // From library https://github.com/knolleary/pubsubclient
+
+char AlarmMessageBuffer[81];
+
+// MQTT Broker
+const char* mqtt_broker_name = "public.cloud.shiftr.io";
+const char* mqtt_user = "public";
+const char* mqtt_password = "public";
+const unsigned int NUM_WIFI_RECONNECT_RETRIES = 3;
+
+char publish_Alarm_Topic[2][17];
+char macAddressString[13];
+
+#define MAC2STR(a) (a)[0], (a)[1], (a)[2], (a)[3], (a)[4], (a)[5]
+#define MACSTR "%02x:%02x:%02x:%02x:%02x:%02x"
+#define MACSTR_PLN "%02X%02X%02X%02X%02X%02X"
+
+
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+// [willTopic, willQoS, willRetain, willMessage]
+
+
+// {
+// mac_to_NameDict.set("F024F9F1B874", "KRAKE_LB0001");
+//   mac_to_NameDict.set("142B2FEB1F00", "KRAKE_LB0002");
+//   mac_to_NameDict.set("142B2FEB1C64", "KRAKE_LB0003");
+//   mac_to_NameDict.set("142B2FEB1E24", "KRAKE_LB0004");
+//   mac_to_NameDict.set("F024F9F1B880", "KRAKE_LB0005");
+
+ 
+//   mac_to_NameDict.set("ECC9FF7D8EE8", "KRAKE_US0005");
+//   mac_to_NameDict.set("ECC9FF7D8EF4", "KRAKE_US0004");
+//   mac_to_NameDict.set("ECC9FF7C8C98", "KRAKE_US0003");
+//   mac_to_NameDict.set("ECC9FF7D8F00", "KRAKE_US0002");
+//   mac_to_NameDict.set("ECC9FF7C8BDC", "KRAKE_US0001");
+//   mac_to_NameDict.set("3C61053DF08C", "20240421_USA1");
+//   mac_to_NameDict.set("3C6105324EAC", "20240421_USA2");
+//   mac_to_NameDict.set("3C61053DF63C", "20240421_USA3");
+//   mac_to_NameDict.set("10061C686A14", "20240421_USA4");
+//   mac_to_NameDict.set("FCB467F4F74C", "20240421_USA5");
+//   mac_to_NameDict.set("CCDBA730098C", "20240421_LEB1");
+//   mac_to_NameDict.set("CCDBA730BFD4", "20240421_LEB2");
+//   mac_to_NameDict.set("CCDBA7300954", "20240421_LEB3");
+//   mac_to_NameDict.set("A0DD6C0EFD28", "20240421_LEB4");
+//   mac_to_NameDict.set("10061C684D28", "20240421_LEB5");
+//   mac_to_NameDict.set("A0B765F51E28", "MockingKrake_LEB");
+//   mac_to_NameDict.set("3C61053DC954", "Not Homework2, Maryville TN");
+// }//end setup mac_to_NameDict
+
+const char* LEB4 = "A0DD6C0EFD28";
+const char* NAGHAM = "ECC9FF7D8EF4";
+
+const char* willTopic ""ECC9FF7D8EF4_ALM" ;
+uint8_t willQos = 2;
+boolean willRetain = true ;
+const char* willMessage = "The VentMon has croaked.";
+
+bool readMacAddress(uint8_t* baseMac) {
+  //  uint8_t baseMac[6];
+  esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, baseMac);
+  if (ret == ESP_OK) {
+    // Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
+    //               baseMac[0], baseMac[1], baseMac[2],
+    //               baseMac[3], baseMac[4], baseMac[5]);
+    return true;
+  } else {
+    // Serial.println("Failed to read MAC address");
+    return false;
+  }
+}
+
+
+void publishTestToKrake() {
+  Serial.print("TestToKrakeCalled!\n");
+  char onLineMsg[32] = "a3 SpikeTest VentMon";
+ // client.publish(publish_Alarm_Topic[0], onLineMsg);
+  client.publish("A0DD6C0EFD28_ALM", onLineMsg);
+  client.publish("ECC9FF7D8EF4_ALM", onLineMsg);
+}
+
+void reconnect() {
+  int n = 0;
+  while (!client.connected() && n < NUM_WIFI_RECONNECT_RETRIES) {
+    n++;
+    Serial.print("Attempting MQTT connection...");
+//    connect(const char* id, const char* user, const char* pass, const char* willTopic, uint8_t willQos, boolean willRetain, const char* willMessage);
+    if (client.connect(COMPANY_NAME, mqtt_user, mqtt_password)) {
+    // if (client.connect(COMPANY_NAME, mqtt_user, mqtt_password)) {
+      Serial.println("success!");
+ //     client.subscribe(publish_Alarm_Topic);  // Subscribe to GPAD API alarms
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      delay(1000);
+    }
+  }
+  Serial.println((client.connected()) ? "connected!" : "failed to reconnect!");
+}
+bool setupMQTT() {
+  publish_Alarm_Topic[0][0] = '\0';
+
+  uint8_t mac[6];
+  readMacAddress(mac);
+  char buff[13];
+  sprintf(buff, MACSTR_PLN, MAC2STR(mac));
+
+#if (DEBUG > 0)
+  printf("My mac is " MACSTR "\n", MAC2STR(mac));
+  Serial.print("MAC as char array: ");
+  Serial.println(buff);
+#endif
+
+  const int MAC_ADDRESS_LEN = 12;
+  const int MSG_TYPE_LEN = 4;
+  strcpy(macAddressString, buff);
+  macAddressString[12] = '\0';
+
+  // Publishing to LEE's Krake
+  strcpy(publish_Alarm_Topic[0], NAGHAM);
+  strcpy(publish_Alarm_Topic[0] + MAC_ADDRESS_LEN, "_ALM");
+  publish_Alarm_Topic[0][MAC_ADDRESS_LEN + MSG_TYPE_LEN] = '\0';
+
+#if (DEBUG > 1)
+  Serial.println("XXXXXXX");
+  Serial.println(publish_Alarm_Topic[0]);
+  Serial.println("XXXXXXX");
+#endif
+  client.setServer(mqtt_broker_name, 1883);  //Default MQTT port
+  return true;
+}
 
 #define V5
 //#define V4 // V0.4 VentMon with the new 128x64 OLED Screen
@@ -63,6 +207,7 @@
 #else
 #include <Adafruit_SSD1306.h>
 #endif
+
 
 
 #define BAUD_RATE 500000
@@ -1602,6 +1747,8 @@ void configure() {
 String inputString = "";         // a String to hold incoming data
 bool stringComplete = false;  // whether the string is complete
 
+const long KRAKE_SEND_MS = 10000;
+long krake_last_published = 0;
 void loop() {
   if (need_to_configure) {
     configure();
@@ -1685,6 +1832,7 @@ void loop() {
   }
   smooth_ambient = (signed long) (smooth_ambient / AMB_WINDOW_SIZE);
 
+ if (OUTPUT_DATA) {
 
   // Differential, from absolute pressures
   ms = millis();
@@ -1773,6 +1921,7 @@ void loop() {
         PERIOD_B_GAS_ms = ms;
     }
   }
+}
 
   /* BLUETOOTH */
   #ifdef BLE
@@ -1781,6 +1930,20 @@ void loop() {
       characteristicTX->notify();
   }
   #endif
+
+{
+  unsigned long ms = millis();
+  if (ms > krake_last_published + KRAKE_SEND_MS) {
+    publishTestToKrake();
+    krake_last_published = ms;
+    delay(1000);
+  }
+}
+
+  if (!client.connected()) {
+      reconnect();
+      delay(1000);
+  }
 }
 
 
@@ -1918,5 +2081,10 @@ void setup() {
   printCurrentCredentials();
   need_to_configure = true;
 
+  if (setupMQTT()) {
+     Serial.println("MQTT setup seems to have suceeded");
+  } else {
+     Serial.println("MQTT setup seems to have failed");
+  }
 
 }
