@@ -40,7 +40,7 @@
 #define FIRMWARE_VERSION "V5.0.krake " // Initial Menu implementation 
 
 #define DEBUG 2
-const bool OUTPUT_DATA = false; // set false to stop output for debugging
+const bool OUTPUT_DATA_TO_SERIAL = true; // set false to stop output for debugging
 
 #include <Dns.h>
 #include <PIRDS.h>
@@ -115,13 +115,16 @@ PubSubClient client(espClient);
 //   mac_to_NameDict.set("3C61053DC954", "Not Homework2, Maryville TN");
 // }//end setup mac_to_NameDict
 
+
+const unsigned long OVER_PRESSURE_ALARM_LIMIT_10THS_MM_H2O = 600; // 40 cmH2O * 10 mm / cm 
+
 const char* LEB4 = "A0DD6C0EFD28";
 const char* NAGHAM = "ECC9FF7D8EF4";
 
 const char* willTopic = "ECC9FF7D8EF4_ALM" ;
 uint8_t willQos = 1;
-boolean willRetain = true ;
-const char* willMessage = "a5The VentMon has croaked.";
+boolean willRetain = false ;
+const char* willMessage = "a1The VentMon has croaked.";
 
 bool readMacAddress(uint8_t* baseMac) {
   //  uint8_t baseMac[6];
@@ -141,6 +144,16 @@ bool readMacAddress(uint8_t* baseMac) {
 void publishTestToKrake() {
   Serial.print("TestToKrakeCalled!\n");
   char onLineMsg[32] = "a3 SpikeTest VentMon";
+ // client.publish(publish_Alarm_Topic[0], onLineMsg);
+  client.publish("A0DD6C0EFD28_ALM", onLineMsg);
+  client.publish("ECC9FF7D8EF4_ALM", onLineMsg);
+}
+
+void publishOverPressureToKrake(unsigned long mmH2O) {
+  Serial.print("Over Pressure Called!\n");
+  float cmH2O = (float) mmH2O / 10.0;
+  char onLineMsg[64] = "";
+  sprintf(onLineMsg,"a3 Inspiratory OverPressure: %f ",cmH2O);
  // client.publish(publish_Alarm_Topic[0], onLineMsg);
   client.publish("A0DD6C0EFD28_ALM", onLineMsg);
   client.publish("ECC9FF7D8EF4_ALM", onLineMsg);
@@ -657,8 +670,10 @@ void output_on_serial_print_PIRDS(char e, char t, char loc, unsigned short int n
 }
 
 void outputMeasurement(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
-  output_on_serial_print_PIRDS(e, t, loc, n, ms, val);
-  Serial.println();
+  if (OUTPUT_DATA_TO_SERIAL) {
+    output_on_serial_print_PIRDS(e, t, loc, n, ms, val);
+    Serial.println();
+  }
   send_data(e, t, loc, n, ms, val);
   display_print_pirds(e, t, loc, n, ms, val);
 }
@@ -1511,12 +1526,23 @@ void output_O2() {
    unsigned long ms = millis();
    outputMeasurement('M', 'O', 'I', 0, ms, fiO2);
 }
-
+const bool REVERSE_HSCPRESSURE = true;
 void output_I_DPRES() {
     unsigned long ms = millis();
           // really this should be a running max, for now it is instantaneous
     display_max_pressure = readHSCPressure();
+
+    if (REVERSE_HSCPRESSURE) display_max_pressure = -display_max_pressure;
     outputMeasurement('M', 'D', 'I', 0, ms, display_max_pressure);
+
+    Serial.println(display_max_pressure);  
+    delay(500);
+    if (abs(display_max_pressure) > OVER_PRESSURE_ALARM_LIMIT_10THS_MM_H2O) {
+        // tell the Krake
+      Serial.print("OVER_PRESSSURE!\n");
+      publishOverPressureToKrake(display_max_pressure);
+    }
+    
     // This arbitrarily make 45 cm H20 the limit;
     uint8_t s = (GRAPH_Y_PIXELS * display_max_pressure) / MAX_PRESSURE_SCALE * 10;
     push_sample(s);
@@ -1530,6 +1556,15 @@ void output_I_ADPRES() {
       long diff_pressure = internal_pressure - smooth_ambient;
       // NOTE!!! We are representing this as location "1" to distinguish from the differential pressure sensor!
       outputMeasurement('M', 'D', 'I', 1, ms, diff_pressure);
+
+      Serial.println(diff_pressure);  
+      delay(500);
+      if (diff_pressure > OVER_PRESSURE_ALARM_LIMIT_10THS_MM_H2O) {
+        // tell the Krake
+        Serial.print("OVER_PRESSSURE!\n");
+        delay(10000);
+      }
+
     } else {
      Serial.print(INSPIRATORY_PRESSURE_SENSOR_ERROR);
      outputMetaEvent(INSPIRATORY_PRESSURE_SENSOR_ERROR, ms);
@@ -1550,7 +1585,9 @@ void output_PRES(int idx) {
     unsigned long ms = millis();
     signed long pressure = readPressureOnly(sensor);
     if (pressure != LONG_MIN) {
-      outputMeasurement('M', 'P', loc, 0, ms, pressure);
+      outputMeasurement('M', 'P', loc, 0, ms, pressure); 
+  
+
     } else {
       if (idx == 0) {
         Serial.print(INSPIRATORY_PRESSURE_SENSOR_ERROR);
@@ -1747,7 +1784,7 @@ void configure() {
 String inputString = "";         // a String to hold incoming data
 bool stringComplete = false;  // whether the string is complete
 
-const long KRAKE_SEND_MS = 10000;
+const long KRAKE_SEND_MS = 30000;
 long krake_last_published = 0;
 void loop() {
   if (need_to_configure) {
@@ -1831,8 +1868,6 @@ void loop() {
     smooth_ambient += ambient_window[i];
   }
   smooth_ambient = (signed long) (smooth_ambient / AMB_WINDOW_SIZE);
-
- if (OUTPUT_DATA) {
 
   // Differential, from absolute pressures
   ms = millis();
@@ -1921,7 +1956,6 @@ void loop() {
         PERIOD_B_GAS_ms = ms;
     }
   }
-}
 
   /* BLUETOOTH */
   #ifdef BLE
@@ -1931,14 +1965,14 @@ void loop() {
   }
   #endif
 
-{
-  unsigned long ms = millis();
-  if (ms > krake_last_published + KRAKE_SEND_MS) {
-    publishTestToKrake();
-    krake_last_published = ms;
-    delay(1000);
-  }
-}
+// {
+//   unsigned long ms = millis();
+//   if (ms > krake_last_published + KRAKE_SEND_MS) {
+//     publishTestToKrake();
+//     krake_last_published = ms;
+//     delay(2000);
+//   }
+// }
 
   if (!client.connected()) {
       reconnect();
