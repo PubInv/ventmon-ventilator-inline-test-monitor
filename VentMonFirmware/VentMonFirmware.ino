@@ -37,7 +37,7 @@
 
 #define COMPANY_NAME "PubInv "  // For the Broker ID for MQTT 
 #define PROG_NAME "VentMonFirmware "   // This program
-#define FIRMWARE_VERSION "V5.0.krake " // Initial Menu implementation 
+#define FIRMWARE_VERSION "V5.1.mqtt " // Initial Menu implementation 
 
 #define DEBUG 2
 const bool OUTPUT_DATA_TO_SERIAL = true; // set false to stop output for debugging
