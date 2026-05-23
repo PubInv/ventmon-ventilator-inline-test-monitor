@@ -7,6 +7,7 @@
 #include <WebServer.h>
 #include <WiFi.h>
 #include <WiFiManager.h>
+#include <LittleFS.h>
 
 namespace {
 Preferences prefs;
@@ -58,38 +59,47 @@ bool isVentMonMeasurementJson(const char *payload) {
   return strcmp(event, "M") == 0;
 }
 
-String htmlPage() {
-  return F(R"rawliteral(
-<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>VentMon Visualizer</title>
-<style>
-body{font-family:Arial,sans-serif;margin:0;background:#101827;color:#eef2ff}header{padding:16px;background:#172036;position:sticky;top:0}main{padding:16px;display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}.card{background:#1f2a44;border-radius:16px;padding:16px;box-shadow:0 8px 20px #0005}a{color:#93c5fd}input,select{width:100%;padding:10px;margin:6px 0 12px;border-radius:10px;border:0;box-sizing:border-box}button{padding:10px 14px;border:0;border-radius:10px;cursor:pointer;margin:4px 4px 4px 0}pre{white-space:pre-wrap;word-break:break-word;background:#0b1020;padding:12px;border-radius:12px}.ok{color:#86efac}.bad{color:#fca5a5}.small{opacity:.8;font-size:.9rem}</style>
-</head><body><header><h2>VentMon Web Visualizer</h2><div id="net"></div><p><a href="/mqtt">Open MQTT configuration and topic selector</a></p></header><main>
-<section class="card"><h3>Live measurement</h3><pre id="meas">loading...</pre><h3>Last alarm</h3><pre id="alarm"></pre></section>
-<section class="card"><h3>Network status</h3><pre id="lines"></pre><button onclick="fetch('/reset-wifi',{method:'POST'}).then(()=>alert('Saved. Reboot/reset to open WiFi portal.'))">Reset WiFi</button></section>
-</main><script>
-async function refresh(){let s=await (await fetch('/api/status')).json();net.innerHTML=`WiFi: <b class="${s.wifi?'ok':'bad'}">${s.ip}</b> MQTT: <b class="${s.mqtt?'ok':'bad'}">${s.mqtt?'connected':'offline'}</b>`;meas.textContent=JSON.stringify(s.lastMeasurement,null,2);alarm.textContent=s.lastAlarm||'';lines.textContent=(s.line1||'')+'\n'+(s.line2||'');}
-refresh();setInterval(refresh,1000);
-</script></body></html>
-)rawliteral");
+
+const char *contentType(const String &path) {
+  if (path.endsWith(".html") || path.endsWith(".htm")) return "text/html";
+  if (path.endsWith(".css")) return "text/css";
+  if (path.endsWith(".js")) return "application/javascript";
+  if (path.endsWith(".json")) return "application/json";
+  if (path.endsWith(".png")) return "image/png";
+  if (path.endsWith(".svg")) return "image/svg+xml";
+  return "text/plain";
 }
 
-String mqttPage() {
-  return F(R"rawliteral(
-<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>VentMon MQTT</title>
-<style>body{font-family:Arial,sans-serif;margin:0;background:#101827;color:#eef2ff}main{padding:16px;max-width:900px;margin:auto}.card{background:#1f2a44;border-radius:16px;padding:16px;margin:12px 0;box-shadow:0 8px 20px #0005}input,select{width:100%;padding:10px;margin:6px 0 12px;border-radius:10px;border:0;box-sizing:border-box}button{padding:10px 14px;border:0;border-radius:10px;cursor:pointer;margin:4px 4px 4px 0}.row{display:grid;grid-template-columns:1fr 2fr 150px 90px 70px;gap:8px;align-items:end}@media(max-width:760px){.row{grid-template-columns:1fr}.hide-mobile{display:none}}a{color:#93c5fd}</style></head><body><main>
-<h2>MQTT configuration</h2><p><a href="/">Back to visualizer</a></p>
-<div class="card"><label><input type="checkbox" id="mqttEnabled"> MQTT enabled</label><label>MQTT host<input id="mqttHost"></label><label>MQTT port<input id="mqttPort" type="number"></label><label>MQTT user<input id="mqttUser"></label><label>MQTT password<input id="mqttPassword" type="password"></label><label>Device name<input id="deviceName"></label></div>
-<div class="card"><h3>Publish topics</h3><p>Safety rule: this device publishes only VentMon measurement updates where <code>event</code> is <code>M</code>, plus explicit custom alarms. No WiFi, IP, heartbeat, status, RSSI, or device-info messages are published to MQTT.</p><div id="topics"></div><button onclick="addTopic()">+ Add topic</button><button onclick="save()">Save MQTT settings</button></div>
-</main><script>
-const kinds=['measurement','alarm'];
-function topicRow(t={label:'',topic:'',kind:'measurement',enabled:true}){let d=document.createElement('div');d.className='row';d.innerHTML=`<label>Label<input class="label" value="${t.label||''}"></label><label>Topic<input class="topic" value="${t.topic||''}"></label><label>Type<select class="kind">${kinds.map(k=>`<option ${k==t.kind?'selected':''}>${k}</option>`).join('')}</select></label><label>Publish?<select class="enabled"><option value="true" ${t.enabled?'selected':''}>yes</option><option value="false" ${!t.enabled?'selected':''}>no</option></select></label><button onclick="this.parentElement.remove()">Remove</button>`;topics.appendChild(d)}
-function addTopic(){topicRow()}
-async function load(){let c=await (await fetch('/api/config')).json();mqttEnabled.checked=!!c.mqttEnabled;mqttHost.value=c.mqttHost||'';mqttPort.value=c.mqttPort||1883;mqttUser.value=c.mqttUser||'';mqttPassword.value=c.mqttPassword||'';deviceName.value=c.deviceName||'VentMon';topics.innerHTML='';(c.topics||[]).forEach(topicRow);if(!(c.topics||[]).length){addTopic();}}
-async function save(){let ts=[...topics.children].map(r=>({label:r.querySelector('.label').value,topic:r.querySelector('.topic').value,kind:r.querySelector('.kind').value,enabled:r.querySelector('.enabled').value==='true'})).filter(t=>t.topic.trim());let body={mqttEnabled:mqttEnabled.checked,mqttHost:mqttHost.value,mqttPort:Number(mqttPort.value||1883),mqttUser:mqttUser.value,mqttPassword:mqttPassword.value,deviceName:deviceName.value,topics:ts};await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});alert('MQTT settings saved. Device will reconnect using the new settings.');}
-load();
-</script></body></html>
-)rawliteral");
+void addCacheHeaders(const String &path) {
+  if (path.endsWith(".html") || path.endsWith(".htm")) {
+    server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  } else {
+    server.sendHeader("Cache-Control", "public, max-age=86400, immutable");
+  }
+}
+
+bool serveLittleFSFile(String path) {
+  if (path.length() == 0) path = "/index.html";
+  if (path.endsWith("/")) path += "index.html";
+
+  bool useGzip = false;
+  String filePath = path;
+  if (LittleFS.exists(path + ".gz")) {
+    filePath = path + ".gz";
+    useGzip = true;
+  } else if (!LittleFS.exists(path)) {
+    return false;
+  }
+
+  File file = LittleFS.open(filePath, "r");
+  if (!file) return false;
+
+  addCacheHeaders(path);
+  if (useGzip) server.sendHeader("Content-Encoding", "gzip");
+  server.streamFile(file, contentType(path));
+  file.close();
+  Serial.println("[WEB] Served " + filePath);
+  return true;
 }
 
 void setDefaultTopics() {
@@ -209,8 +219,12 @@ void publishToKind(VentMonTopicKind kind, const char *payload, bool retained = f
 }
 
 void setupWeb() {
-  server.on("/", HTTP_GET, [](){ server.send(200, "text/html", htmlPage()); });
-  server.on("/mqtt", HTTP_GET, [](){ server.send(200, "text/html", mqttPage()); });
+  server.on("/", HTTP_GET, [](){
+    if (!serveLittleFSFile("/index.html")) server.send(404, "text/plain", "Not found");
+  });
+  server.on("/mqtt", HTTP_GET, [](){
+    if (!serveLittleFSFile("/mqtt.html")) server.send(404, "text/plain", "Not found");
+  });
   server.on("/api/config", HTTP_GET, [](){ server.send(200, "application/json", configJson()); });
   server.on("/api/config", HTTP_POST, saveConfigFromBody);
   server.on("/api/status", HTTP_GET, [](){
@@ -234,20 +248,36 @@ void setupWeb() {
     reportStatus("WiFi reset saved", "Reboot to configure");
     server.send(200, "application/json", "{\"ok\":true}");
   });
+
+  server.onNotFound([](){
+    const String uri = server.uri();
+    if (uri.startsWith("/api/")) {
+      server.send(404, "application/json", "{\"ok\":false,\"error\":\"not found\"}");
+      return;
+    }
+    if (serveLittleFSFile(uri)) return;
+    if (serveLittleFSFile("/index.html")) return;
+    server.send(404, "text/plain", "Not found");
+  });
+
   server.begin();
+  Serial.println(F("[WEB] Web server started"));
 }
 
 void connectMqttIfNeeded() {
   if (!cfg.mqttEnabled || mqtt.connected() || WiFi.status() != WL_CONNECTED) return;
   if (millis() - lastMqttAttemptMs < 5000) return;
   lastMqttAttemptMs = millis();
+  Serial.println(F("[MQTT] Connecting..."));
   reportStatus("MQTT connecting", cfg.mqttHost + ":" + String(cfg.mqttPort));
   String clientId = cfg.deviceName + "-" + String((uint32_t)ESP.getEfuseMac(), HEX);
   // No MQTT Last-Will / online announcement: broker receives only VentMon updates and explicit custom alarms.
   bool ok = mqtt.connect(clientId.c_str(), cfg.mqttUser.c_str(), cfg.mqttPassword.c_str());
   if (ok) {
+    Serial.println(F("[MQTT] Connected"));
     reportStatus("MQTT connected", cfg.mqttHost);
   } else {
+    Serial.println(F("[MQTT] Connection failed"));
     reportStatus("MQTT failed", "state " + String(mqtt.state()));
   }
 }
@@ -258,8 +288,16 @@ void networkServiceSetStatusCallback(VentMonStatusCallback callback) {
 }
 
 void networkServiceBegin() {
-  Serial.println(F("[NET] Starting WiFiManager, OTA, web visualizer, and MQTT service"));
+  Serial.println(F("[WIFI] Starting WiFiManager, OTA, web visualizer, and MQTT service"));
   loadConfig();
+
+  if (LittleFS.begin(true)) {
+    Serial.println(F("[FS] LittleFS mounted"));
+    reportStatus("FS mounted", "LittleFS ready");
+  } else {
+    Serial.println(F("[FS] LittleFS mount failed"));
+    reportStatus("FS mount failed", "LittleFS error");
+  }
 
   WiFi.mode(WIFI_STA);
   WiFiManager wm;
@@ -280,9 +318,9 @@ void networkServiceBegin() {
   }
 
   ArduinoOTA.setHostname(cfg.deviceName.c_str());
-  ArduinoOTA.onStart([](){ reportStatus("OTA update", "Starting..."); });
-  ArduinoOTA.onEnd([](){ reportStatus("OTA update", "Done"); });
-  ArduinoOTA.onError([](ota_error_t error){ reportStatus("OTA error", String((int)error)); });
+  ArduinoOTA.onStart([](){ Serial.println(F("[OTA] Start")); reportStatus("OTA update", "Starting..."); });
+  ArduinoOTA.onEnd([](){ Serial.println(F("[OTA] Done")); reportStatus("OTA update", "Done"); });
+  ArduinoOTA.onError([](ota_error_t error){ Serial.println(F("[OTA] Error")); reportStatus("OTA error", String((int)error)); });
   ArduinoOTA.begin();
   mqtt.setServer(cfg.mqttHost.c_str(), cfg.mqttPort);
   mqtt.setBufferSize(768);
