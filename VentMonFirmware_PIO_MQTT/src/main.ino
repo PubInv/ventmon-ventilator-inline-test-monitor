@@ -2019,14 +2019,14 @@ void loop() {
   }
   #endif
 
-// {
-//   unsigned long ms = millis();
-//   if (ms > krake_last_published + KRAKE_SEND_MS) {
-//     publishTestToKrake();
-//     krake_last_published = ms;
-//     delay(2000);
-//   }
-// }
+{
+  unsigned long ms = millis();
+  if (ms > krake_last_published + KRAKE_SEND_MS) {
+    publishTestToKrake();
+    krake_last_published = ms;
+    delay(4000);
+  }
+}
 
   networkServiceLoop();
 }
