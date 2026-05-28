@@ -37,7 +37,7 @@
 
 #define COMPANY_NAME "PubInv "  // For the Broker ID for MQTT 
 #define PROG_NAME "VentMonFirmware "   // This program
-#define FIRMWARE_VERSION "V5.1.mqtt " // Initial Menu implementation 
+#define FIRMWARE_VERSION "V5.2.mqtt " // Initial Menu implementation 
 
 #define DEBUG 2
 const bool OUTPUT_DATA_TO_SERIAL = true; // set false to stop output for debugging
@@ -65,6 +65,7 @@ const bool OUTPUT_DATA_TO_SERIAL = true; // set false to stop output for debuggi
 // Include MQTT
 #include <PubSubClient.h>  // From library https://github.com/knolleary/pubsubclient
 #include "network_service.h"
+#include <ArduinoJson.h>
 
 char AlarmMessageBuffer[81];
 
@@ -117,7 +118,9 @@ PubSubClient client(espClient);
 // }//end setup mac_to_NameDict
 
 
-const unsigned long OVER_PRESSURE_ALARM_LIMIT_10THS_MM_H2O = 600; // 40 cmH2O * 10 mm / cm 
+// Internal pressure values are stored as tenths of cmH2O.
+// 40.0 cmH2O => 400 tenths of cmH2O.
+const signed long OVER_PRESSURE_ALARM_LIMIT_10THS_CM_H2O = 400; 
 
 const char* LEB4 = "A0DD6C0EFD28";
 const char* NAGHAM = "ECC9FF7D8EF4";
@@ -144,13 +147,13 @@ bool readMacAddress(uint8_t* baseMac) {
 
 void publishTestToKrake() {
   Serial.print("TestToKrakeCalled!\n");
-  char onLineMsg[32] = "a3 SpikeTest VentMon";
+  char onLineMsg[32] = "a1 SpikeTest VentMon";
   networkServicePublishAlarm(onLineMsg);
 }
 
-void publishOverPressureToKrake(unsigned long mmH2O) {
+void publishOverPressureToKrake(signed long pressureTenthsCmH2O) {
   Serial.print("Over Pressure Called!\n");
-  float cmH2O = (float) mmH2O / 10.0;
+  float cmH2O = fabs((float)pressureTenthsCmH2O) / 10.0f;
   char onLineMsg[96] = "";
   snprintf(onLineMsg, sizeof(onLineMsg), "a3 Inspiratory OverPressure: %.1f cmH2O", cmH2O);
   networkServicePublishAlarm(onLineMsg);
@@ -666,16 +669,134 @@ void output_on_serial_print_PIRDS(char e, char t, char loc, unsigned short int n
   Serial.print(buff);
 }
 
+// MQTT publishing policy:
+// - Keep compact PIRDS Measurement internally/serial/UDP.
+// - Publish polished JSON to MQTT so dashboards do not need to decode type/loc/value scaling.
+// - Include pressure alarm state inside pressure measurements.
+// - Also publish HIGH_PRESSURE once to the alarm topic when the threshold is crossed.
+
+const float MQTT_PRESSURE_HIGH_CM_H2O = 40.0f;
+const float MQTT_PRESSURE_CLEAR_CM_H2O = 35.0f;
+bool mqttHighPressureActive = false;
+
+const char* mqttMeasurementName(char t) {
+  switch (t) {
+    case 'F': return "flow";
+    case 'O': return "oxygen";
+    case 'D': return "differential_pressure";
+    case 'P': return "absolute_pressure";
+    case 'T': return "temperature";
+    case 'H': return "humidity";
+    case 'A': return "altitude";
+    case 'G': return "gas_resistance";
+    default:  return "unknown";
+  }
+}
+
+const char* mqttLocationName(char loc) {
+  switch (loc) {
+    case 'I': return "inspiratory";
+    case 'E': return "expiratory";
+    case 'B': return "ambient";
+    default:  return "unknown";
+  }
+}
+
+const char* mqttUnitForType(char t) {
+  switch (t) {
+    case 'F': return "slm";
+    case 'O': return "%";
+    case 'D': return "cmH2O";
+    case 'P': return "cmH2O";
+    case 'T': return "C";
+    case 'H': return "%RH";
+    case 'A': return "m";
+    case 'G': return "ohm";
+    default:  return "raw";
+  }
+}
+
+float mqttScaledValue(char t, signed long val) {
+  switch (t) {
+    case 'F': return ((float)val) / 1000.0f; // internal: mL/min, MQTT: slm
+    case 'D': return ((float)val) / 10.0f;   // internal: mmH2O, MQTT: cmH2O
+    case 'P': return ((float)val) / 10.0f;   // internal: mmH2O, MQTT: cmH2O
+    case 'T': return ((float)val) / 100.0f;  // internal: C * 100
+    case 'H': return ((float)val) / 100.0f;  // internal: %RH * 100
+    default:  return (float)val;
+  }
+}
+
+bool mqttIsPressure(char t) {
+  return (t == 'D' || t == 'P');
+}
+
+void publishHighPressureAlarmIfNeeded(char t, char loc, unsigned long ms, float pressureCmH2O) {
+  if (!mqttIsPressure(t) || loc != 'I') return;
+
+  if (!mqttHighPressureActive && pressureCmH2O >= MQTT_PRESSURE_HIGH_CM_H2O) {
+    mqttHighPressureActive = true;
+
+    JsonDocument alarm;
+    alarm["event"] = "A";
+    alarm["alarm"] = "HIGH_PRESSURE";
+    alarm["severity"] = "high";
+    alarm["measurement"] = mqttMeasurementName(t);
+    alarm["location"] = mqttLocationName(loc);
+    alarm["value"] = pressureCmH2O;
+    alarm["threshold"] = MQTT_PRESSURE_HIGH_CM_H2O;
+    alarm["unit"] = "cmH2O";
+    alarm["timestamp_ms"] = ms;
+
+    char alarmBuff[256];
+    serializeJson(alarm, alarmBuff, sizeof(alarmBuff));
+    networkServicePublishAlarm(alarmBuff);
+  }
+
+  if (mqttHighPressureActive && pressureCmH2O <= MQTT_PRESSURE_CLEAR_CM_H2O) {
+    mqttHighPressureActive = false;
+  }
+}
+
+void fillPolishedMqttMeasurement(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val,
+                                 char* out, size_t outSize) {
+  float scaledValue = mqttScaledValue(t, val);
+
+  JsonDocument doc;
+  doc["event"] = String(e);
+  doc["measurement"] = mqttMeasurementName(t);
+  doc["type"] = String(t);        // keep original PIRDS type for compatibility
+  doc["location"] = mqttLocationName(loc);
+  doc["loc"] = String(loc);       // keep original PIRDS loc for compatibility
+  doc["num"] = n;
+  doc["value"] = scaledValue;
+  doc["raw_value"] = val;
+  doc["unit"] = mqttUnitForType(t);
+  doc["timestamp_ms"] = ms;
+
+  if (mqttIsPressure(t) && loc == 'I') {
+    doc["high_pressure"] = (scaledValue >= MQTT_PRESSURE_HIGH_CM_H2O);
+    doc["high_pressure_threshold"] = MQTT_PRESSURE_HIGH_CM_H2O;
+  }
+
+  serializeJson(doc, out, outSize);
+}
+
 void outputMeasurement(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val) {
   Measurement ma = get_measurement(e, t, loc, n, ms, val);
-  char mqttBuff[256];
-  fill_JSON_buffer_measurement(&ma, mqttBuff, sizeof(mqttBuff));
+
+  char mqttBuff[384];
+  fillPolishedMqttMeasurement(e, t, loc, n, ms, val, mqttBuff, sizeof(mqttBuff));
 
   if (OUTPUT_DATA_TO_SERIAL) {
     Serial.print(mqttBuff);
     Serial.println();
   }
+
   networkServicePublishMeasurement(mqttBuff);
+  publishHighPressureAlarmIfNeeded(t, loc, ms, mqttScaledValue(t, val));
+
+  // Keep the original compact PIRDS object for existing UDP/serial/display behavior.
   send_data(e, t, loc, n, ms, val);
   display_print_pirds(e, t, loc, n, ms, val);
 }
@@ -1590,7 +1711,7 @@ void output_I_DPRES() {
 
     Serial.println(display_max_pressure);  
     delay(500);
-    if (abs(display_max_pressure) > OVER_PRESSURE_ALARM_LIMIT_10THS_MM_H2O) {
+    if (abs(display_max_pressure) >= OVER_PRESSURE_ALARM_LIMIT_10THS_CM_H2O) {
         // tell the Krake
       Serial.print("OVER_PRESSSURE!\n");
       publishOverPressureToKrake(display_max_pressure);
@@ -1612,10 +1733,10 @@ void output_I_ADPRES() {
 
       Serial.println(diff_pressure);  
       delay(500);
-      if (diff_pressure > OVER_PRESSURE_ALARM_LIMIT_10THS_MM_H2O) {
+      if (abs(diff_pressure) >= OVER_PRESSURE_ALARM_LIMIT_10THS_CM_H2O) {
         // tell the Krake
         Serial.print("OVER_PRESSSURE!\n");
-        delay(10000);
+        publishOverPressureToKrake(diff_pressure);
       }
 
     } else {
@@ -2024,7 +2145,7 @@ void loop() {
   if (ms > krake_last_published + KRAKE_SEND_MS) {
     publishTestToKrake();
     krake_last_published = ms;
-    delay(4000);
+    //delay(4000);
   }
 }
 
