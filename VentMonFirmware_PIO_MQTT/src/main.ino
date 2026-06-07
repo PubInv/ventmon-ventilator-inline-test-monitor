@@ -146,9 +146,29 @@ bool readMacAddress(uint8_t* baseMac) {
 
 
 void publishTestToKrake() {
-  Serial.print("TestToKrakeCalled!\n");
-  char onLineMsg[32] = "a1 SpikeTest VentMon";
-  networkServicePublishAlarm(onLineMsg);
+  static bool sendHighFlowRange = true;
+  const char* alarmName = sendHighFlowRange ? "FLOW_OUT_OF_RANGE_HIGH" : "FLOW_OUT_OF_RANGE_LOW";
+  float flowSlm = sendHighFlowRange ? 205.0f : -205.0f;
+
+  Serial.print("FlowRangeTestToKrakeCalled: ");
+  Serial.println(alarmName);
+
+  JsonDocument alarm;
+  alarm["event"] = "A";
+  alarm["alarm"] = alarmName;
+  alarm["severity"] = "medium";
+  alarm["measurement"] = "flow";
+  alarm["location"] = "inspiratory";
+  alarm["parameter"] = "inspiratory_flow_slm";
+  alarm["value"] = flowSlm;
+  alarm["unit"] = "slm";
+  alarm["timestamp_ms"] = millis();
+
+  char alarmBuff[256];
+  serializeJson(alarm, alarmBuff, sizeof(alarmBuff));
+  networkServicePublishAlarm(alarmBuff);
+
+  sendHighFlowRange = !sendHighFlowRange;
 }
 
 void publishOverPressureToKrake(signed long pressureTenthsCmH2O) {
@@ -674,10 +694,12 @@ void output_on_serial_print_PIRDS(char e, char t, char loc, unsigned short int n
 // - Publish polished JSON to MQTT so dashboards do not need to decode type/loc/value scaling.
 // - Include pressure alarm state inside pressure measurements.
 // - Also publish HIGH_PRESSURE once to the alarm topic when the threshold is crossed.
+// - Publish FLOW_OUT_OF_RANGE_HIGH/LOW once when the inspiratory flow sensor saturates.
 
 const float MQTT_PRESSURE_HIGH_CM_H2O = 40.0f;
 const float MQTT_PRESSURE_CLEAR_CM_H2O = 35.0f;
 bool mqttHighPressureActive = false;
+bool mqttFlowOutOfRangeActive = false;
 
 const char* mqttMeasurementName(char t) {
   switch (t) {
@@ -716,6 +738,12 @@ const char* mqttUnitForType(char t) {
   }
 }
 
+const char* mqttAlarmParameterName(char t, char loc) {
+  if (loc == 'I' && (t == 'D' || t == 'P')) return "inspiratory_pressure_cmH2O";
+  if (loc == 'I' && t == 'F') return "inspiratory_flow_slm";
+  return "unsupported";
+}
+
 float mqttScaledValue(char t, signed long val) {
   switch (t) {
     case 'F': return ((float)val) / 1000.0f; // internal: mL/min, MQTT: slm
@@ -743,6 +771,7 @@ void publishHighPressureAlarmIfNeeded(char t, char loc, unsigned long ms, float 
     alarm["severity"] = "high";
     alarm["measurement"] = mqttMeasurementName(t);
     alarm["location"] = mqttLocationName(loc);
+    alarm["parameter"] = mqttAlarmParameterName(t, loc);
     alarm["value"] = pressureCmH2O;
     alarm["threshold"] = MQTT_PRESSURE_HIGH_CM_H2O;
     alarm["unit"] = "cmH2O";
@@ -755,6 +784,31 @@ void publishHighPressureAlarmIfNeeded(char t, char loc, unsigned long ms, float 
 
   if (mqttHighPressureActive && pressureCmH2O <= MQTT_PRESSURE_CLEAR_CM_H2O) {
     mqttHighPressureActive = false;
+  }
+}
+
+void publishFlowRangeAlarmIfNeeded(float flowSlm, bool outOfRange, unsigned long ms) {
+  if (outOfRange && !mqttFlowOutOfRangeActive) {
+    mqttFlowOutOfRangeActive = true;
+
+    JsonDocument alarm;
+    alarm["event"] = "A";
+    alarm["alarm"] = (flowSlm < 0.0f) ? "FLOW_OUT_OF_RANGE_LOW" : "FLOW_OUT_OF_RANGE_HIGH";
+    alarm["severity"] = "medium";
+    alarm["measurement"] = mqttMeasurementName('F');
+    alarm["location"] = mqttLocationName('I');
+    alarm["parameter"] = mqttAlarmParameterName('F', 'I');
+    alarm["value"] = flowSlm;
+    alarm["unit"] = "slm";
+    alarm["timestamp_ms"] = ms;
+
+    char alarmBuff[256];
+    serializeJson(alarm, alarmBuff, sizeof(alarmBuff));
+    networkServicePublishAlarm(alarmBuff);
+  }
+
+  if (!outOfRange && mqttFlowOutOfRangeActive) {
+    mqttFlowOutOfRangeActive = false;
   }
 }
 
@@ -775,8 +829,14 @@ void fillPolishedMqttMeasurement(char e, char t, char loc, unsigned short int n,
   doc["timestamp_ms"] = ms;
 
   if (mqttIsPressure(t) && loc == 'I') {
+    doc["alarm_parameter"] = mqttAlarmParameterName(t, loc);
     doc["high_pressure"] = (scaledValue >= MQTT_PRESSURE_HIGH_CM_H2O);
     doc["high_pressure_threshold"] = MQTT_PRESSURE_HIGH_CM_H2O;
+  }
+
+  if (t == 'F' && loc == 'I') {
+    doc["alarm_parameter"] = mqttAlarmParameterName(t, loc);
+    doc["flow_out_of_range"] = false;
   }
 
   serializeJson(doc, out, outSize);
@@ -1686,7 +1746,10 @@ void output_flow() {
     unsigned long ms = millis();
 
     float flow = (SENSOR_INSTALLED_BACKWARD) ? -raw_flow : raw_flow;
-    if (flowSensor.checkRange(raw_flow)) {
+    bool flowOutOfRange = flowSensor.checkRange(raw_flow);
+    publishFlowRangeAlarmIfNeeded(flow, flowOutOfRange, ms);
+
+    if (flowOutOfRange) {
       outputMetaEvent( (char *) ((flow < 0) ? flow_too_low : flow_too_high), ms);
     } else {
       signed long flow_milliliters_per_minute = (signed long) (flow * 1000);

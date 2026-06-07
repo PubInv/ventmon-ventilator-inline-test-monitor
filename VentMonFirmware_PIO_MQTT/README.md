@@ -54,6 +54,44 @@ After setup finishes, the display shows the network summary for 30 seconds, then
 
 This is controlled in `src/main.ino` with `NETWORK_SUMMARY_AFTER_SETUP_MS` set to `30000UL`.
 
+## MQTT alarm parameter
+
+The most useful parameter for a needed ventilator alarm is inspiratory airway pressure, published as `inspiratory_pressure_cmH2O` in MQTT pressure measurements and high-pressure alarm payloads. VentMon raises a `HIGH_PRESSURE` alarm when the inspiratory differential/absolute pressure reaches `40.0 cmH2O` and keeps the alarm latched until pressure falls to `35.0 cmH2O`, avoiding repeated alarm messages while pressure remains high.
+
+Another useful alarm is inspiratory flow sensor saturation, published with the `inspiratory_flow_slm` parameter. VentMon raises `FLOW_OUT_OF_RANGE_HIGH` or `FLOW_OUT_OF_RANGE_LOW` when the SFM3X00 flow sensor reports a value outside its calibrated measurement range, then clears the latch after flow returns to range.
+
+Example high-pressure alarm payload:
+
+```json
+{
+  "event": "A",
+  "alarm": "HIGH_PRESSURE",
+  "severity": "high",
+  "measurement": "differential_pressure",
+  "location": "inspiratory",
+  "parameter": "inspiratory_pressure_cmH2O",
+  "value": 42.5,
+  "threshold": 40.0,
+  "unit": "cmH2O",
+  "timestamp_ms": 123456
+}
+```
+
+Example flow out-of-range alarm payload:
+
+```json
+{
+  "event": "A",
+  "alarm": "FLOW_OUT_OF_RANGE_HIGH",
+  "severity": "medium",
+  "measurement": "flow",
+  "location": "inspiratory",
+  "parameter": "inspiratory_flow_slm",
+  "value": 205.0,
+  "unit": "slm",
+  "timestamp_ms": 123456
+}
+```
 
 ## MQTT publish restriction
 
