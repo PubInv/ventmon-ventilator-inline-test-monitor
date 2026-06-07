@@ -153,19 +153,8 @@ void publishTestToKrake() {
   Serial.print("FlowRangeTestToKrakeCalled: ");
   Serial.println(alarmName);
 
-  JsonDocument alarm;
-  alarm["event"] = "A";
-  alarm["alarm"] = alarmName;
-  alarm["severity"] = "medium";
-  alarm["measurement"] = "flow";
-  alarm["location"] = "inspiratory";
-  alarm["parameter"] = "inspiratory_flow_slm";
-  alarm["value"] = flowSlm;
-  alarm["unit"] = "slm";
-  alarm["timestamp_ms"] = millis();
-
-  char alarmBuff[256];
-  serializeJson(alarm, alarmBuff, sizeof(alarmBuff));
+  char alarmBuff[96];
+  snprintf(alarmBuff, sizeof(alarmBuff), "a5 %s: %.1f slm", alarmName, flowSlm);
   networkServicePublishAlarm(alarmBuff);
 
   sendHighFlowRange = !sendHighFlowRange;
@@ -788,22 +777,13 @@ void publishHighPressureAlarmIfNeeded(char t, char loc, unsigned long ms, float 
 }
 
 void publishFlowRangeAlarmIfNeeded(float flowSlm, bool outOfRange, unsigned long ms) {
+  (void)ms;
   if (outOfRange && !mqttFlowOutOfRangeActive) {
     mqttFlowOutOfRangeActive = true;
 
-    JsonDocument alarm;
-    alarm["event"] = "A";
-    alarm["alarm"] = (flowSlm < 0.0f) ? "FLOW_OUT_OF_RANGE_LOW" : "FLOW_OUT_OF_RANGE_HIGH";
-    alarm["severity"] = "medium";
-    alarm["measurement"] = mqttMeasurementName('F');
-    alarm["location"] = mqttLocationName('I');
-    alarm["parameter"] = mqttAlarmParameterName('F', 'I');
-    alarm["value"] = flowSlm;
-    alarm["unit"] = "slm";
-    alarm["timestamp_ms"] = ms;
-
-    char alarmBuff[256];
-    serializeJson(alarm, alarmBuff, sizeof(alarmBuff));
+    const char* alarmName = (flowSlm < 0.0f) ? "FLOW_OUT_OF_RANGE_LOW" : "FLOW_OUT_OF_RANGE_HIGH";
+    char alarmBuff[96];
+    snprintf(alarmBuff, sizeof(alarmBuff), "a5 %s: %.1f slm", alarmName, flowSlm);
     networkServicePublishAlarm(alarmBuff);
   }
 
