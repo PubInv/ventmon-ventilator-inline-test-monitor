@@ -714,6 +714,11 @@ const char* mqttUnitForType(char t) {
   }
 }
 
+const char* mqttAlarmParameterName(char t, char loc) {
+  if (loc == 'I' && (t == 'D' || t == 'P')) return "inspiratory_pressure_cmH2O";
+  return "unsupported";
+}
+
 float mqttScaledValue(char t, signed long val) {
   switch (t) {
     case 'F': return ((float)val) / 1000.0f; // internal: mL/min, MQTT: slm
@@ -744,6 +749,7 @@ void fillPolishedMqttMeasurement(char e, char t, char loc, unsigned short int n,
   if ((t == 'D' || t == 'P') && loc == 'I') {
     doc["high_pressure"] = (scaledValue >= MQTT_PRESSURE_HIGH_CM_H2O);
     doc["high_pressure_threshold"] = MQTT_PRESSURE_HIGH_CM_H2O;
+    doc["sudden_pressure_drop_threshold"] = MQTT_PRESSURE_DROP_ALARM_DELTA_CM_H2O;
   }
 
   serializeJson(doc, out, outSize);
