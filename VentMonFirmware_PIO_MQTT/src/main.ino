@@ -145,11 +145,11 @@ bool readMacAddress(uint8_t* baseMac) {
 }
 
 
-void publishTestToKrake() {
-  Serial.print("TestToKrakeCalled!\n");
-  char onLineMsg[32] = "a1 SpikeTest VentMon";
-  networkServicePublishAlarm(onLineMsg);
-}
+// void publishTestToKrake() {
+//   Serial.print("TestToKrakeCalled!\n");
+//   char onLineMsg[32] = "a1 SpikeTest VentMon";
+//   networkServicePublishAlarm(onLineMsg);
+// }
 
 void publishOverPressureToKrake(signed long pressureTenthsCmH2O) {
   Serial.print("Over Pressure Called!\n");
@@ -2140,14 +2140,14 @@ void loop() {
   }
   #endif
 
-{
-  unsigned long ms = millis();
-  if (ms > krake_last_published + KRAKE_SEND_MS) {
-    publishTestToKrake();
-    krake_last_published = ms;
-    //delay(4000);
-  }
-}
+// {
+//   unsigned long ms = millis();
+//   if (ms > krake_last_published + KRAKE_SEND_MS) {
+//     publishTestToKrake();
+//     krake_last_published = ms;
+//     //delay(4000);
+//   }
+// }
 
   networkServiceLoop();
 }
