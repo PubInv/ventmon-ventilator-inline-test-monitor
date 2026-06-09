@@ -673,21 +673,9 @@ void output_on_serial_print_PIRDS(char e, char t, char loc, unsigned short int n
 // MQTT publishing policy:
 // - Keep compact PIRDS Measurement internally/serial/UDP.
 // - Publish polished JSON to MQTT so dashboards do not need to decode type/loc/value scaling.
-// - Include pressure alarm state inside pressure measurements.
-// - Also publish HIGH_PRESSURE once to the alarm topic when the threshold is crossed.
-// - Also publish SUDDEN_PRESSURE_DROP when inspiratory pressure drops quickly, such as test-lung disconnect.
+// - Publish only the compact a3 over-pressure alarm on the alarm topic.
 
 const float MQTT_PRESSURE_HIGH_CM_H2O = 40.0f;
-const float MQTT_PRESSURE_CLEAR_CM_H2O = 35.0f;
-const float MQTT_PRESSURE_DROP_ALARM_DELTA_CM_H2O = 10.0f;
-const float MQTT_PRESSURE_DROP_CLEAR_DELTA_CM_H2O = 3.0f;
-bool mqttHighPressureActive = false;
-bool mqttPressureDropActive = false;
-bool mqttLastPressureValid = false;
-char mqttLastPressureType = '\0';
-char mqttLastPressureLoc = '\0';
-unsigned short int mqttLastPressureNum = 0;
-float mqttLastPressureCmH2O = 0.0f;
 
 const char* mqttMeasurementName(char t) {
   switch (t) {
@@ -742,74 +730,6 @@ float mqttScaledValue(char t, signed long val) {
   }
 }
 
-bool mqttIsPressure(char t) {
-  return (t == 'D' || t == 'P');
-}
-
-void publishHighPressureAlarmIfNeeded(char t, char loc, unsigned long ms, float pressureCmH2O) {
-  if (!mqttIsPressure(t) || loc != 'I') return;
-
-  if (!mqttHighPressureActive && pressureCmH2O >= MQTT_PRESSURE_HIGH_CM_H2O) {
-    mqttHighPressureActive = true;
-
-    JsonDocument alarm;
-    alarm["event"] = "A";
-    alarm["alarm"] = "HIGH_PRESSURE";
-    alarm["severity"] = "high";
-    alarm["measurement"] = mqttMeasurementName(t);
-    alarm["location"] = mqttLocationName(loc);
-    alarm["parameter"] = mqttAlarmParameterName(t, loc);
-    alarm["value"] = pressureCmH2O;
-    alarm["threshold"] = MQTT_PRESSURE_HIGH_CM_H2O;
-    alarm["unit"] = "cmH2O";
-    alarm["timestamp_ms"] = ms;
-
-    char alarmBuff[256];
-    serializeJson(alarm, alarmBuff, sizeof(alarmBuff));
-    networkServicePublishAlarm(alarmBuff);
-  }
-
-  if (mqttHighPressureActive && pressureCmH2O <= MQTT_PRESSURE_CLEAR_CM_H2O) {
-    mqttHighPressureActive = false;
-  }
-}
-
-void publishSuddenPressureDropAlarmIfNeeded(char t, char loc, unsigned short int n, unsigned long ms, float pressureCmH2O) {
-  if (!mqttIsPressure(t) || loc != 'I') return;
-
-  bool samePressureStream = mqttLastPressureValid &&
-                            mqttLastPressureType == t &&
-                            mqttLastPressureLoc == loc &&
-                            mqttLastPressureNum == n;
-
-  if (samePressureStream) {
-    float pressureDeltaCmH2O = pressureCmH2O - mqttLastPressureCmH2O;
-
-    if (!mqttPressureDropActive && pressureDeltaCmH2O <= -MQTT_PRESSURE_DROP_ALARM_DELTA_CM_H2O) {
-      mqttPressureDropActive = true;
-
-      (void)ms;
-      Serial.print("SUDDEN_PRESSURE_DROP: ");
-      Serial.print(mqttLastPressureCmH2O);
-      Serial.print(" -> ");
-      Serial.println(pressureCmH2O);
-
-      char onLineMsg[32] = "a5 Hose disconnected";
-      networkServicePublishAlarm(onLineMsg);
-    }
-
-    if (mqttPressureDropActive && fabs(pressureDeltaCmH2O) <= MQTT_PRESSURE_DROP_CLEAR_DELTA_CM_H2O) {
-      mqttPressureDropActive = false;
-    }
-  }
-
-  mqttLastPressureType = t;
-  mqttLastPressureLoc = loc;
-  mqttLastPressureNum = n;
-  mqttLastPressureCmH2O = pressureCmH2O;
-  mqttLastPressureValid = true;
-}
-
 void fillPolishedMqttMeasurement(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val,
                                  char* out, size_t outSize) {
   float scaledValue = mqttScaledValue(t, val);
@@ -826,8 +746,7 @@ void fillPolishedMqttMeasurement(char e, char t, char loc, unsigned short int n,
   doc["unit"] = mqttUnitForType(t);
   doc["timestamp_ms"] = ms;
 
-  if (mqttIsPressure(t) && loc == 'I') {
-    doc["alarm_parameter"] = mqttAlarmParameterName(t, loc);
+  if ((t == 'D' || t == 'P') && loc == 'I') {
     doc["high_pressure"] = (scaledValue >= MQTT_PRESSURE_HIGH_CM_H2O);
     doc["high_pressure_threshold"] = MQTT_PRESSURE_HIGH_CM_H2O;
     doc["sudden_pressure_drop_threshold"] = MQTT_PRESSURE_DROP_ALARM_DELTA_CM_H2O;
@@ -848,9 +767,6 @@ void outputMeasurement(char e, char t, char loc, unsigned short int n, unsigned 
   }
 
   networkServicePublishMeasurement(mqttBuff);
-  float scaledValue = mqttScaledValue(t, val);
-  publishHighPressureAlarmIfNeeded(t, loc, ms, scaledValue);
-  publishSuddenPressureDropAlarmIfNeeded(t, loc, n, ms, scaledValue);
 
   // Keep the original compact PIRDS object for existing UDP/serial/display behavior.
   send_data(e, t, loc, n, ms, val);

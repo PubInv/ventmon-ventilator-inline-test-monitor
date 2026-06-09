@@ -54,33 +54,14 @@ After setup finishes, the display shows the network summary for 30 seconds, then
 
 This is controlled in `src/main.ino` with `NETWORK_SUMMARY_AFTER_SETUP_MS` set to `30000UL`.
 
-## MQTT alarm parameter
+## MQTT alarm payload
 
-The most useful parameter for a needed ventilator alarm is inspiratory airway pressure, published as `inspiratory_pressure_cmH2O` in MQTT pressure measurements and high-pressure alarm payloads. VentMon raises a `HIGH_PRESSURE` alarm when the inspiratory differential/absolute pressure reaches `40.0 cmH2O` and keeps the alarm latched until pressure falls to `35.0 cmH2O`, avoiding repeated alarm messages while pressure remains high.
+This build publishes only the compact `a3` over-pressure alarm to MQTT. VentMon sends the alarm when inspiratory pressure reaches the over-pressure limit.
 
-VentMon also raises `SUDDEN_PRESSURE_DROP` when consecutive readings from the same inspiratory pressure stream drop by at least `10.0 cmH2O`, which can indicate a test lung or patient circuit disconnect. The drop alarm remains latched until the pressure delta stabilizes to `3.0 cmH2O` or less.
-
-Example high-pressure alarm payload:
-
-```json
-{
-  "event": "A",
-  "alarm": "HIGH_PRESSURE",
-  "severity": "high",
-  "measurement": "differential_pressure",
-  "location": "inspiratory",
-  "parameter": "inspiratory_pressure_cmH2O",
-  "value": 42.5,
-  "threshold": 40.0,
-  "unit": "cmH2O",
-  "timestamp_ms": 123456
-}
-```
-
-Example sudden pressure drop alarm payload:
+Example over-pressure alarm payload:
 
 ```text
-a5 Hose disconnected
+a3 Inspiratory OverPressure: 42.5 cmH2O
 ```
 
 ## MQTT publish restriction
@@ -89,6 +70,6 @@ This build intentionally publishes only two message classes to the broker:
 
 1. VentMon measurement/update JSON where `event` is exactly `M`, for example:
    `{ "event": "M", "type": "F", "ms": 36570, "loc": "I", "num": 0, "val": -33 }`
-2. Explicit custom alarms sent through `networkServicePublishAlarm(...)`.
+2. The compact `a3` over-pressure alarm sent through `networkServicePublishAlarm(...)`.
 
 It does **not** publish WiFi status, IP address, RSSI, heartbeat/alive messages, online/offline messages, OTA status, or web visualizer/device-info messages to MQTT. Those remain local only on Serial/LCD/web.
