@@ -54,6 +54,15 @@ After setup finishes, the display shows the network summary for 30 seconds, then
 
 This is controlled in `src/main.ino` with `NETWORK_SUMMARY_AFTER_SETUP_MS` set to `30000UL`.
 
+## MQTT alarm payload
+
+This build publishes only the compact `a3` over-pressure alarm to MQTT. VentMon sends the alarm when inspiratory pressure reaches the over-pressure limit.
+
+Example over-pressure alarm payload:
+
+```text
+a3 Inspiratory OverPressure: 42.5 cmH2O
+```
 
 ## MQTT publish restriction
 
@@ -61,6 +70,6 @@ This build intentionally publishes only two message classes to the broker:
 
 1. VentMon measurement/update JSON where `event` is exactly `M`, for example:
    `{ "event": "M", "type": "F", "ms": 36570, "loc": "I", "num": 0, "val": -33 }`
-2. Explicit custom alarms sent through `networkServicePublishAlarm(...)`.
+2. The compact `a3` over-pressure alarm sent through `networkServicePublishAlarm(...)`.
 
 It does **not** publish WiFi status, IP address, RSSI, heartbeat/alive messages, online/offline messages, OTA status, or web visualizer/device-info messages to MQTT. Those remain local only on Serial/LCD/web.
