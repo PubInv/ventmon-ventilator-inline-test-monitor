@@ -54,6 +54,34 @@ After setup finishes, the display shows the network summary for 30 seconds, then
 
 This is controlled in `src/main.ino` with `NETWORK_SUMMARY_AFTER_SETUP_MS` set to `30000UL`.
 
+## MQTT alarm parameter
+
+The most useful parameter for a needed ventilator alarm is inspiratory airway pressure, published as `inspiratory_pressure_cmH2O` in MQTT pressure measurements and high-pressure alarm payloads. VentMon raises a `HIGH_PRESSURE` alarm when the inspiratory differential/absolute pressure reaches `40.0 cmH2O` and keeps the alarm latched until pressure falls to `35.0 cmH2O`, avoiding repeated alarm messages while pressure remains high.
+
+VentMon also raises `SUDDEN_PRESSURE_DROP` when consecutive readings from the same inspiratory pressure stream drop by at least `10.0 cmH2O`, which can indicate a test lung or patient circuit disconnect. The drop alarm remains latched until the pressure delta stabilizes to `3.0 cmH2O` or less.
+
+Example high-pressure alarm payload:
+
+```json
+{
+  "event": "A",
+  "alarm": "HIGH_PRESSURE",
+  "severity": "high",
+  "measurement": "differential_pressure",
+  "location": "inspiratory",
+  "parameter": "inspiratory_pressure_cmH2O",
+  "value": 42.5,
+  "threshold": 40.0,
+  "unit": "cmH2O",
+  "timestamp_ms": 123456
+}
+```
+
+Example sudden pressure drop alarm payload:
+
+```text
+a5 Hose disconnected
+```
 
 ## MQTT publish restriction
 
