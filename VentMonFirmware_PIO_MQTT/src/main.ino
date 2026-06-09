@@ -2001,6 +2001,7 @@ void configure() {
 String inputString = "";         // a String to hold incoming data
 bool stringComplete = false;  // whether the string is complete
 
+const bool ENABLE_KRAKE_TEST_ALARMS = false;
 const long KRAKE_SEND_MS = 30000;
 long krake_last_published = 0;
 void loop() {
@@ -2183,14 +2184,14 @@ void loop() {
   }
   #endif
 
-{
-  unsigned long ms = millis();
-  if (ms > krake_last_published + KRAKE_SEND_MS) {
-    publishTestToKrake();
-    krake_last_published = ms;
-    //delay(4000);
+  if (ENABLE_KRAKE_TEST_ALARMS) {
+    unsigned long ms = millis();
+    if (ms > krake_last_published + KRAKE_SEND_MS) {
+      publishTestToKrake();
+      krake_last_published = ms;
+      //delay(4000);
+    }
   }
-}
 
   networkServiceLoop();
 }
