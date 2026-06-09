@@ -20,177 +20,139 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-#
 
-#! /usr/bin/env python
-#################################################################################
-#     File Name           :     server_test_random_data.py
-#     Created By          :     lauriaclarke
-#     Creation Date       :     [2020-04-15 13:39]
-#     Last Modified       :     [2020-04-15 13:59]
-#     Description         :
-#################################################################################
+"""Send randomized VentMon measurements to a data-lake TCP endpoint."""
 
-import threading
-import time
-import struct
+from __future__ import annotations
+
 import random
-import time
-import math
-from time import sleep
-import sys
-import datetime
-
 import socket
 import sys
-import os
+import time
 import traceback
-import threading
-
-
-# This makes it a rather short pattern.
-# Up to 10,000 samples seems to work fine.
-# Managing the continuity of time in the samples can be tedious, however.
-SAMPLES = 3000
+from dataclasses import dataclass
 
 DATA_LAKE_HOST = "ventmon.coslabs.com"
 DATA_LAKE_PORT = 6110
-DATA_LAKE_SAMPLES_TO_SEND = 0
-NUM_SENT_TO_DATA_LAKE = 0
+DEFAULT_SAMPLE_COUNT = 0
 
-NUMREAD = 0;
-REPORT_MODULUS = 500;
-
-RUN_LIMIT = 0;
-RUN_CNT = 0;
+DEVICE_TYPES = ("B", "A", "M", "D")
+MEASUREMENT_TYPES = ("T", "P", "D", "F", "O", "H", "V", "B", "G", "A")
 
 
+@dataclass(frozen=True)
 class Measurement:
-  def __init__(self, measurementType, deviceType, deviceLocation, measurementTime, measurementValue):
-      self.m                = "M"
-      self.measurementType  = measurementType
-      self.deviceType       = deviceType
-      self.deviceLocation   = deviceLocation
-      self.measurementTime  = measurementTime
-      self.measurementValue = measurementValue
+    """A single VentMon measurement encoded in the PIRDS binary format."""
+
+    measurement_type: str
+    device_type: str
+    device_location: int
+    measurement_time: int
+    measurement_value: int
+
+    def as_bytes(self) -> bytearray:
+        """Return this measurement as a 12-byte PIRDS measurement frame."""
+        encoded = bytearray(12)
+        encoded[0] = ord("M")
+        encoded[1] = ord(self.measurement_type)
+        encoded[2] = ord(self.device_type)
+        encoded[3] = self.device_location
+        encoded[4:8] = self.measurement_time.to_bytes(4, "big")
+        encoded[8:12] = self.measurement_value.to_bytes(4, "big", signed=True)
+        return encoded
+
+    def asBytes(self) -> bytearray:
+        """Compatibility wrapper for the original camelCase method name."""
+        return self.as_bytes()
+
+    def print_measurement(self) -> None:
+        print(
+            "measurement to send: ",
+            "M",
+            self.measurement_type,
+            self.device_type,
+            self.device_location,
+            self.measurement_time,
+            self.measurement_value,
+        )
+
+    def printMeasurement(self) -> None:
+        """Compatibility wrapper for the original camelCase method name."""
+        self.print_measurement()
 
 
-  def asBytes(self):
-
-      b = bytearray(12)
-
-      b[0] = ord(self.m)
-      b[1] = ord(self.measurementType)
-      b[2] = ord(self.deviceType)
-      b[3] = ord(chr(self.deviceLocation))
-
-      x = self.measurementTime.to_bytes(4, 'big')
-      b[4] = x[0];
-      b[5] = x[1];
-      b[6] = x[2];
-      b[7] = x[3];
-
-      y = self.measurementValue.to_bytes(4, 'big', signed=True)
-      b[8]  = y[0];
-      b[9]  = y[1];
-      b[10] = y[2];
-      b[11] = y[3];
+def terminate_with_newline(measurement_bytes: bytearray) -> bytearray:
+    """Append the newline byte expected by the data-lake socket server."""
+    return measurement_bytes + b"\n"
 
 
-      # debugging
-      # test we can convert to a signed int
-      #p = int.from_bytes(b'\xff\xff\xff\xff', byteorder='big', signed=True)
-      #print("%d" %p)
-
-      # print all bytes in b
-      #for x in b:
-        #print("%X" %x)
-
-      return b
-
-  def printMeasurement(self):
-      print("measurement to send: ", self.m, self.measurementType, self.deviceType, self.deviceLocation, self.measurementTime, self.measurementValue)
+def random_measurement(start_time: int) -> Measurement:
+    """Build a randomized measurement relative to ``start_time`` in ms."""
+    return Measurement(
+        measurement_type=random.choice(MEASUREMENT_TYPES),
+        device_type=random.choice(DEVICE_TYPES),
+        device_location=random.randrange(0, 10),
+        measurement_time=int(round(time.time() * 1000)) - start_time,
+        measurement_value=random.randrange(-10, 10),
+    )
 
 
+def send_random_measurements(sock: socket.socket, sample_count: int) -> int:
+    """Send ``sample_count`` randomized measurements and return the sent count."""
+    start_time = int(round(time.time() * 1000))
+    sent_count = 0
 
-def terminate_with_newline(mbytes):
-      b = bytearray(len(mbytes)+1)
-      for i in range(len(mbytes)):
-        b[i] = mbytes[i]
-      b[12] = ord('\n')
-      return b;
+    while sample_count <= 0 or sent_count < sample_count:
+        measurement = random_measurement(start_time)
+        print(f"sending {sent_count} / {sample_count}")
+
+        try:
+            payload = terminate_with_newline(measurement.as_bytes())
+            measurement.print_measurement()
+            print(f'sending "{payload}"\n')
+            sock.sendall(payload)
+            sent_count += 1
+        except OverflowError:
+            print("Overflow error:", sys.exc_info()[0])
+            traceback.print_exc(file=sys.stdout)
+            break
+        except BrokenPipeError:
+            traceback.print_exc(file=sys.stdout)
+            break
+
+    return sent_count
 
 
-# pass socket from main
-def read_from_port(sock):
-  global NUMREAD
-  global my_deque
-  global NUM_SENT_TO_DATA_LAKE
-  global DATA_LAKE_SAMPLES_TO_SEND
-  global RUN_CNT
-  global RUN_LINIT
+def parse_args(argv: list[str]) -> tuple[str, int, int]:
+    """Parse positional CLI args while preserving the legacy interface."""
+    host = argv[1] if len(argv) > 1 else DATA_LAKE_HOST
+    port = int(argv[2]) if len(argv) > 2 else DATA_LAKE_PORT
+    sample_count = int(argv[3]) if len(argv) > 3 else DEFAULT_SAMPLE_COUNT
+    return host, port, sample_count
 
-  while True :
-    if ((RUN_LIMIT > 0) and RUN_CNT >= RUN_LIMIT):
-      os._exit(os.EX_OK)
-    RUN_CNT = RUN_CNT + 1
 
-    # generate randomized values and types
-    measurementValue = random.randrange(-10, 10, 1)
-    measurementTime = int(round(time.time() * 1000)) - startTime
-    deviceLocation = random.randrange(0, 10, 1)
-    deviceType = random.choice(['B', 'A', 'M', 'D'])
-    measurementType = random.choice(['T', 'P', 'D', 'F', 'O', 'H', 'V', 'B', 'G', 'A'])
-    # assign them ot measurement
-    m = Measurement(measurementType, deviceType, deviceLocation, measurementTime, measurementValue)
+def main(argv: list[str] | None = None) -> int:
+    """CLI entry point."""
+    argv = argv or sys.argv
+    print(f"Arguments count: {len(argv)}")
+    print(f"Name of the script      : {argv[0]}")
+    print(f"Arguments of the script : {argv[1:]}\n")
 
-    if  ((DATA_LAKE_SAMPLES_TO_SEND > 0) and (NUM_SENT_TO_DATA_LAKE < DATA_LAKE_SAMPLES_TO_SEND)):
-      print(f'sending {NUM_SENT_TO_DATA_LAKE} / {DATA_LAKE_SAMPLES_TO_SEND}')
+    host, port, sample_count = parse_args(argv)
+    server_address = (host, port)
 
-      try:
-        mbytes = m.asBytes()
-        bytes = terminate_with_newline(mbytes)
-        m.printMeasurement()
-        print('sending "%s" \n' % str(bytes))
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect(server_address)
+            sent_count = send_random_measurements(sock, sample_count)
+            print("\nclosing socket")
+            print(f"sent: {sent_count} / {sample_count}")
+    except ConnectionRefusedError:
+        print(f"Connection refused: {server_address}")
+        return 1
 
-        sock.sendall(bytes)
-
-        NUM_SENT_TO_DATA_LAKE = NUM_SENT_TO_DATA_LAKE + 1
-
-        if NUM_SENT_TO_DATA_LAKE >= DATA_LAKE_SAMPLES_TO_SEND:
-          print("\nclosing socket")
-          print(f'sent: {NUM_SENT_TO_DATA_LAKE} / {DATA_LAKE_SAMPLES_TO_SEND}')
-          sock.close()
-          os._exit(os.EX_OK)
-
-      except OverflowError:
-        print("Overflow error:", sys.exc_info()[0])
-        traceback.print_exc(file=sys.stdout)
-        os._exit(os.EX_OK)
-      except BrokenPipeError:
-        traceback.print_exc(file=sys.stdout)
-        os._exit(os.EX_OK)
-
+    return 0
 
 
 if __name__ == "__main__":
-  startTime = int(round(time.time() * 1000))
-  print(f"Arguments count: {len(sys.argv)}")
-  print(f"Name of the script      : {sys.argv[0]}")
-  print(f"Arguments of the script : {sys.argv[1:]}\n")
-  if len(sys.argv) > 1:
-    DATA_LAKE_HOST = sys.argv[1]
-  if len(sys.argv) > 2:
-    DATA_LAKE_PORT = sys.argv[2]
-  if len(sys.argv) > 3:
-    DATA_LAKE_SAMPLES_TO_SEND = int(sys.argv[3])
-  server_address = (DATA_LAKE_HOST, int(DATA_LAKE_PORT))
-  try:
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect(server_address)
-  except (ConnectionRefusedError):
-   print(f"ConnectionRefuesd{sys.exc_info()[0]}")
-
-
-thread = threading.Thread(target=read_from_port(sock))
-thread.start()
+    raise SystemExit(main())
