@@ -145,10 +145,11 @@ bool readMacAddress(uint8_t* baseMac) {
 }
 
 
+void publishOverPressureToKrake(signed long pressureTenthsCmH2O);
+
 void publishTestToKrake() {
-  Serial.print("TestToKrakeCalled!\n");
-  char onLineMsg[32] = "a1 SpikeTest VentMon";
-  networkServicePublishAlarm(onLineMsg);
+  Serial.print("OverPressureTestToKrakeCalled!\n");
+  publishOverPressureToKrake(OVER_PRESSURE_ALARM_LIMIT_10THS_CM_H2O);
 }
 
 void publishOverPressureToKrake(signed long pressureTenthsCmH2O) {
@@ -672,12 +673,9 @@ void output_on_serial_print_PIRDS(char e, char t, char loc, unsigned short int n
 // MQTT publishing policy:
 // - Keep compact PIRDS Measurement internally/serial/UDP.
 // - Publish polished JSON to MQTT so dashboards do not need to decode type/loc/value scaling.
-// - Include pressure alarm state inside pressure measurements.
-// - Also publish HIGH_PRESSURE once to the alarm topic when the threshold is crossed.
+// - Publish only the compact a3 over-pressure alarm on the alarm topic.
 
 const float MQTT_PRESSURE_HIGH_CM_H2O = 40.0f;
-const float MQTT_PRESSURE_CLEAR_CM_H2O = 35.0f;
-bool mqttHighPressureActive = false;
 
 const char* mqttMeasurementName(char t) {
   switch (t) {
@@ -727,37 +725,6 @@ float mqttScaledValue(char t, signed long val) {
   }
 }
 
-bool mqttIsPressure(char t) {
-  return (t == 'D' || t == 'P');
-}
-
-void publishHighPressureAlarmIfNeeded(char t, char loc, unsigned long ms, float pressureCmH2O) {
-  if (!mqttIsPressure(t) || loc != 'I') return;
-
-  if (!mqttHighPressureActive && pressureCmH2O >= MQTT_PRESSURE_HIGH_CM_H2O) {
-    mqttHighPressureActive = true;
-
-    JsonDocument alarm;
-    alarm["event"] = "A";
-    alarm["alarm"] = "HIGH_PRESSURE";
-    alarm["severity"] = "high";
-    alarm["measurement"] = mqttMeasurementName(t);
-    alarm["location"] = mqttLocationName(loc);
-    alarm["value"] = pressureCmH2O;
-    alarm["threshold"] = MQTT_PRESSURE_HIGH_CM_H2O;
-    alarm["unit"] = "cmH2O";
-    alarm["timestamp_ms"] = ms;
-
-    char alarmBuff[256];
-    serializeJson(alarm, alarmBuff, sizeof(alarmBuff));
-    networkServicePublishAlarm(alarmBuff);
-  }
-
-  if (mqttHighPressureActive && pressureCmH2O <= MQTT_PRESSURE_CLEAR_CM_H2O) {
-    mqttHighPressureActive = false;
-  }
-}
-
 void fillPolishedMqttMeasurement(char e, char t, char loc, unsigned short int n, unsigned long ms, signed long val,
                                  char* out, size_t outSize) {
   float scaledValue = mqttScaledValue(t, val);
@@ -774,7 +741,7 @@ void fillPolishedMqttMeasurement(char e, char t, char loc, unsigned short int n,
   doc["unit"] = mqttUnitForType(t);
   doc["timestamp_ms"] = ms;
 
-  if (mqttIsPressure(t) && loc == 'I') {
+  if ((t == 'D' || t == 'P') && loc == 'I') {
     doc["high_pressure"] = (scaledValue >= MQTT_PRESSURE_HIGH_CM_H2O);
     doc["high_pressure_threshold"] = MQTT_PRESSURE_HIGH_CM_H2O;
   }
@@ -794,7 +761,6 @@ void outputMeasurement(char e, char t, char loc, unsigned short int n, unsigned 
   }
 
   networkServicePublishMeasurement(mqttBuff);
-  publishHighPressureAlarmIfNeeded(t, loc, ms, mqttScaledValue(t, val));
 
   // Keep the original compact PIRDS object for existing UDP/serial/display behavior.
   send_data(e, t, loc, n, ms, val);
@@ -1958,6 +1924,7 @@ void configure() {
 String inputString = "";         // a String to hold incoming data
 bool stringComplete = false;  // whether the string is complete
 
+const bool ENABLE_KRAKE_TEST_ALARMS = false;
 const long KRAKE_SEND_MS = 30000;
 long krake_last_published = 0;
 void loop() {
@@ -2140,14 +2107,14 @@ void loop() {
   }
   #endif
 
-{
-  unsigned long ms = millis();
-  if (ms > krake_last_published + KRAKE_SEND_MS) {
-    publishTestToKrake();
-    krake_last_published = ms;
-    //delay(4000);
+  if (ENABLE_KRAKE_TEST_ALARMS) {
+    unsigned long ms = millis();
+    if (ms > krake_last_published + KRAKE_SEND_MS) {
+      publishTestToKrake();
+      krake_last_published = ms;
+      //delay(4000);
+    }
   }
-}
 
   networkServiceLoop();
 }
