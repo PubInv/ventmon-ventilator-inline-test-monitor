@@ -212,8 +212,14 @@ const unsigned char logo_bmp [] PROGMEM = {
 // #define V4 // V0.4 VentMon with the new 128x64 OLED Screen
 //#define DEBUG_1
 
+// Many of the VentMon T0.5 devices have the gage pressure sensor
+// installed incorrectly, which requires us to negate the pressure.
+bool NEGATE_PRESSURE = true;
+
 /* In theory, some of these components are optional, so we track what we find... */
 bool found_display = false;
+
+
 
 /*  These are all the supported sensor. Each sensor has a "period".
  *  The Period is the number of milliseconds to wait before the next event for that sensor.
@@ -490,7 +496,7 @@ long readHSCPressure()
       // convert to 10th of a cm H2O
       p = p *0.0101972 * 10;
   }
-  return (long) p;
+  return (long) (NEGATE_PRESSURE) ? -p : p;
 }
 
 // true if we have ANY such sensor...
